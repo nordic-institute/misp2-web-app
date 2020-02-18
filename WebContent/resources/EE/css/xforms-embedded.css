@@ -1,0 +1,370 @@
+/*
+ * The MIT License
+ * Copyright (c) 2019 Estonian Information System Authority (RIA)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ */
+
+@import 'custom-form-elements.css';
+#xformsframe{
+	overflow: auto;
+	margin-top: 0;
+}
+
+#xformsframe /* input[type=text], */input[type=password], .xforms-type-time {-moz-border-radius:5px;-webkit-border-radius:5px;background:#fff;border:1px solid #ccc;border-radius:5px;color:#000;font-family:"trebuchet ms",sans-serif;font-size:14px;height:20px;line-height:20px;padding-left:6px;width:192px;}
+
+.xforms-type-date, .xforms-type-time{width: 100px !important;} 
+
+
+#xformsframe button, .maincontent, .sidebox, input, .multiselect, #save, .button {position:relative;}
+#xformsframe a.button {padding:4px 9px !important;text-decoration:none !important;color:#fff !important;height: 20px}
+#xformsframe {font-family:trebuchet ms,sans-serif;font-size:100%;color:#000000;background:#fff 50% 0 no-repeat;}
+#xformsframe button, .button {padding:0 8px;display:inline-block;background:none;background:url(../images/sprite.png) 0 -402px repeat-x; height:28px;-moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;font-family:trebuchet ms,sans-serif;color:#fff;cursor:pointer;}
+#xformsframe input.button  {padding-bottom: 2px}
+#xformsframe button:active, .button:active {top:1px;} 
+
+#xformsframe button{text-shadow: none; font-size:100%;}
+
+/* Does not work properly; should enable resizing */
+#xformsframe table.repeat-compact, table.repeat-full, table.repeat-small
+ table.group-compact, table.group-full, table.group-small{width:auto;}
+
+#body .maincontent {float:left; margin-left: 1px; width:95%;/*border: 1px solid silver;*/}
+.maincontent{-moz-border-radius:5px 5px 5px 0;-webkit-border-radius:5px 5px 5px 0;border-radius:5px 5px 5px 0;overflow:visible;/*border:1px solid #d9d9d9;*/background:#fff;padding:3px 26px;}
+.maincontent>*+* , .form li+li , #save , .sidebox>*+* {margin-top:11px;}
+/* '.orbeon .maincontent' is used instead of '.maincontent' to make selectors specific enough so that they override Orbeon selectors*/
+.orbeon .maincontent  h1 {font-size:1.3em;font-weight:bold; margin-left:-10px; margin-bottom:10px; margin-top:11px; line-height: normal;}
+.orbeon .maincontent  h2 {font-size:1.1em;font-weight:bold; margin-left:-10px; margin-bottom:10px; margin-top:11px; line-height: normal;}
+.orbeon .maincontent  h3 {font-size:1.1em;font-weight:bold; margin-left:-10px; margin-bottom:10px; margin-top:11px; line-height: normal;}
+.orbeon .maincontent  h4 {font-size:1.1em;font-weight:bold; margin-left:-10px; margin-bottom:10px; margin-top:11px; line-height: normal;}
+.orbeon .maincontent  h1 label {font-size:1.3em;font-weight:bold;}
+.orbeon .maincontent  h2 label {font-size:1.1em;font-weight:bold;}
+.orbeon .maincontent  h3 label {font-size:1.1em;font-weight:bold;}
+.orbeon .maincontent  h4 label {font-size:1.1em;font-weight:bold;}
+.orbeon .maincontent legend.xforms-label {display: none}
+.orbeon .maincontent label { margin-bottom: 0;}
+.orbeon .maincontent  h5 {font-size:1.1em;font-weight:bold; margin-left:-10px; margin-bottom:10px; margin-top:11px; line-height: normal;}
+.orbeon .maincontent  form button { margin:12px 8px 0 0; -moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;}
+.orbeon .maincontent  form h3 {margin:0 0 11px 0;}
+.orbeon .maincontent  hr {margin:22px 20px 22px 0;height:0;border:0;border-top:1px solid #ccc;border-bottom:1px solid #e5e5e5;}
+.orbeon .maincontent  ul ul {margin:-19px 0 0 144px;}
+.orbeon .maincontent  li {padding-left:16px;}
+.orbeon .maincontent  label {font-weight: bold;}
+.orbeon .maincontent  span .serviceid {display: inline-block; margin-bottom:10px; margin-top:11px;}
+.orbeon .maincontent  form li {background:none;padding:0;}
+.orbeon .maincontent  form label {display: inline-block; width:auto;min-width:15px;} 
+.orbeon .maincontent  .xforms-label {display: inline-block; width:auto; min-width:15px;}
+.orbeon .maincontent  .xforms-input input, .orbeon .maincontent select {width: 20em; display: inline | block; margin-bottom: 2px; height: 20px; padding: 1px; padding-left: 6px;}  
+.orbeon .maincontent  select {width: auto;}
+.orbeon .maincontent  .xforms-trigger {margin:12px 8px 0 0; -moz-border-radius:5px;-webkit-border-radius:5px;border-radius:5px;}
+.orbeon .maincontent  .xforms-repeat-selected-item-1 { background-color: transparent;}
+.orbeon .maincontent  .xforms-repeat-selected-item-2 { background-color: transparent;}
+.orbeon .maincontent  .xforms-repeat-selected-item-3 { background-color: transparent;}
+.orbeon .maincontent  .xforms-repeat-selected-item-4 { background-color: transparent;}
+.orbeon .maincontent  .xforms-repeat-selected-item-5 { background-color: transparent;}
+.orbeon .maincontent  .xforms-repeat-begin-end { display:none;}
+.orbeon .maincontent  button .xforms-readonly {color: #ccc; background:url(../images/sprite.png) 0 -402px repeat-x !important; cursor: default;}
+.orbeon .maincontent  span.xforms-help, .maincontent span.xforms-alert{ vertical-align: middle;}
+.orbeon .maincontent .radio {background: none;}
+.orbeon .maincontent .radio span {vertical-align: middle;}
+
+.orbeon .maincontent input:disabled, .maincontent textarea:disabled, .maincontent select:disabled{
+	background-color: rgb(235, 235, 228);
+	color: rgb(84, 84, 84);
+}
+
+/* 'hidden' class can be used to hide blocks in custom xforms */
+.orbeon .maincontent .hidden{ display: none; }
+.orbeon tr.label{display: table-row; color: black;}
+
+/* Show only first error - legacy xforms are designed with single error in mind */
+.yui-overlay .bd:not(.show) li:not(:first-child){ display: none; }
+
+/* Orbeon inspector adjustments */
+.xbl-fr-xforms-inspector .fr-xforms-inspector-block .xforms-group, 
+.xbl-fr-xforms-inspector .fr-xforms-inspector-mode .xforms-group{display: inline-block !important;  margin: 0;}
+.xbl-fr-xforms-inspector .CodeMirror-cursor { display: none !important }
+
+/* Remove yellow background from repeats. */
+.xforms-repeat-selected-item-1,
+.xforms-repeat-selected-item-2,
+.xforms-repeat-selected-item-3,
+.xforms-repeat-selected-item-4
+{
+  background-color: transparent !important;
+}
+
+
+.orbeon .maincontent .group-minimal-field > label
+{
+  font-weight: bold;
+  padding-right: 12px;
+}
+
+
+
+.orbeon .maincontent table.repeat-full,
+.orbeon .maincontent table.group-full
+{
+  width: auto;
+  background-color: #ffffff;
+  border-top: #e2e8ee 3px solid;
+  border-right: #e2e8ee 3px solid;
+  border-bottom: #e2e8ee 3px solid;
+  border-left: #e2e8ee 3px solid;
+  margin-bottom: 10px;
+  border-collapse:separate;
+  border-spacing:2px;
+}
+.orbeon .maincontent table.repeat-full td,
+.orbeon .maincontent table.group-full td
+{
+  background: #fff;
+  text-align: left;
+  vertical-align: top;
+  border:1px solid #F1F1F1;
+}
+
+.orbeon .maincontent table.repeat-full th,
+.orbeon .maincontent table.group-full th
+{
+  text-align: left;
+  vertical-align: top;
+  border:1px solid #F1F1F1;
+  background-color: #ededed;
+}
+.orbeon .maincontent th.repeat-full-label,
+.orbeon .maincontent th.group-full-label
+{
+  width: auto;
+  padding: 5px;
+  font-weight: normal;
+  text-align:right;
+}
+.orbeon .maincontent td.repeat-full-value,
+.orbeon .maincontent td.group-full-value
+{
+  width: auto;
+  padding: 5px 10px;
+}
+.orbeon .maincontent td.repeat-full-value input,
+.orbeon .maincontent td.repeat-full-value select,
+.orbeon .maincontent td.repeat-full-value textarea,
+.orbeon .maincontent td.group-full-value input,
+.orbeon .maincontent td.group-full-value select,
+.orbeon .maincontent td.group-full-value textarea
+{
+  font-family:trebuchet ms,sans-serif;
+  font-size: 12px;
+}
+.orbeon .maincontent td.repeat-full-value table,
+.orbeon .maincontent td.group-full-value table,
+.orbeon .maincontent td.repeat-compact-value table,
+.orbeon .maincontent td.group-compact-value table
+{
+  margin: 0;
+}
+
+/* repeat-small */
+.orbeon .maincontent table.repeat-small
+{
+	width: auto;
+	table-layout: fixed;
+	border-top: #e2e8ee 2px solid;
+	border-right: #e2e8ee 2px solid;
+	border-bottom: #dbe3ea 2px solid;
+	border-left: #e2e8ee 2px solid;
+	background-color: #ffffff;
+	border-collapse:separate;
+	border-spacing:1px;
+}
+
+.orbeon .maincontent table.repeat-small th.repeat-small-label
+{
+    text-align: left;
+	font-weight: bold;
+    border: #f1f1f1 1px solid;
+    background-color: #ededed;
+    line-height: 120%;
+    margin: 0;
+    padding: 2px 2px 2px 4px;
+}
+
+.orbeon .maincontent table.repeat-small td.repeat-small-value
+{
+    border: #f1f1f1 1px solid;
+    line-height: 120%;
+    margin: 0;
+    padding: 2px 2px 2px 4px;
+}
+
+
+/* repeat-compact, group-compact */
+.orbeon .maincontent table.group-compact,
+.orbeon .maincontent table.repeat-compact
+{
+	width: auto;
+	table-layout: fixed;
+	border-top: #e2e8ee 2px solid;
+	border-right: #e2e8ee 2px solid;
+	border-bottom: #dbe3ea 2px solid;
+	border-left: #e2e8ee 2px solid;
+	background-color: #ffffff;
+	border-collapse:separate;
+	border-spacing:2px;
+}
+
+.orbeon .maincontent table.group-compact th.group-compact-label,
+.orbeon .maincontent table.repeat-compact th.repeat-compact-label
+{
+    text-align: left;
+	font-weight: bold;
+    border: #f1f1f1 1px solid;
+    background-color: #ededed;
+    line-height: 120%;
+    margin: 0;
+    padding: 2px 2px 2px 4px;
+}
+.orbeon .maincontent table.group-compact td.group-compact-value,
+.orbeon .maincontent table.repeat-compact td.repeat-compact-value
+{
+    border: #f1f1f1 1px solid;
+    line-height: 120%;
+    margin: 0;
+    padding: 2px 2px 2px 4px;
+}
+
+.orbeon .maincontent .xforms-group
+{
+  display: block; /* Orbeon uses <span> for groups by default. */
+  margin: 1em 0 0 0;
+}
+
+.orbeon .maincontent td.group-full-value .xforms-group,
+.orbeon .maincontent td.group-compact-value .xforms-group,
+.orbeon .maincontent td.repeat-full-value .xforms-group,
+.orbeon .maincontent td.repeat-compact-value .xforms-group
+{
+  margin: 0;
+}
+
+.orbeon .maincontent .group-minimal-field label {padding-right: 10px;}
+
+#overlay-loading{
+    position: absolute;            
+    text-align: center;      
+    width: 100%;      
+    height: 100%;      
+    background-color:white;      
+    top: 0;            
+    left: 0;                  
+    z-index: 200;
+    opacity: 0.9;
+    display: none;
+}
+/* Commented out, because MISP2 already has a loading span that works fine*/
+.xforms-loading-loading
+{/*
+  background: white url("../images/loading.gif") no-repeat center !important;
+  color: black !important;
+  border: 2px solid #EDF2F9 !important;
+  padding: 5px 45px 100px 45px !important;
+  text-align: center !important;
+  vertical-align: middle !important;
+  position: fixed !important;
+  opacity: 1;
+  right: 40% !important;
+  left: 40% !important;*/
+}
+
+.xforms-alert-active{
+	margin-left: 4px !important;
+	vertical-align: top !important;
+	background-image: url("../images/alert.gif") !important;
+	width:25px !important;
+	height:25px !important;
+}
+
+.results-save-dialog{
+	width: 750px !important;
+}
+
+#save-dialog{top: -100px;}
+#save {
+	-moz-border-radius:5px;-webkit-border-radius:5px;background:#fafafa;border-radius:5px;color:#4d4d4d;overflow:hidden;padding:20px;border:1px solid #e0e0e0;
+}
+#pdf {float:left;padding: 0px 20px 0px 20px; text-align:center; border-right:1px solid #e0e0e0;}
+#email {float:left;padding: 10px 10px 0px 20px; width: 450px;}
+
+#xml h5, #pdf h5, #email h5 {
+	padding-left: 20px;
+}
+#pdf a {margin: 12px 0 0 0;}
+#pdf a:hover, #email a:hover {text-decoration:underline;}
+#pdf a.button:hover, #email a.button:hover {text-decoration:none;}
+#pdf a:active, #email a:active {}
+#pdf a:visited, #email a:visited {}
+#email form, fieldset, legend, label, input, button, option {border:0;line-height:normal;}
+#email label {font-weight: bold; min-width: 8em; padding-left:20px;}
+#email button {margin-left:20px;}
+#xformsframe ul, ol, dl {list-style:none outside;margin-bottom:1em;}
+#xformsframe ul ul, ul ol, ul dl, ol ul, ol ol, ol dl, dl ul, dl ol, dl dl {}
+#xformsframe li:last-child {margin-bottom:0;}
+.clearfix:after {content:'';display:block;width:0;height:0;font-size:0;line-height:0;visibility:hidden;clear:both;}
+.clearfix {zoom:1;}
+.service-module {position:relative;background:#f2f2f2;-moz-border-radius:10px;-webkit-border-radius:10px;border-radius:10px;/*behavior:url(pie.php);*/padding:32px;border:1px solid #e0e0e0;margin-bottom:10px;}
+.messagepop {margin-top:30px; -moz-border-radius:5px;-webkit-border-radius:5px;background:#fafafa;border-radius:5px;color:#4d4d4d;overflow:hidden;border:1px solid #e0e0e0;}
+#close {width:30px;height:30px;background:url(../images/exit.png) no-repeat center; float: right;}
+.yui-calcontainer{width:175px; float:none !important;}
+.issue{padding-left: 10px;}
+
+/* Orbeon 3.9.post wraps buttons into spans - these spans should not become visible*/
+span.button{ 
+ background-color:transparent;
+ background:none;
+ padding-bottom:3px;
+}
+
+#footer {
+	margin-top: 0;
+	padding-top: 0;
+	display: none;
+}
+
+.orbeon .maincontent #xforms-message-dialog .hd, 
+.orbeon .maincontent #xforms-message-dialog .bd, 
+.orbeon .maincontent #xforms-message-dialog .ft{
+	font-family: trebuchet ms,sans-serif;
+	text-align: center;
+	color: black;
+	font-size: 1.3em;
+}
+.yui-skin-sam .yui-tt .bd{font-size: 1.3em;}
+
+/* Datatable */
+.orbeon .maincontent .xbl-fr-datatable span.xforms-group{display: inline-block;}
+.orbeon .maincontent .xbl-fr-datatable th div.datatable-cell-content{width: auto;}
+.orbeon .maincontent .xbl-fr-datatable tr.yui-dt-even  td{background-color: rgb(255, 255, 255);}
+.orbeon .maincontent .xbl-fr-datatable tr.yui-dt-odd  td{background-color: rgb(237, 245, 255);}
+.orbeon .maincontent .xbl-fr-datatable tr.yui-dt-selected td    {color: black;}
+.orbeon .maincontent .xbl-fr-datatable .xforms-trigger {margin-top:2px;}
+
+
+

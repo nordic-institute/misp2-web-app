@@ -1,0 +1,30 @@
+<!DOCTYPE validators PUBLIC "-//Apache Struts//XWork Validator 1.0.2//EN" "http://struts.apache.org/dtds/xwork-validator-1.0.2.dtd">
+<validators>
+    <field name="query.name">
+        <field-validator type="requiredstring">
+            <param name="trim">true</param>
+            <message>${getText("validation.input_required")} (${getText("label.change.name")})</message>
+        </field-validator>
+        <field-validator type="stringlength">
+            <param name="maxLength">50</param>
+            <param name="trim">true</param>
+            <message>${getText("validation.max_length", {getText("label.change.name")})}</message>
+        </field-validator>
+    </field>
+    <field name="queryNames">
+        <field-validator type="visitor">
+            <message></message>
+        </field-validator>
+    </field>
+    <field name="xforms.url">
+        <field-validator type="requiredstring">
+            <param name="trim">true</param>
+            <message>${getText("validation.input_required")} (${getText("label.change.url.SOAP")})</message>
+        </field-validator>
+        <field-validator type="stringlength">
+            <param name="maxLength">256</param>
+            <param name="trim">true</param>
+            <message>${getText("validation.max_length", {getText("label.change.url.SOAP")})}</message>
+        </field-validator>
+    </field>
+</validators>

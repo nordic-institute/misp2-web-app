@@ -1,0 +1,201 @@
+/*
+ * The MIT License
+ * Copyright (c) 2019 Estonian Information System Authority (RIA)
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ *
+ */
+
+@charset "UTF-8";
+
+/* Markdown styles to display EULA content*/
+#eula-content i, #eula-content em {
+    font-style:italic;
+}
+.ui-selectmenu-menu.ui-selectmenu-open {
+    z-index: 250 !important;
+}
+#eula-content b, #eula-content strong {
+	font-weight: bold;
+}
+#eula-content ol {
+   list-style: decimal;
+   counter-reset: item;
+}
+#eula-content ul {
+	list-style-type: circle;
+}
+#eula-content pre {
+   display: block;
+   font-family: monospace;
+   white-space: pre;
+   margin: 1em 0;
+}
+#eula-content code {
+   display: inline;
+   font-family: monospace;
+   white-space: pre;
+}
+#eula-content table {
+    /*width: 100%;*/
+    border-collapse:collapse;
+    margin: 5px 5px 5px 10px;
+}
+#eula-content table td, #eula-content table th {
+    text-align: left;
+    border: 1px solid black;
+    padding: 5px;
+}
+#eula-content table th {
+    font-weight: bold;
+}
+	
+/* Partially ased on standardcss.com sample. */			
+#eula-content, #eula-content p, #eula-content li, #eula-content pre,
+#eula-content td, #eula-content th, #eula-content dt, #eula-content dd {
+	font-size: 14px;
+	line-height: 18px;
+	font-family: Arial, Helvetica, sans-serif;
+}
+#eula-content ul,
+#eula-content ol,
+#eula-content li,
+#eula-content h1,
+#eula-content h2,
+#eula-content h3, 
+#eula-content h4,
+#eula-content h5,
+#eula-content h6,
+#eula-content pre,
+#eula-content p,
+#eula-content blockquote,
+#eula-content fieldset,
+#eula-content dl,
+#eula-content dt,
+#eula-content dd,
+#eula-content iframe,
+#eula-content table,
+#eula-content tbody,
+#eula-content thead,
+#eula-content td,
+#eula-content th,
+#eula-content address,
+#eula-content legend {
+	margin:0;
+	padding:0;
+	font-size: 1.0em;
+	font-style: inherit;
+	font-family: inherit;
+	vertical-align: baseline;
+			text-align: justify;
+}
+
+#eula-content h1 { 
+	font-size: 1.5em; /* 18px */
+	line-height: 1em; /* 18px */
+	margin: 2em 0 1em 0; /* 18px */
+}
+	
+#eula-content h2 {
+	font-size: 1.3333em; /* 16px */
+	line-height: 1.125em; /* 18px */
+	margin-top: 1.6875em; /* 27px */
+	margin-bottom: 0.5625em; /* 9px */
+}
+
+#eula-content h3 {
+	font-size: 1.1667em; /* 14px */
+	line-height: 1.286em; /* 18px */
+	margin-top: 1.929em; /* 27 px */
+	margin-bottom: 0.643em; /* 9px */
+	}
+	#eula-content h2 + #eula-content h3 { 
+		margin-top: 1.2857em; /* 18 px */ 
+	}
+
+#eula-content h4 {
+	margin-top: 1.5em; /* 18px */
+	}
+	#eula-content h3 + #eula-content h4 {
+		margin-top: 0.5em; /* 9 px */
+	}
+
+#eula-content h5 {
+	margin-top: 1.5em; /* 18px */
+	font-weight: normal;
+}
+	#eula-content h4 + #eula-content h5 {
+		margin-top: 0em; /* 9 px */
+	}
+
+#eula-content p { 
+	font-size: 1em; /* 12px */
+	line-height: 1.5em; /* 18px */
+	margin: 0.5em 0 0.5em 0; 
+}
+#eula-content p.intro {
+	font-size: 1.08333em;
+	line-height: 1.3846em;
+	font-weight: bold;
+}
+
+#eula-content blockquote {
+	margin: 0 2.5em 1.5em 2.5em;
+	font-style: oblique;
+}
+#eula-content q { font-style: oblique; }
+
+#eula-content hr {
+	margin: 0 0 1.5em 0;
+	height: 1px;
+	background: #333;
+	border: none;
+}
+
+#eula-content small { 
+	font-size: 0.8333em; /* 10px */
+	line-height: 1.8em; /* 18px */ /* SOMETHING STRANGE HAPPENING HERE!! was 1.8em IE IS NOT HELPING HERE! */
+}
+
+#eula-content a img, #eula-content :link img, #eula-content :visited img { 
+	border: none;
+}
+
+#eula-content a {
+	background: transparent; /* prevents grey brackground IE10 */
+	outline: 0;
+}
+
+#eula-content address { font-style: normal; }
+
+#eula-content figure {
+    margin: 0;
+}
+
+#eula-content ul,
+#eula-content ol { margin: 0 0 1.5em 2.5em; }
+	#eula-content li ul,
+	#eula-content li ol { margin: 0 0 0 2.5em; }
+
+#eula-content dl { margin: 0 0 1.5em 0; }
+	#eula-content dt {
+		font-weight: bold;
+		margin: 1.5em 0 0 0;
+	}
+	#eula-content dd { margin: 0 0 0 2.5em; }

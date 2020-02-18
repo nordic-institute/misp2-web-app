@@ -1,0 +1,16 @@
+<!DOCTYPE validators PUBLIC "-//Apache Struts//XWork Validator 1.0.2//EN" "http://struts.apache.org/dtds/xwork-validator-1.0.2.dtd">
+<validators>
+    
+    <field name="group.name">
+        <field-validator type="requiredstring">
+            <param name="trim">true</param>
+            <message>${getText("validation.input_required")}</message>
+        </field-validator>
+        <field-validator type="stringlength">
+            <param name="maxLength">150</param>
+            <param name="trim">true</param>
+            <message>${getText("validation.max_length", {getText("groups.edit_data.name")})}</message>
+        </field-validator>
+    </field>
+
+</validators>

@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xmlns:aop="http://www.springframework.org/schema/aop"
+    xmlns:tx="http://www.springframework.org/schema/tx"
+    xsi:schemaLocation="
+    http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.0.xsd
+    http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.0.xsd
+    http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-2.0.xsd">
+
+    <bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+        <property name="location">
+            <value>classpath:config.cfg</value>
+        </property>
+    </bean>
+    
+    <bean id="confFile" class="org.apache.commons.configuration.PropertiesConfiguration">
+        <constructor-arg value="config.cfg"/>
+    </bean>
+
+    <bean id="orgPortal-confFile" class="org.apache.commons.configuration.PropertiesConfiguration">
+        <constructor-arg value="orgportal-conf.cfg"/>
+    </bean>
+    
+ 	<bean id="univPortal-confFile" class="org.apache.commons.configuration.PropertiesConfiguration">
+        <constructor-arg value="uniportal-conf.cfg"/>
+    </bean>
+    <!-- A wrapper around univPortal-confFile parses out configuration to objects with easy access to relevant parts -->
+ 	<bean id="authCheckQueryConfWrapper" class="ee.aktors.misp2.util.xroad.soap.query.unit.UnitQueryConf" scope="singleton">
+        <constructor-arg ref="orgPortal-confFile"/>
+        <constructor-arg ref="univPortal-confFile"/>
+    </bean>
+    <import resource="applicationContext-persistance.xml"/>
+
+
+    <bean id="configurationProvider" class="ee.aktors.misp2.provider.ConfigurationProvider" scope="singleton">
+        <property name="config" ref="confFile"/>
+    </bean>
+    
+    <bean id="digiDoc4jConfiguration" class="ee.aktors.misp2.configuration.DigiDoc4jConfiguration" scope="singleton"/>
+    
+    <bean id="soapConnectionFactory" class="javax.xml.soap.SOAPConnectionFactory" factory-method="newInstance" scope="singleton"/>
+    <bean class="ee.aktors.misp2.provider.UserInterfaceFacadeTextProviderFactory"
+        name="userInterfaceFacadeTextProviderFactory"
+        scope="singleton"/>  
+
+    <bean id="queryService" class="ee.aktors.misp2.service.QueryService"/>
+    <bean id="producerService" class="ee.aktors.misp2.service.ProducerService"/>
+    <bean id="xroadInstanceService" class="ee.aktors.misp2.service.XroadInstanceService"/>
+    <bean id="eulaService" class="ee.aktors.misp2.service.EulaService"/>
+    <bean id="queryExportImportService" class="ee.aktors.misp2.service.QueryExportImportService">
+    	<property name="queryService" ref="queryService"/>
+    	<property name="producerService" ref="producerService"/>
+    	<property name="orgService" ref="orgService"/>
+    </bean>
+    <bean id="portalService" class="ee.aktors.misp2.service.PortalService"/>
+    <bean id="stylesService" class="ee.aktors.misp2.service.StylesService"/>
+    <bean id="userService" class="ee.aktors.misp2.service.UserService"/>
+    <bean id="queryLogService" class="ee.aktors.misp2.service.QueryLogService"/>
+    <bean id="groupService" class="ee.aktors.misp2.service.GroupService"/>
+    <bean id="orgService" class="ee.aktors.misp2.service.OrgService"/>
+    <bean id="classifierService" class="ee.aktors.misp2.service.ClassifierService"/>
+    <bean id="managerCandidateService" class="ee.aktors.misp2.service.ManagerCandidateService"/>
+    <bean id="topicService" class="ee.aktors.misp2.service.TopicService"/>
+    <bean id="t3SecService" class="ee.aktors.misp2.service.T3SecService"/>
+    <bean id="newsService" class="ee.aktors.misp2.service.NewsService"/>
+    <bean id="exportImportService" class="ee.aktors.misp2.service.ExportImportService">
+        <property name="orgService" ref="orgService"/>
+        <property name="userService" ref="userService"/>
+        <property name="groupService" ref="groupService"/>
+        <property name="topicService" ref="topicService"/>
+        <property name="producerService" ref="producerService"/>
+        <property name="queryService" ref="queryService"/>
+        <property name="queryExportImportService" ref="queryExportImportService"/>
+        <property name="portalService" ref="portalService"/>
+        <property name="xroadInstanceService" ref="xroadInstanceService"/>
+    </bean>
+    
+    <bean id="loginInterceptor" class="ee.aktors.misp2.interceptor.LoginInterceptor" scope="prototype">
+        <constructor-arg ref="userService"/>
+    </bean>
+    <bean id="menuInterceptor" class="ee.aktors.misp2.interceptor.MenuInterceptor" scope="prototype">
+
+    </bean>
+    <bean id="portalInterceptor" class="ee.aktors.misp2.interceptor.PortalInterceptor" scope="prototype">
+        <constructor-arg ref="portalService"/>
+        <constructor-arg ref="userService"/>
+        <constructor-arg ref="xroadInstanceService" />
+        <constructor-arg ref="eulaService" />
+    </bean>
+    <bean id="rolesInterceptor" class="ee.aktors.misp2.interceptor.RoleChangeInterceptor" scope="prototype">
+        <constructor-arg ref="portalService"/>
+        <constructor-arg ref="univPortal-confFile"/>
+        <constructor-arg ref="authCheckQueryConfWrapper"/>
+    </bean>
+    <bean id="portalChangeInterceptor" class="ee.aktors.misp2.interceptor.PortalChangeInterceptor" scope="prototype">
+        <constructor-arg ref="portalService" />
+        <constructor-arg ref="userService" />
+        <constructor-arg ref="xroadInstanceService" />
+        <constructor-arg ref="eulaService" />
+    </bean>
+
+    <bean id="logQuery" scope="singleton" class="ee.aktors.misp2.util.LogQuery">
+        <constructor-arg ref="userService"/> <!-- any service as long as it extends ee.aktrs.misp2.services.BaseService class -->
+    </bean>
+
+    <bean id="logQueryProvider" class="ee.aktors.misp2.provider.LogQueryProvider" scope="singleton">
+        <property name="logQuery" ref="logQuery"/>
+    </bean>
+
+    <!-- - - - - - -  - - - - - - - - - - - - - - - - - -->
+    <bean id="pageFaultsAction" scope="prototype" class="ee.aktors.misp2.action.PageFaultsAction"/>
+
+    <bean id="queryAction" scope="prototype" class="ee.aktors.misp2.action.QueryAction">
+        <constructor-arg ref="queryService" />
+        <constructor-arg ref="userService" />
+    </bean>
+    
+    <bean id="restMediatorAction" scope="prototype"
+    	class="ee.aktors.misp2.action.RestMediatorAction">
+        <constructor-arg ref="queryService"/>
+        <constructor-arg ref="queryLogService" />
+        <constructor-arg ref="xroadInstanceService" />
+    </bean>
+
+    <bean id="logoutAction" scope="prototype" class="ee.aktors.misp2.action.LogoutAction">
+        
+    </bean>
+    <bean id="entranceAction" scope="prototype" class="ee.aktors.misp2.action.EntranceAction">
+        <constructor-arg ref="portalService" />
+        <constructor-arg ref="userService" />
+    </bean>
+
+    <bean id="loginAction" scope="prototype" class="ee.aktors.misp2.action.LoginAction">
+    	<constructor-arg ref="digiDoc4jConfiguration" />
+        <constructor-arg ref="portalService" />
+        <constructor-arg ref="userService" />
+        <constructor-arg ref="mobileIdService"/>
+    </bean>
+    <bean id="portalAction" scope="prototype" class="ee.aktors.misp2.action.admin.PortalAction">
+        <constructor-arg ref="portalService" />
+        <constructor-arg ref="orgService" />
+        <constructor-arg ref="xroadInstanceService" />
+        <constructor-arg ref="authCheckQueryConfWrapper"/>
+        <constructor-arg ref="eulaService" />
+    </bean>
+    <bean id="xroadInstanceAction" scope="prototype" 
+    	class="ee.aktors.misp2.action.admin.XroadInstanceAction" />
+    <bean id="eulaAction" scope="prototype" 
+    	class="ee.aktors.misp2.action.EulaAction">
+        <constructor-arg ref="eulaService" />
+    </bean>
+    	
+    <bean id="managerAction" scope="prototype" class="ee.aktors.misp2.action.admin.ManagerAction">
+        <constructor-arg ref="portalService" />
+        <constructor-arg ref="userService" />
+    </bean>
+    <bean id="adminAction" scope="prototype" class="ee.aktors.misp2.action.admin.AdminAction">
+		<constructor-arg ref="userService" />
+    </bean>
+    <bean id="helpAction" scope="prototype" class="ee.aktors.misp2.action.HelpAction" />
+    
+    <bean id="versionAction" scope="prototype" class="ee.aktors.misp2.action.VersionAction" />
+    
+    <bean id="producerAction" scope="prototype" class="ee.aktors.misp2.action.ProducerAction">
+        <constructor-arg ref="producerService" />
+        <constructor-arg ref="queryExportImportService" />
+        <constructor-arg ref="xroadInstanceService" />
+    </bean>
+    
+    <bean id="stylesAction" scope="prototype" class="ee.aktors.misp2.action.StylesAction">
+        <constructor-arg ref="stylesService" />
+    </bean>
+    <bean id="URLAction" scope="prototype" class="ee.aktors.misp2.action.URLAction"/>
+    <bean id="userAction" scope="prototype" class="ee.aktors.misp2.action.UserAction">
+        <constructor-arg ref="userService"/>
+        <constructor-arg ref="classifierService"/>
+        <constructor-arg ref="groupService"/>
+        <constructor-arg ref="orgService"/>
+    </bean>
+    <bean id="userSettingAction" scope="prototype" class="ee.aktors.misp2.action.UserSettingAction">
+        <constructor-arg ref="userService"/>
+    </bean>
+
+    <bean id="queryLogAction" scope="prototype" class="ee.aktors.misp2.action.QueryLogAction">
+        <constructor-arg ref="queryLogService"/>
+        <constructor-arg ref="userService"/>
+    </bean>
+    <bean id="managerQueryLogAction" scope="prototype" class="ee.aktors.misp2.action.ManagerQueryLogAction">
+        <constructor-arg ref="queryLogService"/>
+        <constructor-arg ref="userService"/>
+    </bean>
+    
+    <bean id="groupAction" scope="prototype" class="ee.aktors.misp2.action.GroupAction">
+        <constructor-arg ref="groupService"/>
+        <constructor-arg ref="userService"/>
+        <constructor-arg ref="queryService"/>
+    </bean>
+
+    <bean id="registerUnitAction" scope="prototype" class="ee.aktors.misp2.action.registration.RegisterUnitAction">
+        <constructor-arg ref="orgService"/>
+        <constructor-arg ref="userService"/>
+        <constructor-arg ref="classifierService"/>
+        <constructor-arg ref="managerCandidateService"/>
+        <constructor-arg ref="orgPortal-confFile"/>
+        <constructor-arg ref="univPortal-confFile"/>
+        <constructor-arg ref="authCheckQueryConfWrapper"/>
+    </bean>
+    <bean id="registerUkManagerAction" scope="prototype" class="ee.aktors.misp2.action.registration.RegisterUkManagerAction">
+        <constructor-arg ref="orgService"/>
+        <constructor-arg ref="userService"/>
+        <constructor-arg ref="classifierService"/>
+        <constructor-arg ref="managerCandidateService"/>
+    </bean>
+
+    <bean id="registerUserAction" scope="prototype" class="ee.aktors.misp2.action.registration.RegisterUserAction">
+        <constructor-arg ref="orgService"/>
+        <constructor-arg ref="userService"/>
+        <constructor-arg ref="classifierService"/>
+        <constructor-arg ref="managerCandidateService"/>
+    </bean>
+    <bean id="registerManagerAction" scope="prototype" class="ee.aktors.misp2.action.registration.RegisterManagerAction">
+        <constructor-arg ref="orgService"/>
+        <constructor-arg ref="userService"/>
+        <constructor-arg ref="classifierService"/>
+        <constructor-arg ref="managerCandidateService"/>
+    </bean>
+
+    <bean id="classifierAction" scope="prototype" class="ee.aktors.misp2.action.ClassifierAction">
+        <constructor-arg ref="classifierService"/>
+        <constructor-arg ref="queryService"/>
+        <constructor-arg ref="soapConnectionFactory"/>
+    </bean>
+
+    <bean id="searchQueriesAction" scope="prototype" class="ee.aktors.misp2.action.SearchQueriesAction">
+        <constructor-arg ref="portalService"/>
+    </bean>
+
+    <bean id="topicAction" scope="prototype" class="ee.aktors.misp2.action.TopicAction">
+        <constructor-arg ref="topicService"/>
+        <constructor-arg ref="queryService"/>
+    </bean>
+    
+    <bean id="t3SecAction" scope="prototype" class="ee.aktors.misp2.action.T3SecAction">
+        <constructor-arg ref="t3SecService"/>
+    </bean>
+    <bean id="unitAction" scope="prototype" class="ee.aktors.misp2.action.UnitAction">
+        <constructor-arg ref="orgService"/>
+    </bean>
+
+    <bean id="certificateAction" scope="prototype" class="ee.aktors.misp2.action.CertificateAction"/>
+    <bean id="complexAction" scope="prototype" class="ee.aktors.misp2.action.ComplexQueryAction">
+        <constructor-arg ref="queryService"/>
+        <constructor-arg ref="producerService"/>
+    </bean>
+        <bean id="newsAction" scope="prototype" class="ee.aktors.misp2.action.NewsAction">
+        <constructor-arg ref="newsService"/>
+    </bean>
+    <bean id="exportImportAction" scope="prototype" class="ee.aktors.misp2.action.ExportImportAction">
+    	<constructor-arg ref="exportImportService"/>
+    	<constructor-arg ref="orgService"/>
+    </bean>
+    <bean id="timeoutAction" scope="prototype" class="ee.aktors.misp2.action.TimeoutAction"/>
+    <bean id="digitalSigningService" scope="prototype" class="ee.aktors.misp2.service.crypto.DigitalSigningService">
+        <constructor-arg ref="digiDoc4jConfiguration"/>
+    </bean>
+    <bean id="mobileIdService" scope="prototype" class="ee.aktors.misp2.service.crypto.MobileIdService">
+        <constructor-arg ref="digiDoc4jConfiguration"/>
+    </bean>
+    <bean id="digitalSigningAction" scope="prototype" class="ee.aktors.misp2.action.crypto.DigitalSigningAction">
+        <constructor-arg ref="digitalSigningService"/>
+    </bean>
+    <bean id="midSigningAction" scope="prototype" class="ee.aktors.misp2.action.crypto.MidSigningAction">
+        <constructor-arg ref="digitalSigningService"/>
+    </bean>
+    <bean id="idCardSigningAction" scope="prototype" class="ee.aktors.misp2.action.crypto.IdCardSigningAction">
+        <constructor-arg ref="digitalSigningService"/>
+    </bean>
+</beans>

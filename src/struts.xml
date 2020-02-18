@@ -1,0 +1,1459 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+
+    <include file="struts-constants.xml"/>
+    
+    <!--Override i18n translations with custom bean by defining custom text provider factory '
+    (defined in applicationContext.xml) -->
+    
+	<constant name="struts.textProviderFactory" value="userInterfaceFacadeTextProviderFactory"/>
+        
+    <package name="misp2admin" extends="misp2" namespace="/admin">
+        <interceptors>
+            <interceptor-stack name="adminStack">
+                <interceptor-ref name="logger"/>
+                <interceptor-ref name="myException"/>
+                <interceptor-ref name="action_wrapper"/>
+                <interceptor-ref name="constants" />
+                <interceptor-ref name="session"/>
+                <interceptor-ref name="params"/>
+                <interceptor-ref name="i18nWrapper" />
+                <interceptor-ref name="flash"/>
+                <interceptor-ref name="httpMethods"/>
+                <interceptor-ref name="csrfProtection"/>
+                <interceptor-ref name="login" />
+                <interceptor-ref name="menu" />
+                <interceptor-ref name="prepare" />
+                <interceptor-ref name="chain" />
+                <interceptor-ref name="modelDriven"/>
+                <interceptor-ref name="fileUpload" />
+                <interceptor-ref name="params"/>
+                <interceptor-ref name="conversionError" />
+                <interceptor-ref name="validation" />
+                <interceptor-ref name="workflow" />
+                <interceptor-ref name="redirectMessage" />
+            </interceptor-stack>
+        </interceptors>
+
+        <default-interceptor-ref name="adminStack"/>
+        <default-action-ref name="admin"/>
+        <action name="admin" method="showLogin" class="loginAction">
+            <interceptor-ref name="loginStack" />
+            <result name="success">/admin/login.jsp</result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">${actionName}</param>
+            </result>
+        </action>
+         <action name="logout" method="logoutAdmin" class="logoutAction">
+            <interceptor-ref name="logoutStack"/>
+            <param name="request_locale">${locale.language}</param>
+            <result name="success" type="redirectAction">
+                <param name="actionName">admin</param>
+            </result>
+        </action>
+        
+        <action name="enter" method="execute" class="logoutAction">
+            <interceptor-ref name="logoutStack"/>
+            <param name="request_locale">${locale.language}</param>
+            <result name="success" type="redirectAction">
+                <param name="actionName">../enter</param>
+            </result>
+        </action>
+        
+        <action name="loginAdmin" method="loginAdmin" class="loginAction">
+            <interceptor-ref name="loginStack" />
+            <result name="success" type="redirectAction">
+                <param name="actionName">listPortals</param>
+            </result>
+            <result name="error">/admin/login.jsp</result>
+        </action>
+        <action name="changeAdminPassword" method="changeAdminPassword" class="adminAction">
+            <result>/admin/changeAdminPassword.jsp</result>
+        </action>
+        <action name="saveAdminPassword" method="saveAdminPassword" class="adminAction">
+            <result>/admin/changeAdminPassword.jsp</result>
+            <result name="input">/admin/changeAdminPassword.jsp</result>
+            <result name="error">/admin/changeAdminPassword.jsp</result>
+        </action>
+        <!--############## Portal management ##############-->
+
+        <action name="savePortal" method="savePortal" class="portalAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">showPortal</param>
+                <param name="portalId">%{portalId}</param>
+                <param name="parse">true</param>
+            </result>
+            <result name="input">/admin/portalShow.jsp</result>
+            <result name="error">/admin/portalShow.jsp</result>
+        </action>
+
+        <action name="addPortal" method="addPortal" class="portalAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">showPortal</param>
+                <param name="parse">true</param>
+            </result>
+        </action>
+
+        <action name="listPortals" method="listPortals" class="portalAction">
+            <result name="success">/admin/portalList.jsp</result>
+        </action>
+        
+        <action name="showPortal" method="showPortal" class="portalAction">
+            <result>/admin/portalShow.jsp</result>
+            <result name="input">
+                <param name="location">/admin/portalShow.jsp</param>
+            </result>
+        </action>
+
+        <action name="removePortal" method="removePortal" class="portalAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">listPortals</param>
+                <param name="parse">true</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">showPortal</param>
+                <!---->
+                <param name="portalId">${portal.id}</param>
+            </result>
+            <result name="input" type="redirectAction">
+                <param name="actionName">showPortal</param>
+                <!---->
+                <param name="portalId">${portal.id}</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">listPortals</param>
+                <!--<param name="portalId">${portal.id}</param>-->
+            </result>
+        </action>
+        
+        <!-- Download X-Road instances from security server -->
+        <action name="getXroadInstances" method="getXroadInstances" class="xroadInstanceAction"/>
+        
+
+        <!--############## Portal manager management ##############-->
+        
+        <action name="addManager" method="addManager" class="managerAction">
+            <interceptor-ref name="portal"/>
+            <interceptor-ref name="adminStack"/>
+            <result>/admin/editManager.jsp</result>
+            <result name="input">/admin/editManager.jsp</result>
+            <result name="error">/admin/editManager.jsp</result>
+        </action>
+
+        <action name="saveManager" method="saveManager" class="managerAction">
+            <interceptor-ref name="portal"/>
+            <interceptor-ref name="adminStack"/>
+            <result name="success" type="redirectAction">
+                <param name="actionName">showPortal</param>
+                <param name="portalId">${portal.id}</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">addManager</param>
+            </result>
+            <result name="input">
+                /admin/editManager.jsp
+            </result>
+        </action>
+        
+        <action name="saveUserAdmin" method="saveUserAdmin" class="managerAction">
+            <interceptor-ref name="portal"/>
+            <interceptor-ref name="adminStack"/>
+            <result name="success" type="redirectAction">
+                <param name="actionName">showPortal</param>
+                <param name="portalId">${portal.id}</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">addManager</param>
+            </result>
+            <result name="input">
+                /admin/editManager.jsp
+            </result>
+        </action>
+        
+        <action name="usersFilterAdmin" method="filter" class="managerAction">
+            <interceptor-ref name="portal"/>
+            <interceptor-ref name="adminStack"/>
+            <result>/admin/editManager.jsp</result>
+        </action>
+
+        <action name="managerDelete" method="deleteManager" class="managerAction">
+            <interceptor-ref name="portal"/>
+            <interceptor-ref name="adminStack"/>
+            <result type="redirectAction">
+                <param name="actionName">showPortal</param>
+                <param name="portalId">${portal.id}</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">showPortal</param>
+                <param name="portalId">${portal.id}</param>
+            </result>
+        </action>
+        
+        <action name="userDeleteAdmin" method="deleteUser" class="userAction">
+            <interceptor-ref name="portal"/>
+            <interceptor-ref name="adminStack"/>
+            <result name="success" type="redirectAction">
+                <param name="actionName">addManager</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">addManager</param>
+            </result>
+        </action>
+        <action name="userGenCodeAdmin" method="genCodeUser" class="userAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">addManager</param>
+                <param name="parse">true</param>
+                <param name="generatedOvertakeCode">${generatedOvertakeCode}</param>
+                <param name="userId">${userId}</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">addManager</param>
+                <param name="parse">true</param>
+                <param name="userId">${userId}</param>
+            </result>
+        </action>
+        <!-- ################################################ -->
+    </package>
+    
+    <package name="misp2" extends="struts-default">
+
+        <result-types>
+            <result-type name="dispatcher" class="org.apache.struts2.result.ServletDispatcherResult" default="true"/>
+        </result-types>
+
+        <interceptors>
+
+            <interceptor name="dosProtection" class="ee.aktors.misp2.interceptor.DosProtectionInterceptor"/>
+            <interceptor name="login" class="loginInterceptor"/>
+            <interceptor name="roles" class="rolesInterceptor"/>
+            <interceptor name="session" class="ee.aktors.misp2.interceptor.SessionInterceptor"/>
+            <interceptor name="i18nWrapper" class="ee.aktors.misp2.interceptor.I18nWrapperInterceptor"/>
+            <interceptor name="flash" class="ee.aktors.misp2.flash.FlashInterceptor"/>
+            <interceptor name="httpMethods" class="ee.aktors.misp2.httpMethodChecker.HTTPMethodsInterceptor"/>
+            <interceptor name="csrfProtection" class="ee.aktors.misp2.csrfProtection.CSRFProtectionInterceptor"/>
+            <interceptor name="portal" class="portalInterceptor"/>
+            <interceptor name="portalChange" class="portalChangeInterceptor"/>
+            <!-- this menu interceptor does not quite work, need some modifications to role selection -->
+            <!---->
+            <interceptor name="menu" class="menuInterceptor"/>
+            <interceptor name="constants" class="ee.aktors.misp2.interceptor.ConstantsInterceptor"/>
+            <interceptor name="action_wrapper" class="ee.aktors.misp2.interceptor.ActionWrapperInterceptor"/>
+            <!-- taken from http://glindholm.wordpress.com/2008/07/02/preserving-messages-across-a-redirect-in-struts-2/ -->
+            <interceptor name="redirectMessage" class="ee.aktors.misp2.interceptor.RedirectMessageInterceptor" />
+            <interceptor name="myException" class="com.opensymphony.xwork2.interceptor.ExceptionMappingInterceptor">
+                <param name="logEnabled">true</param>
+                <param name="logLevel">error</param> <!-- (trace, debug, info, warn, error, fatal)? - defaut is debug -->
+            </interceptor>
+            <interceptor-stack name="regularStack">
+                <interceptor-ref name="logger"/>
+                <interceptor-ref name="myException"/>
+                <interceptor-ref name="action_wrapper"/>
+                <interceptor-ref name="constants" />
+                <interceptor-ref name="session"/>
+                <interceptor-ref name="params" />
+                <interceptor-ref name="i18nWrapper"/>
+                <interceptor-ref name="flash"/>
+                <interceptor-ref name="httpMethods"/>
+                <interceptor-ref name="dosProtection"/>
+                <interceptor-ref name="csrfProtection"/>
+                <interceptor-ref name="portalChange"/>
+                <interceptor-ref name="portal"/>
+                <interceptor-ref name="login" />
+                <interceptor-ref name="roles" />
+                <interceptor-ref name="menu" />
+                <interceptor-ref name="prepare" />
+                <interceptor-ref name="chain" />
+                <interceptor-ref name="modelDriven"/>
+                <interceptor-ref name="fileUpload" />
+                <interceptor-ref name="params" />
+                <interceptor-ref name="conversionError" />
+                <interceptor-ref name="validation" />
+                <interceptor-ref name="workflow" />
+                <interceptor-ref name="redirectMessage" />
+            </interceptor-stack>
+            <interceptor-stack name="loginStack">
+                <interceptor-ref name="logger"/>
+                <interceptor-ref name="myException"/>
+                <interceptor-ref name="action_wrapper"/>
+                <interceptor-ref name="constants"/>
+                <interceptor-ref name="session"/>
+                <interceptor-ref name="params" />
+                <interceptor-ref name="i18nWrapper"/>
+                <interceptor-ref name="flash"/>
+                <interceptor-ref name="httpMethods"/>
+                <interceptor-ref name="dosProtection"/>
+                <interceptor-ref name="csrfProtection"/>
+                <interceptor-ref name="portalChange"/>
+                <!--<interceptor-ref name="portal"/>
+                <interceptor-ref name="roles" />
+                <interceptor-ref name="menu" />-->
+                <interceptor-ref name="prepare" />
+                <interceptor-ref name="chain" />
+                <interceptor-ref name="modelDriven"/>
+                <interceptor-ref name="fileUpload" />
+                <interceptor-ref name="params" />
+                <interceptor-ref name="conversionError" />
+                <interceptor-ref name="validation" />
+                <interceptor-ref name="workflow" />
+                <interceptor-ref name="redirectMessage" />
+            </interceptor-stack>
+            <interceptor-stack name="entranceStack">
+                <interceptor-ref name="logger"/>
+                <interceptor-ref name="myException"/>
+                <interceptor-ref name="action_wrapper"/>
+                <interceptor-ref name="constants" />
+<!--                <interceptor-ref name="session"/>-->
+                <interceptor-ref name="params" />
+                <interceptor-ref name="i18nWrapper"/>
+                <interceptor-ref name="flash"/>
+                <interceptor-ref name="httpMethods"/>
+                <interceptor-ref name="csrfProtection"/>
+                <interceptor-ref name="portalChange"/>
+                <!--<interceptor-ref name="portal"/>
+                <interceptor-ref name="roles" />
+                <interceptor-ref name="menu" />-->
+                <interceptor-ref name="prepare" />
+                <interceptor-ref name="chain" />
+                <interceptor-ref name="modelDriven"/>
+                <interceptor-ref name="fileUpload" />
+                <interceptor-ref name="params" />
+                <interceptor-ref name="conversionError" />
+                <interceptor-ref name="validation" />
+                <interceptor-ref name="workflow" />
+                <interceptor-ref name="redirectMessage" />
+            </interceptor-stack>
+            <interceptor-stack name="portalChangeStack">
+                <interceptor-ref name="logger"/>
+                <interceptor-ref name="myException"/>
+                <interceptor-ref name="action_wrapper"/>
+                <interceptor-ref name="constants" />
+                <interceptor-ref name="session"/>
+                <interceptor-ref name="params" />
+                <interceptor-ref name="i18nWrapper"/>
+                <interceptor-ref name="flash"/>
+                <interceptor-ref name="httpMethods"/>
+                <interceptor-ref name="csrfProtection"/>
+                <interceptor-ref name="portalChange"/>
+                <!--<interceptor-ref name="portal"/>
+                <interceptor-ref name="roles" />
+                <interceptor-ref name="menu" />-->
+                <interceptor-ref name="prepare" />
+                <interceptor-ref name="chain" />
+                <interceptor-ref name="modelDriven"/>
+                <interceptor-ref name="fileUpload" />
+                <interceptor-ref name="params" />
+                <interceptor-ref name="conversionError" />
+                <interceptor-ref name="validation" />
+                <interceptor-ref name="workflow" />
+                <interceptor-ref name="redirectMessage" />
+            </interceptor-stack>
+            <interceptor-stack name="logoutStack">
+                <interceptor-ref name="logger"/>
+                <interceptor-ref name="myException"/>
+                <interceptor-ref name="action_wrapper"/>
+                <interceptor-ref name="constants"/>
+                <interceptor-ref name="i18nWrapper"/>
+                <interceptor-ref name="httpMethods"/>
+                <interceptor-ref name="params"/>
+            </interceptor-stack>
+        </interceptors>
+        
+        <default-interceptor-ref name="regularStack" />
+        <default-action-ref name="enter" />
+
+        <global-results>
+            <result name="pageNotFound" type="redirectAction">
+                <param name="actionName">error404</param>
+            </result>
+            <result name="not_logged_in" type="redirectAction">
+                <param name="actionName">login</param>
+            </result>
+            <result name="user_doesnt_exist">/pages/faults/user_dont_exist.jsp</result>
+            <result name="runtimeException">/pages/faults/runtime.jsp</result>
+            <result name="unauthorized">/pages/faults/unauthorized.jsp</result>
+            <result name="no_portal" type="redirectAction">
+                <param name="actionName">login</param>
+                <!-- <param name="namespace">/admin</param> -->
+            </result>
+            <result name="session_expired">/pages/faults/sessionExpired.jsp</result>
+            <result name="csrfError" type="redirectAction">
+                <param name="actionName">login_user</param>
+            </result>
+            <result name="csrfAjaxError" type="httpheader">440</result><!-- Expect, that javascript itself redirects based on this code -->
+            <result name="tooManyRequestsError">/pages/faults/tooManyRequests.jsp</result>
+            
+        </global-results>
+
+        <global-exception-mappings>
+            <exception-mapping result="runtimeException" exception="java.lang.RuntimeException"/>
+            <exception-mapping result="runtimeException" exception="java.lang.Exception"/>
+        </global-exception-mappings>
+
+        <action name="error404" class="pageFaultsAction">
+            <interceptor-ref name="logoutStack"/>
+            <param name="request_locale">${locale.language}</param>
+            <result name="success">/pages/faults/pageNotFound.jsp</result>
+        </action>
+        
+        <action name="error403" class="pageFaultsAction" method="unauthorized">
+            <interceptor-ref name="logoutStack"/>
+            <param name="request_locale">${locale.language}</param>
+        </action>
+        
+        <action name="error" class="pageFaultsAction" method="runtimeException">
+            <interceptor-ref name="logoutStack"/>
+            <param name="request_locale">${locale.language}</param>
+        </action>
+        
+        <action name="login" method="showLogin" class="loginAction">
+            <interceptor-ref name="entranceStack" />
+            <result name="success">/pages/loginPage.jsp</result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">${actionName}</param>
+            </result>
+        </action>
+
+        <action name="formLogin" method="loginUsingForm" class="loginAction">
+            <interceptor-ref name="loginStack" />
+            <result name="success" type="redirectAction">
+                <param name="actionName">enter</param>
+            </result>
+            <result name="error">/pages/loginPage.jsp</result>
+        </action>
+
+        <action name="IDCardLogin" method="loginUsingIDCard" class="loginAction">
+            <interceptor-ref name="loginStack" />
+            <result name="success" type="redirectAction">
+                <param name="actionName">enter</param>
+            </result>
+            <result name="error" type="redirectAction">login</result>
+        </action>
+        
+        <action name="mobileIDLoginStart" method="loginUsingMobileID" class="loginAction">
+            <interceptor-ref name="loginStack" />
+            <result name="success">/pages/mobileIDLoginWaitForLogin.jsp</result>
+            <result name="error">/pages/loginPage.jsp</result>
+        </action>
+        
+        <action name="mobileIDCheckLogin" method="loginUsingMobileID" class="loginAction">
+            <interceptor-ref name="loginStack" />
+            <result name="success" type="redirectAction">
+                <param name="actionName">enter</param>
+            </result>
+            <result name="error">/pages/loginPage.jsp</result>
+        </action>
+        
+        
+        <action name="certLogin" method="loginUsingCertificate" class="loginAction">
+            <interceptor-ref name="loginStack" />
+            <result name="success" type="redirectAction">
+                <param name="actionName">enter</param>
+            </result>
+            <result name="input">/pages/overtakeCode.jsp</result>
+            <result name="error" type="redirectAction">login</result>
+        </action>
+
+        <action name="enter" method="enter" class="entranceAction">
+            <interceptor-ref name="entranceStack" />
+            <result name="success" type="redirectAction">
+                <param name="actionName">${action}</param>
+            </result>
+            <result name="redirectToIDCardLogin" type="redirectAction">
+                <param name="actionName">IDCardLogin</param>
+            </result>
+        </action>
+
+        <action name="portalChange" method="enter" class="entranceAction">
+            <interceptor-ref name="portalChangeStack" />
+            <result name="success" type="redirectAction">
+                <param name="actionName">${action}</param>
+            </result>
+        </action>
+
+        <action name="login_user" method="enterUser" class="entranceAction">
+            <result name="success" >/pages/login.jsp</result>
+            <result name="error">/pages/login.jsp</result>
+            <result name="univ_portal" type="redirectAction">
+                <param name="actionName">getUnitList</param>
+            </result>
+        </action>
+        
+        <action name="login_manager" method="enterManager" class="entranceAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">listProducers</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+        </action>
+
+        <action name="login_unregistered" method="enterUnregistered" class="entranceAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">getUnitList</param>
+            </result>
+        </action>
+        
+        <action name="login_representative" method="enterRepresentative" class="entranceAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">${action}</param>
+            </result>
+        </action>
+
+        <action name="login_limited_representative" method="enterLimitedRepresentative" class="entranceAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">${action}</param>
+            </result>
+        </action>
+
+        <action name="login_perm_manager" method="enterManager" class="entranceAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">groupManage</param>
+            </result>
+        </action>
+        
+        <action name="login_developer" method="enterManager" class="entranceAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">listProducers</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+        </action>
+              
+        <action name="logout" method="execute" class="logoutAction">
+            <interceptor-ref name="logoutStack"/>
+            <param name="request_locale">${locale.language}</param>
+            <result name="success">/pages/loggedOut.jsp</result>
+        </action>
+
+        <!--############## Certificate  ##############-->
+        <action name="certCreate" method="execute" class="certificateAction">
+            <interceptor-ref name="entranceStack"/>
+            <result name="success">
+                <param name="location">/pages/certificateCreate.jsp</param>
+            </result>
+        </action>
+        <action name="certGenerate" method="generate" class="certificateAction">
+            <interceptor-ref name="entranceStack"/>
+            <result name="success">/pages/certificateCreate.jsp</result>
+            <result name="error">/pages/certificateCreate.jsp</result>
+            <result name="input">/pages/certificateCreate.jsp</result>
+        </action>
+        <action name="certLoad" method="execute" class="certificateAction">
+            <interceptor-ref name="entranceStack"/>
+            <result name="success">/loadCertification</result>
+        </action>
+        
+        <!-- Accept or reject EULA (end user license agreement) JSON-based server-side methods. -->
+        <action name="rejectEula" method="rejectEula" class="eulaAction"/>
+        <action name="acceptEula" method="acceptEula" class="eulaAction"/>
+        
+        <!-- ################################################ -->
+
+        <action name="*_help*" method="execute" class="helpAction">
+            <interceptor-ref name="entranceStack" />
+            <result name="success" type="stream">
+              <param name="contentType">${contentType}</param>
+              <param name="inputName">userGuideStream</param>
+              <param name="bufferSize">1024</param>
+            </result>
+        </action>
+
+        <action name="listQueries" method="listQueries" class="queryAction">
+            <result>/pages/listQueries.jsp</result>
+            <result name="input">/pages/listQueries.jsp</result>
+        </action>
+
+        <action name="runQuery_*" class="ee.aktors.misp2.action.RunQueryAction">
+            <result>/xforms-jsp/runq_{1}.xhtml</result>
+        </action>
+        
+        <!--############## Users management ##############-->
+
+        <action name="manageUsers" method="showFilter" class="userAction">
+            <result>/pages/usersFilter.jsp</result>
+        </action>
+
+        <!-- search users -->
+        <action name="usersFilter" method="filter" class="userAction">
+            <result>/pages/usersFilter.jsp</result>
+            <result name="input">/pages/usersFilter.jsp</result>
+            <result name="error">/pages/usersFilter.jsp</result>
+        </action>
+        
+        <action name="showUser" method="showUser" class="userAction">
+            <result>/pages/usersShow.jsp</result>
+            <result name="input">
+                <param name="location">/pages/usersShow.jsp</param>
+            </result>
+        </action>
+        
+        <action name="addUser" method="addUser" class="userAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">showUser</param>
+                <param name="parse">true</param>
+            </result>
+        </action>
+
+        <action name="userSubmit" method="userViewSubmit" class="userAction">
+            <result name="input">
+                <param name="location">/pages/usersShow.jsp</param>
+            </result>
+            <result name="redirect" type="redirectAction">
+                <param name="actionName">${redirectAction}</param>
+                <param name="userId">${userId}</param>
+            </result>
+            <result name="success" type="redirectAction">
+                <param name="actionName">showUser</param>
+                <param name="parse">true</param>
+                <param name="userId">${userId}</param>
+            </result>
+            <result name="error">
+                <param name="location">/pages/usersShow.jsp</param>
+            </result>
+        </action>
+
+        <action name="userDeleteConfirmed" method="deleteUserConfirmed" class="userAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">manageUsers</param>
+                <param name="parse">true</param>
+            </result>
+        </action>
+
+        <action name="userDelete" method="deleteUser" class="userAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">manageUsers</param>
+                <param name="parse">true</param>
+            </result>
+            <result name="confirm">
+                <param name="location">/pages/usersDeleteConfirm.jsp</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">showUser</param>
+                <param name="parse">true</param>
+                <param name="userId">${userId}</param>
+            </result>
+        </action>
+        <!-- generates random password for user -->
+        <action name="userGenCode" method="genCodeUser" class="userAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">showUser</param>
+                <param name="parse">true</param>
+                <param name="generatedOvertakeCode">${generatedOvertakeCode}</param>
+                <param name="userId">${userId}</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">showUser</param>
+                <param name="parse">true</param>
+                <param name="userId">${userId}</param>
+            </result>
+        </action>
+        
+
+        <!-- ################################################ -->
+
+        
+        <!--############## User account management ##############-->
+        <action name="changeUserAccount" method="showUser" class="userSettingAction">
+            <result name="input">/pages/userSettingsShow.jsp</result>
+            <result name="success">/pages/userSettingsShow.jsp</result>
+        </action>
+        
+        <action name="saveUserAccount" method="saveUser" class="userSettingAction">
+            <result name="input">/pages/userSettingsShow.jsp</result>
+            <result name="success" type="redirectAction">
+                <param name="actionName">changeUserAccount</param>
+            </result>
+        </action>
+        <!-- ################################################ -->
+
+        <!--############## Query log search and management ##############-->
+        <action name="queryLogFilter" method="filter" class="queryLogAction">
+            <result>/pages/queryLogFilter.jsp</result>
+            <result name="input">/pages/queryLogFilter.jsp</result>
+            
+            <result name="success_csv" type="stream">
+              <param name="contentType">text/csv;charset=UTF-8</param>
+              <param name="inputName">csvStream</param>
+              <param name="bufferSize">1024</param>
+             <param name="contentDisposition">attachment;filename="${csvFileName}"</param>
+            </result>
+            <result name="error">/pages/queryLogFilter.jsp</result>
+        </action>
+
+        <action name="managerQueryLogFilter" method="filter" class="managerQueryLogAction">
+            <result>/pages/queryLogFilter.jsp</result>
+            <result name="input">/pages/queryLogFilter.jsp</result>
+            <result name="success_csv" type="stream">
+              <param name="contentType">text/csv;charset=UTF-8</param>
+              <param name="inputName">csvStream</param>
+              <param name="bufferSize">1024</param>
+             <param name="contentDisposition">attachment;filename="${csvFileName}"</param>
+            </result>
+            <result name="error">/pages/queryLogFilter.jsp</result>
+        </action>
+        
+        <action name="managerQueryLogs" method="showFilter" class="managerQueryLogAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">managerQueryLogFilter</param>
+            </result>
+        </action>
+
+        <action name="userQueryLogs" method="showFilter" class="queryLogAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">queryLogFilter</param>
+            </result>
+        </action>
+
+        <!-- used when query has been executed -->
+        <!--
+            <action name="saveQueryLog" method="logQuery" class="queryLogAction">
+                <result name="success">/pages/ajax/empty.jsp</result>
+            </action>
+            <action name="saveQueryLogResponse" method="logQueryResponse" class="queryLogAction">
+                <result name="success">/pages/ajax/empty.jsp</result>
+            </action>
+        -->
+        <!-- ################################################ -->
+
+
+        <!-- ############## Styles management ############## -->
+
+        <action name="ajaxReadUrl" method="readUrl" class="URLAction">
+            <result name="success">/pages/ajax/resultFromUrl.jsp</result>
+            <result name="error">/pages/ajax/resultFromUrl.jsp</result>
+        </action>
+        <action name="ajaxProdQuery" method="listQueries" class="stylesAction">
+            <interceptor-ref name="logoutStack"/>
+            <result name="success">/pages/ajax/styleQueries.jsp</result>
+            <result name="error">/pages/ajax/styleQueries.jsp</result>
+        </action>
+        <action name="stylesFilter" method="filter" class="stylesAction">
+            <result name="success">/pages/stylesFilter.jsp</result>
+            <result name="input">/pages/stylesFilter.jsp</result>
+        </action>
+        <action name="addStyle" method="addItem" class="stylesAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">showStyle</param>
+                <param name="parse">true</param>
+            </result>
+        </action>
+
+        <action name="showStyle" method="showItem" class="stylesAction">
+            <result name="success">/pages/styleShow.jsp</result>
+            <result name="input">/pages/styleShow.jsp</result>
+            <result name="error" type="redirectAction">stylesFilter</result>
+        </action>
+
+        <action name="styleSubmit" method="submitItem" class="stylesAction">
+            <result name="input">/pages/styleShow.jsp</result>
+            <result name="success" type="redirectAction">
+                <param name="actionName">showStyle</param>
+                <param name="parse">true</param>
+                <param name="styleId">${styleId}</param>
+            </result>
+            <result name="error" type="redirectAction">stylesFilter</result>
+        </action>
+        
+        <action name="styleDelete" method="deleteItem" class="stylesAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">stylesFilter</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">showStyle</param>
+                <param name="parse">true</param>
+                <param name="styleId">${styleId}</param>
+            </result>
+        </action>
+        <!-- ################################################ -->
+
+
+        <!-- ############## Services ############## -->
+
+        <action name="listProducers" method="execute" class="producerAction">
+            <result>/pages/listProducers.jsp</result>
+            <result name="success">
+                <param name="location">/pages/listProducers.jsp</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+        </action>
+        
+        <action name="listAllProducers" method="listAllProducers" class="producerAction">
+            <result>
+                <param name="protocol">${protocol}</param>
+                <param name="location">/pages/listProducers.jsp</param>
+            </result>
+            <result name="success">
+                <param name="protocol">${protocol}</param>
+                <param name="location">/pages/listProducers.jsp</param>
+            </result>
+        </action>
+        
+        <action name="producerEdit" method="producerEdit" class="producerAction">
+            <result>/pages/editProducer.jsp</result>
+            <result name="success">/pages/editProducer.jsp</result>
+            <result name="error">
+                <param name="location">/pages/editProducer.jsp</param>
+            </result>
+        </action>
+        
+        <action name="producerSave" method="producerSave" class="producerAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">listProducers</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+            <result name="error">
+                <param name="location">/pages/editProducer.jsp</param>
+                <param name="id">${id}</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+            <result name="input">
+                <param name="location">/pages/editProducer.jsp</param>
+                <param name="id">${id}</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+        </action>
+
+        <action name="producerDelete" method="producerDelete" class="producerAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">listProducers</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+            <result name="error">
+                <param name="location">/pages/editProducer.jsp</param>
+                <param name="id">${id}</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+            <result name="input">
+                <param name="location">/pages/editProducer.jsp</param>
+                <param name="id">${id}</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+        </action>
+        
+        <action name="addActiveProducer" method="changeProducerState" class="producerAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">listAllProducers</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+        </action>
+        
+        <action name="soapRefreshProducers" method="refreshProducers" class="producerAction">
+            <result>/pages/listProducers.jsp</result>
+            <result name="success" type="redirectAction">
+                <param name="actionName">listAllProducers</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+        </action>
+        
+        <action name="queriesExport" method="queriesExport" class="producerAction">
+            <result>/pages/queriesExport.jsp</result>
+        </action>
+        
+          <action name="queriesExportReceiveFile" method="queriesExportReceiveFile" class="producerAction">
+          <result type="stream">
+             <param name="inputName">inputStream</param>
+             <param name="contentType">application/octet-stream</param>
+             <param name="contentDisposition">attachment;filename="${exportFileName}"</param>
+           </result>
+        </action>
+        
+        <action name="queriesImport" method="queriesImport" class="producerAction">
+            <result>/pages/queriesImport.jsp</result>
+            <result name="redirect" type="redirectAction">
+                <param name="actionName">queriesImport</param>
+                <param name="protocol">${protocol}</param>
+           </result>
+        </action>
+        
+        <action name="getAllowedMethods" method="getAllowedMethods" class="queryAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">listQueries</param>
+                <param name="id">${producer.id}</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">listQueries</param>
+                <param name="id">${producer.id}</param>
+            </result>
+            
+            <result name="remove">/pages/removeMissingQueries.jsp</result>
+        </action>
+        
+        <action name="removeMissingQueries" method="removeMissingQueries" class="queryAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">listQueries</param>
+                <param name="id">${id}</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+        </action>
+
+        <action name="updateServicesList" method="updateServicesList" class="queryAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">listQueries</param>
+                <param name="id">${producer.id}</param>
+                <param name="protocol">${protocol}</param>
+                <param name="wsdlSource">${wsdlSource}</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">listQueries</param>
+                <param name="id">${producer.id}</param>
+                <param name="protocol">${protocol}</param>
+                <param name="wsdlSource">${wsdlSource}</param>
+            </result>
+
+            <result name="remove">
+                <param name="location">/pages/removeMissingQueries.jsp</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+        </action>
+
+        <action name="updateServicesXFroms" method="updateServicesXFrom" class="queryAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">listQueries</param>
+                <param name="id">${producer.id}</param>
+                <param name="protocol">${protocol}</param>
+                <param name="wsdlSource">${wsdlSource}</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">listQueries</param>
+                <param name="id">${producer.id}</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+
+            <result name="remove">
+                <param name="location">/pages/removeMissingQueries.jsp</param>
+                <param name="protocol">${protocol}</param>
+                <param name="wsdlSource">${wsdlSource}</param>
+            </result>
+        </action>
+
+        <action name="updateAndGenerateForms" method="updateAndGenerateForms" class="queryAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">listQueries</param>
+                <param name="id">${producer.id}</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">listQueries</param>
+                <param name="id">${producer.id}</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+
+            <result name="remove">
+                <param name="location">/pages/removeMissingQueries.jsp</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+        </action>
+
+
+        <!--############## XSLT Management ##############-->
+        <action name="editXforms" method="editXforms" class="queryAction">
+            <result>/pages/editXforms.jsp</result>
+            <result name="input">/pages/editXforms.jsp</result>
+        </action>
+        
+        <action name="saveXforms" method="saveXforms" class="queryAction">
+            <result>/pages/editXforms.jsp</result>
+            <result name="input">/pages/editXforms.jsp</result>
+        </action>
+        
+        <!-- ______________________________________________________ -->
+        
+        <action name="xforms-query" method="executeXforms" class="queryAction">
+            <result>/pages/runQuery.jsp</result>
+            <result name="input">/pages/runQuery.jsp</result>
+            <result name="error">/pages/empty.jsp</result>
+        </action>
+        
+        <!-- XRoad REST query mediator -->
+        <action name="restMediator" method="mediate" class="restMediatorAction" />
+
+        <!--############## Groups management ##############-->
+        <!--  main list  -->
+        <action name="groupManage" method="groupList" class="groupAction">
+            <result>/pages/groupList.jsp</result>
+        </action>
+        <!--  group data editing  -->
+        <action name="groupEditData" method="groupEditData" class="groupAction">
+            <result>/pages/groupEditData.jsp</result>
+            <result name="error" type="redirectAction">groupManage</result>
+        </action>
+        <action name="groupSaveData" method="groupSaveData" class="groupAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">groupManage</param>
+            </result>
+            <result name="input">/pages/groupEditData.jsp</result>
+            <result name="error">/pages/groupEditData.jsp</result>
+        </action>
+        <action name="groupDelete" method="groupDelete" class="groupAction">
+            <result name="success" type="redirectAction">groupManage</result>
+            <result name="error" type="redirectAction">groupManage</result>
+        </action>
+        <!--  group rights editing  -->
+        <action name="groupEditRights" method="groupEditRights" class="groupAction">
+            <result name="edit">/pages/groupEditRights.jsp</result>
+            <result name="view">/pages/groupViewRights.jsp</result>
+            <result name="error" type="redirectAction">groupManage</result>
+        </action>
+        <action name="groupSaveRights" method="groupSaveRights" class="groupAction">
+            <result name="success" type="redirectAction">groupManage</result>
+            <result name="error" type="redirectAction">groupManage</result>
+        </action>
+        <!--  group members editing  -->
+        <action name="groupEditMembers" method="groupEditMembers" class="groupAction">
+            <result>/pages/groupEditMembers.jsp</result>
+            <result name="error" type="redirectAction">groupManage</result>
+        </action>
+        <action name="groupSaveMembers" method="groupSaveMembers" class="groupAction">
+            <result name="success" type="redirectAction">groupManage</result>
+            <result name="error" type="redirectAction">groupManage</result>
+        </action>
+        <!--###############################################-->
+        
+        
+        <!--  unit registration -->
+        <action name="getUnitList"  method="execute" class="registerUnitAction">
+            <result name="success" >/pages/registration/registerUnit.jsp</result>
+            <result name="error" >/pages/registration/registerUnit.jsp</result>
+        </action>
+        <action name="registerUnit"  method="registerUnit" class="registerUnitAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">${redirectAction}</param>
+            </result>
+            <!--<result name="error" >/pages/registration/registerUnit.jsp</result>-->
+            <result name="error" type="redirectAction">getUnitList</result>
+        </action>
+
+        <!-- unknown unit registration -->
+        <action name="registerUnknownUnit" method="registerUkUnit" class="registerUnitAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">registerUnit</param>
+                <param name="registerUnknown">true</param>
+                <param name="orgCode">${orgCode}</param>
+                <param name="csrfToken">%{sessionCSRFToken}</param>
+            </result>
+        </action>
+
+        <!--###############################################-->
+
+        <action name="registerManager" method="showForm" class="registerManagerAction">
+            <result name="success">/pages/registration/registerManager.jsp</result>
+            <result name="error">/pages/registration/registerManager.jsp</result>
+        </action>
+
+        <action name="managerRegisterUnitFilter" method="showForm" class="registerManagerAction">
+            <result name="success">/pages/registration/registerManager.jsp</result>
+            <result name="error">/pages/registration/registerManager.jsp</result>
+        </action>
+        
+        <action name="registerUkManager" method="showForm" class="registerUkManagerAction">
+            <result name="success">/pages/registration/registerManager.jsp</result>
+            <result name="error">/pages/registration/registerManager.jsp</result>
+        </action>
+        <action name="managerRegisterUnitUKFilter" method="showForm" class="registerUkManagerAction">
+            <result name="success">/pages/registration/registerManager.jsp</result>
+            <result name="error">/pages/registration/registerManager.jsp</result>
+        </action>
+       <!-- adds new unit manager, hides business logic from end-user -->
+        <action name="addUnitManager"  method="addUnitPerson" class="registerManagerAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">userSubmit</param>
+                <param name="userId">${userId}</param>
+                <param name="roleValue">%{roleIntValue}</param>
+                <param name="remote">true</param>
+                <param name="redirectAction">registerManager</param>
+                <param name="keepEmptyParameters">true</param>
+                <param name="csrfToken">%{sessionCSRFToken}</param>
+            </result>
+            <result type="redirectAction" name="input">
+                <param name="actionName">registerManager</param>
+            </result>
+        </action>
+
+        <!-- removes unit manager, hides business logic from end-user -->
+        <action name="removeUnitManager" method="removeUnitPerson" class="registerManagerAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">userSubmit</param>
+                <param name="userId">${userId}</param>
+                <param name="redirectAction">registerManager</param>
+                <param name="keepEmptyParameters">true</param>
+                <param name="roleValue">%{roleIntValue}</param>
+                <param name="remote">true</param>
+                <param name="csrfToken">%{sessionCSRFToken}</param>
+            </result>
+        </action>
+       
+
+
+        <action name="addManagerCandidate" method="addUnitPerson" class="registerUkManagerAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">registerUkManager</param>
+            </result>
+            <result name="input" type="redirectAction">
+                <param name="actionName">registerUkManager</param>
+            </result>
+            <result name="redirect" type="redirectAction">
+                <param name="actionName">userSubmit</param>
+                <param name="userId">${userId}</param>
+                <param name="roleValue">%{roleIntValue}</param>
+                <param name="remote">true</param>
+                <param name="redirectAction">registerUkManager</param>
+                <param name="keepEmptyParameters">true</param>
+                <param name="csrfToken">%{sessionCSRFToken}</param>
+            </result>
+        </action>
+        <action name="removeManagerCandidate" method="removeUnitPerson" class="registerUkManagerAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">userSubmit</param>
+                <param name="userId">${userId}</param>
+                <param name="redirectAction">registerUkManager</param>
+                <param name="keepEmptyParameters">true</param>
+                <param name="roleValue">%{roleIntValue}</param>
+                <param name="remote">true</param>
+                <param name="csrfToken">%{sessionCSRFToken}</param>
+            </result>
+        </action>
+        <!--  unit registration without manager role   -->
+        <action name="registerUser" method="showForm" class="registerUserAction">
+            <result name="success" >/pages/registration/registerUser.jsp</result>
+            <result name="error" >/pages/registration/registerUnit.jsp</result>
+        </action>
+        <action name="userRegisterUnitFilter" method="showForm" class="registerUserAction">
+            <result>/pages/registration/registerUser.jsp</result>
+            <result name="error">/pages/registration/registerUser.jsp</result>
+        </action>
+        
+        <action name="addUnitUser" method="addUnitPerson" class="registerUserAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">userSubmit</param>
+                <param name="userId">${userId}</param>
+                <param name="roleValue">%{roleIntValue}</param>
+                <param name="remote">true</param>
+                <param name="resetAllGroups">true</param>
+                <param name="redirectAction">registerUser</param>
+                <param name="keepEmptyParameters">true</param>
+                <param name="csrfToken">%{sessionCSRFToken}</param>
+            </result>
+            <result type="redirectAction" name="input">
+                <param name="actionName">registerUser</param>
+            </result>
+        </action>
+        
+        <action name="removeUnitUser" method="removeUnitPerson" class="registerUserAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">userSubmit</param>
+                <param name="userId">${userId}</param>
+                <param name="redirectAction">registerUser</param>
+                <param name="keepEmptyParameters">true</param>
+                <param name="removeAllGroups">true</param>
+                <param name="roleValue">%{roleIntValue}</param>
+                <param name="remote">true</param>
+                <param name="csrfToken">%{sessionCSRFToken}</param>
+            </result>
+        </action>
+       
+        <!--############## Classifiers management ##############-->
+
+        <action name="listClassifiers"  method="listClassifiers" class="classifierAction">
+            <result name="success" >/pages/listClassifiers.jsp</result>
+            <result name="error" >/pages/listClassifiers.jsp</result>
+        </action>
+        <action name="removeClassifier"  method="removeClassifier" class="classifierAction">
+            <result name="error" type="redirectAction">
+                <param name="actionName">listClassifiers</param>
+            </result>
+            <result name="success" type="redirectAction">
+                <param name="actionName">listClassifiers</param>
+            </result>
+        </action>
+        <action name="listClassifierQuerys"  method="listClassifierQuerys" class="classifierAction">
+            <result name="success" >/pages/listClassifierQuerys.jsp</result>
+        </action>
+        <action name="updateClassifier"  method="updateClassifier" class="classifierAction">
+            <result name="error" type="redirectAction">
+                <param name="actionName">listClassifiers</param>
+            </result>
+            <result name="success" type="redirectAction">
+                <param name="actionName">listClassifiers</param>
+            </result>
+        </action>
+        <action name="listQueryClassifiers"  method="updateClassifier" class="classifierAction">
+            <result name="success" >/pages/listQueryClassifiers.jsp</result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">listClassifiers</param>
+            </result>
+        </action>
+
+        
+        
+        <!-- actions with complex services -->
+        <!--  complex producer data editing  -->
+        <action name="complexProducerEdit" method="complexProducerEdit" class="complexAction">
+            <result>/pages/complexProducerEdit.jsp</result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">listProducers</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+        </action>
+        
+        <action name="complexProducerSave" method="complexProducerSave" class="complexAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">listProducers</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+            <result name="input">
+                <param name="location">/pages/complexProducerEdit.jsp</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+            <result name="error">
+                <param name="location">/pages/complexProducerEdit.jsp</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+        </action>
+        
+        <action name="complexProducerDelete" method="complexProducerDelete" class="complexAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">listProducers</param>
+                <param name="protocol">${protocol}</param>
+
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">listProducers</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+        </action>
+                
+        <action name="listComplexQueries" method="listComplexQueries" class="complexAction">
+            <result>/pages/listComplex.jsp</result>
+            <result name="success">/pages/listComplex.jsp</result>
+        </action>
+        
+        <action name="addComplexQuery" method="addComplexQuery" class="complexAction">
+            <result>/pages/editComplex.jsp</result>
+            <result name="success">/pages/editComplex.jsp</result>
+        </action>
+        
+        <action name="changeComplexDesc" method="changeComplexQuery" class="complexAction">
+            <result>/pages/editComplex.jsp</result>
+            <result name="success">/pages/editComplex.jsp</result>
+        </action>
+        
+        <action name="saveComplexData" method="saveComplexData" class="complexAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">listComplexQueries</param>
+                <param name="id">${complexProducer.id}</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+            <result name="input">/pages/editComplex.jsp</result>
+            <result name="error">/pages/editComplex.jsp</result>
+        </action>
+        
+        <action name="deleteComplex" method="deleteComplex" class="complexAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">listComplexQueries</param>
+                <param name="id">${complexProducer.id}</param>
+                <param name="protocol">${protocol}</param>
+            </result>
+        </action>
+        <!--######################################################-->
+
+        <!--############## Search  ##############-->
+        <action name="searchQueries" method="search" class="searchQueriesAction">
+            <result name="success">/pages/login.jsp</result>
+        </action>
+        <!-- ################################### -->
+        
+        <!--############## Version  ##############-->
+        <action name="version" class="versionAction">
+            <result name="success">/pages/version.jsp</result>
+            <result name="error">/pages/version.jsp</result>
+        </action>
+        <!-- ################################### -->
+        
+        <!--############## Topic management ##############-->
+        <action name="topicsFilter" method="filter" class="topicAction">
+            <result>/pages/topicsFilter.jsp</result>
+            <result name="input">/pages/topicsFilter.jsp</result>
+        </action>
+        <action name="addTopic" method="addItem" class="topicAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">showTopic</param>
+                <param name="parse">true</param>
+            </result>
+        </action>
+
+        <action name="showTopic" method="showItem" class="topicAction">
+            <result name="success">/pages/topicsShow.jsp</result>
+            <result name="input">/pages/topicsShow.jsp</result>
+            <result name="error" type="redirectAction">topicsFilter</result>
+        </action>
+
+        <action name="topicSubmit" method="submitItem" class="topicAction">
+            <result name="input">
+                <param name="location">/pages/topicsShow.jsp</param>
+            </result>
+            <result name="success" type="redirectAction">
+                <param name="actionName">showTopic</param>
+                <param name="parse">true</param>
+                <param name="topicId">${topicId}</param>
+            </result>
+            <result name="error" type="redirectAction">topicsFilter</result>
+        </action>
+        <action name="topicDelete" method="deleteItem" class="topicAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">topicsFilter</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">showTopic</param>
+                <param name="parse">true</param>
+                <param name="topicId">${topicId}</param>
+            </result>
+        </action>
+        <!-- ################################### -->
+
+        <!--############## Manager logs handle  ##############-->
+        <action name="t3SecFilterInit" method="execute" class="t3SecAction">
+            <result>/pages/tThreeSec.jsp</result>
+            <result name="input">/pages/tThreeSec.jsp</result>
+        </action>
+        
+        <action name="t3SecFilter" method="filter" class="t3SecAction">
+            <result>/pages/tThreeSec.jsp</result>
+            <result name="input">/pages/tThreeSec.jsp</result>
+        </action>
+
+        <!-- ################################### -->
+
+        <!--############## Unit management ##############-->
+        <action name="unitsFilter" method="filter" class="unitAction">
+            <result>/pages/unitsFilter.jsp</result>
+            <result name="input">/pages/unitsFilter.jsp</result>
+        </action>
+        <action name="addUnit" method="addItem" class="unitAction">
+            <result type="redirectAction" name="success">
+                <param name="actionName">showUnit</param>
+                <param name="parse">true</param>
+            </result>
+        </action>
+
+        <action name="showUnit" method="showItem" class="unitAction">
+            <result name="success">/pages/unitsShow.jsp</result>
+            <result name="input">/pages/unitsShow.jsp</result>
+            <result name="error" type="redirectAction">unitsFilter</result>
+        </action>
+
+        <action name="unitSubmit" method="submitItem" class="unitAction">
+            <result name="input">
+                <param name="location">/pages/unitsShow.jsp</param>
+            </result>
+
+            <result name="redirect" type="redirectAction">
+                <param name="actionName">registerUnit</param>
+                <param name="orgCode">${unit.code}</param>
+                <param name="csrfToken">%{sessionCSRFToken}</param>
+            </result>
+            <result name="success" type="redirectAction">
+                <param name="actionName">showUnit</param>
+                <param name="parse">true</param>
+                <param name="unitId">${unitId}</param>
+            </result>
+            <result name="error" type="redirectAction">unitsFilter</result>
+        </action>
+        <action name="unitDelete" method="deleteItem" class="unitAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">unitsFilter</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">showUnit</param>
+                <param name="parse">true</param>
+                <param name="unitId">${unitId}</param>
+            </result>
+        </action>
+        
+         <!--############## News Management ##############-->
+        <action name="editNews" method="editNews" class="newsAction">
+            <result>/pages/editNews.jsp</result>
+            <result name="input">/pages/editNews.jsp</result>
+        </action>
+        
+        <action name="saveNews" method="saveNews" class="newsAction">
+            <result>/pages/editNews.jsp</result>
+            <result name="input">/pages/editNews.jsp</result>
+            <result name="error">/pages/editNews.jsp</result>
+            <result name="success" type="redirectAction">
+                <param name="actionName">editNews</param>
+            </result>
+        </action>
+        
+        <action name="deleteNews" method="deleteNews" class="newsAction">
+            <result name="success" type="redirectAction">
+                <param name="actionName">editNews</param>
+            </result>
+            <result name="error" type="redirectAction">
+                <param name="actionName">editNews</param>
+                <param name="parse">true</param>
+                <param name="newsId">${newsId}</param>
+            </result>
+        </action>
+        
+        <!-- ################################### -->
+        
+        <!--############## Export and import ##############-->
+        
+        <action name="exportImport" method="exportImport" class="exportImportAction">
+            <result>/pages/exportImport.jsp</result>
+        </action>
+        
+          <action name="exportFile" method="exportFile" class="exportImportAction">
+          	<result name="error">/pages/exportImport.jsp</result>
+          	<result type="stream">
+             <param name="inputName">inputStream</param>
+             <param name="contentType">application/octet-stream</param>
+             <param name="contentDisposition">attachment;filename="${exportFileName}"</param>
+           </result>
+        </action>
+        
+          <action name="importFile" method="importFile" class="exportImportAction">
+            <result name="success" type="redirectAction">exportImport</result>
+              <result name="error">/pages/exportImport.jsp</result>
+        </action>
+        
+        <!-- ################################### -->
+
+        <!--############## Custom ##############-->
+        
+        <action name="checkTimeout" method="checkTimeout" class="timeoutAction">
+          <result type="stream">
+             <param name="contentType">text/html;charset=UTF-8</param>
+             <param name="inputName">inputStream</param>
+           </result>
+        </action>
+
+        <!-- ################################### -->
+
+
+        <!--############## DigitalSigning ##############-->
+
+        <action name="testDigitalSigning" method="execute" class="digitalSigningAction">
+            <result name="success">
+                <param name="location">/pages/testDigitalSigning.jsp</param>
+            </result>
+        </action>
+        <action name="getTranslations" method="getTranslations" class="digitalSigningAction"/>
+        <action name="getDefaultSigningMethod" method="getDefaultSigningMethod" class="digitalSigningAction"/>
+        <action name="uploadDataToSign" method="uploadDataToSign" class="digitalSigningAction"/>
+        <action name="downloadContainer" method="downloadContainer" class="digitalSigningAction"/>
+
+        <!--############## IdCardSigning ##############-->
+
+        <action name="generateHash" method="generateHash" class="idCardSigningAction"/>
+        <action name="createContainer" method="createContainer" class="idCardSigningAction"/>
+
+        <!--############## Mobilesigning ##############-->
+
+        <action name="sendSignatureRequest" method="sendSignatureRequest" class="midSigningAction"/>
+        <action name="signMobileContainer" method="signMobileContainer" class="midSigningAction"/>
+
+        <!-- ######################################### -->
+
+    </package>
+</struts>
+

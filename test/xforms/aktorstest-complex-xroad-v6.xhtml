@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xhtml:html xmlns:xhtml="http://www.w3.org/1999/xhtml"
+            xmlns:xforms="http://www.w3.org/2002/xforms"
+            xmlns:xxforms="http://orbeon.org/oxf/xml/xforms"
+            xmlns:events="http://www.w3.org/2001/xml-events"
+            xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+            xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
+            xmlns:SOAP-ENC="http://schemas.xmlsoap.org/soap/encoding/"
+            xmlns:xtee="http://x-tee.riik.ee/xsd/xtee.xsd"
+            xmlns:xrd="http://x-road.eu/xsd/xroad.xsd"
+            xmlns:iden="http://x-road.eu/xsd/identifiers"
+            xmlns:tns="http://aktorstest.x-road.ee/producer">
+	<xhtml:head>
+		<xhtml:title xml:lang="en">Persons List query</xhtml:title>
+		<xhtml:title xml:lang="et">Isikute nimekirja päring</xhtml:title>
+		<xforms:model>
+			<xforms:instance id="personList.input">
+				<SOAP-ENV:Envelope>
+					<SOAP-ENV:Header>
+						<xrd:protocolVersion>4.0</xrd:protocolVersion>
+						<xrd:id/>
+						<xrd:userId>EE</xrd:userId>
+						<xrd:service iden:objectType="SERVICE">
+							<iden:xRoadInstance>ee-dev</iden:xRoadInstance>
+							<iden:memberClass>COM</iden:memberClass>
+							<iden:memberCode>11333578</iden:memberCode>
+							<iden:subsystemCode>aktorstest-db01</iden:subsystemCode>
+							<iden:serviceCode>personList</iden:serviceCode>
+							<iden:serviceVersion>v1</iden:serviceVersion>
+						</xrd:service>
+						<xrd:client iden:objectType="MEMBER">
+							<iden:xRoadInstance>ee-dev</iden:xRoadInstance>
+							<iden:memberClass/>
+							<iden:memberCode/>
+							<iden:subsystemCode/>
+						</xrd:client>
+					</SOAP-ENV:Header>
+					<SOAP-ENV:Body>
+						<ns5:personList xmlns:ns5="http://aktorstest.x-road.ee/producer">
+							<request>
+								<givenName/>
+								<surname/>
+							</request>
+						</ns5:personList>
+					</SOAP-ENV:Body>
+				</SOAP-ENV:Envelope>
+			</xforms:instance>
+			<xforms:instance id="personList.output">
+				<dummy/>
+			</xforms:instance>
+			<xforms:bind nodeset="instance('personList.input')/SOAP-ENV:Body">
+				<xforms:bind nodeset="tns:personList">
+					<xforms:bind nodeset="request">
+						<xforms:bind nodeset="givenName" type="xforms:string"/>
+						<xforms:bind nodeset="surname" type="xforms:string"/>
+					</xforms:bind>
+				</xforms:bind>
+			</xforms:bind>
+			<xforms:bind nodeset="instance('personList.output')/SOAP-ENV:Body">
+				<xforms:bind nodeset="tns:personListResponse">
+					<xforms:bind nodeset="response">
+						<xforms:bind nodeset="faultCode" type="xforms:string"/>
+						<xforms:bind nodeset="faultString" type="xforms:string"/>
+						<xforms:bind nodeset="person">
+							<xforms:bind nodeset="givenName" type="xforms:string"/>
+							<xforms:bind nodeset="surname" type="xforms:string"/>
+							<xforms:bind nodeset="ssn" type="xforms:string"/>
+						</xforms:bind>
+					</xforms:bind>
+				</xforms:bind>
+			</xforms:bind>
+			<xforms:submission id="personList.submission"
+                            action="http://192.168.219.190:8080/aktorstest-xroad-v6/services/aktorstestServicePort"
+                            mediatype="application/soap+xml; charset=UTF-8; action="
+                            encoding="UTF-8"
+                            ref="instance('personList.input')"
+                            method="post"
+                            replace="instance"
+                            instance="personList.output">
+				<xforms:setvalue ref="instance('temp')/relevant"
+                             value="false()"
+                             events:event="xforms-submit"/>
+				<xforms:setvalue ref="instance('personList.input')/SOAP-ENV:Header/*:id"
+                             value="digest(string(random()), 'SHA-1', 'hex')"
+                             events:event="xforms-submit"/>
+				<xforms:toggle case="personList.response" events:event="xforms-submit-done"/>
+				<xforms:setvalue ref="instance('temp')/relevant"
+                             value="true()"
+                             events:event="xforms-submit-done"/>
+				<xforms:setvalue ref="instance('temp')/relevant"
+                             value="true()"
+                             events:event="xforms-submit-error"/>
+				<xforms:message level="modal" events:event="xforms-submit-error">
+					<xforms:output xml:lang="et"
+                              value="if (event('error-type') = 'submission-in-progress') then 'Üks päring juba käib!'        else if (event('error-type') = 'no-data') then 'Pole andmeid, mida saata!'        else if (event('error-type') = 'validation-error') then 'Valideerimise viga!'        else if (event('error-type') = 'parse-error') then 'Viga vastuse töötlemisel!'        else if (event('error-type') = 'resource-error') then 'Päringu vastus ei ole XML!'        else if (event('error-type') = 'target-error') then 'Sihtkoha viga!'        else 'Sisemine viga!'"/>
+					<xforms:output xml:lang="en"
+                              value="if (event('error-type') = 'submission-in-progress') then 'Submission already started!'        else if (event('error-type') = 'no-data') then 'No data to submit!'        else if (event('error-type') = 'validation-error') then 'Validation error!'        else if (event('error-type') = 'parse-error') then 'Error parsing response!'        else if (event('error-type') = 'resource-error') then 'Response is not XML!'        else if (event('error-type') = 'target-error') then 'Target error!'        else 'Internal error!'"/>
+				</xforms:message>
+			</xforms:submission>
+			<xforms:instance id="temp">
+				<temp>
+					<relevant xsi:type="boolean">true</relevant>
+					<ssn></ssn>
+				</temp>
+			</xforms:instance>
+			<xforms:instance id="variables">
+				<variables>
+					<ssn></ssn>
+				</variables>
+			</xforms:instance>
+			<xforms:dispatch targetid="personList.request"
+                          name="xforms-select"
+                          events:event="xforms-ready"/>
+
+
+			<!-- personDetails service starts -->
+			<xforms:instance id="personDetails.input">
+				<SOAP-ENV:Envelope>
+					<SOAP-ENV:Header>
+						<xrd:protocolVersion>4.0</xrd:protocolVersion>
+						<xrd:id/>
+						<xrd:userId>EE</xrd:userId>
+						<xrd:service iden:objectType="SERVICE">
+							<iden:xRoadInstance>ee-dev</iden:xRoadInstance>
+							<iden:memberClass>COM</iden:memberClass>
+							<iden:memberCode>11333578</iden:memberCode>
+							<iden:subsystemCode>aktorstest-db01</iden:subsystemCode>
+							<iden:serviceCode>personDetails</iden:serviceCode>
+							<iden:serviceVersion>v1</iden:serviceVersion>
+						</xrd:service>
+						<xrd:client iden:objectType="MEMBER">
+							<iden:xRoadInstance>ee-dev</iden:xRoadInstance>
+							<iden:memberClass/>
+							<iden:memberCode/>
+							<iden:subsystemCode/>
+						</xrd:client>
+					</SOAP-ENV:Header>
+					<SOAP-ENV:Body>
+						<ns5:personDetails xmlns:ns5="http://aktorstest.x-road.ee/producer">
+							<request>
+								<ssn/>
+							</request>
+						</ns5:personDetails>
+					</SOAP-ENV:Body>
+				</SOAP-ENV:Envelope>
+			</xforms:instance>
+			<xforms:instance id="personDetails.output">
+				<dummy/>
+			</xforms:instance>
+			<xforms:bind nodeset="instance('personDetails.input')/SOAP-ENV:Body">
+				<xforms:bind nodeset="tns:personDetails">
+					<xforms:bind nodeset="request">
+						<xforms:bind nodeset="ssn" type="xforms:string"/>
+					</xforms:bind>
+				</xforms:bind>
+			</xforms:bind>
+			<xforms:bind nodeset="instance('personDetails.output')/SOAP-ENV:Body">
+				<xforms:bind nodeset="tns:personDetailsResponse">
+					<xforms:bind nodeset="response">
+						<xforms:bind nodeset="faultCode" type="xforms:string"/>
+						<xforms:bind nodeset="faultString" type="xforms:string"/>
+						<xforms:bind nodeset="personDetailInfo">
+							<xforms:bind nodeset="givenName" type="xforms:string"/>
+							<xforms:bind nodeset="surname" type="xforms:string"/>
+							<xforms:bind nodeset="ssn" type="xforms:string"/>
+							<xforms:bind nodeset="username" type="xforms:string"/>
+							<xforms:bind nodeset="created" type="xforms:date"/>
+						</xforms:bind>
+					</xforms:bind>
+				</xforms:bind>
+			</xforms:bind>
+			<xforms:submission id="personDetails.submission"
+                            action="http://192.168.219.190:8080/aktorstest-xroad-v6/services/aktorstestServicePort"
+                            mediatype="application/soap+xml; charset=UTF-8; action="
+                            encoding="UTF-8"
+                            ref="instance('personDetails.input')"
+                            method="post"
+                            replace="instance"
+                            instance="personDetails.output">
+				<xforms:setvalue ref="instance('temp')/relevant"
+                             value="false()"
+                             events:event="xforms-submit"/>
+				<xforms:setvalue ref="instance('personDetails.input')/SOAP-ENV:Header/*:id"
+                             value="digest(string(random()), 'SHA-1', 'hex')"
+                             events:event="xforms-submit"/>
+				<xforms:toggle case="personDetails.response" events:event="xforms-submit-done"/>
+				<xforms:setvalue ref="instance('temp')/relevant"
+                             value="true()"
+                             events:event="xforms-submit-done"/>
+				<xforms:setvalue ref="instance('temp')/relevant"
+                             value="true()"
+                             events:event="xforms-submit-error"/>
+				<xforms:message level="modal" events:event="xforms-submit-error">
+					<xforms:output xml:lang="et"
+                              value="if (event('error-type') = 'submission-in-progress') then 'Üks päring juba käib!'        else if (event('error-type') = 'no-data') then 'Pole andmeid, mida saata!'        else if (event('error-type') = 'validation-error') then 'Valideerimise viga!'        else if (event('error-type') = 'parse-error') then 'Viga vastuse töötlemisel!'        else if (event('error-type') = 'resource-error') then 'Päringu vastus ei ole XML!'        else if (event('error-type') = 'target-error') then 'Sihtkoha viga!'        else 'Sisemine viga!'"/>
+					<xforms:output xml:lang="en"
+                              value="if (event('error-type') = 'submission-in-progress') then 'Submission already started!'        else if (event('error-type') = 'no-data') then 'No data to submit!'        else if (event('error-type') = 'validation-error') then 'Validation error!'        else if (event('error-type') = 'parse-error') then 'Error parsing response!'        else if (event('error-type') = 'resource-error') then 'Response is not XML!'        else if (event('error-type') = 'target-error') then 'Target error!'        else 'Internal error!'"/>
+				</xforms:message>
+			</xforms:submission>
+		</xforms:model>
+	</xhtml:head>
+	<xhtml:body>
+		<xhtml:h1 xml:lang="en">Persons List query</xhtml:h1>
+		<xforms:group class="help" xml:lang="en">The service returns list of persons filtered by name</xforms:group>
+		<xhtml:h1 xml:lang="et">Isikute nimekirja päring</xhtml:h1>
+		<xforms:group class="help" xml:lang="et">Teenus tagastab isikute nimekirja mis otsitakse nime järgi</xforms:group>
+		<xforms:switch>
+			<xforms:case id="personList.request">
+				<xforms:group ref="instance('personList.input')/SOAP-ENV:Body">
+					<xforms:group ref="tns:personList">
+						<xforms:group ref="request">
+							<xforms:input ref="givenName">
+								<xforms:label xml:lang="en">Given name</xforms:label>
+								<xforms:label xml:lang="et">Eesnimi</xforms:label>
+							</xforms:input>
+							<xforms:input ref="surname">
+								<xforms:label xml:lang="en">Surname</xforms:label>
+								<xforms:label xml:lang="et">Perenimi</xforms:label>
+								<xforms:help>Perekonnanimi v teine nimi</xforms:help>
+							</xforms:input>
+						</xforms:group>
+					</xforms:group>
+				</xforms:group>
+				<xforms:group class="actions">
+					<xforms:submit submission="personList.submission">
+						<xforms:label xml:lang="et">Esita päring</xforms:label>
+						<xforms:label xml:lang="en">Submit</xforms:label>
+					</xforms:submit>
+				</xforms:group>
+			</xforms:case>
+			<xforms:case id="personList.response">
+				<xforms:group ref="instance('personList.output')/SOAP-ENV:Header" class="serviceid">
+					<xforms:output ref="xrd:id">
+						<xforms:label xml:lang="et">Päringu id</xforms:label>
+						<xforms:label xml:lang="en">Query id</xforms:label>
+					</xforms:output>
+				</xforms:group>
+				<xforms:group ref="instance('personList.output')/SOAP-ENV:Body">
+					<xforms:group ref="tns:personListResponse">
+						<xforms:group ref="response">
+							<xforms:output ref="faultCode"/>
+							<xforms:output ref="faultString"/>
+							<xforms:repeat nodeset="person"
+                                    id="personList_output_tns_personListResponse_response_person">
+								<xforms:output ref="givenName">
+									<xforms:label xml:lang="en">Given name</xforms:label>
+									<xforms:label xml:lang="et">Eesnimi</xforms:label>
+								</xforms:output>
+								<xforms:output ref="surname">
+									<xforms:label xml:lang="en">Surname</xforms:label>
+									<xforms:label xml:lang="et">Perenimi</xforms:label>
+								</xforms:output>
+								<xforms:output ref="ssn">
+									<xforms:label xml:lang="en">SSN</xforms:label>
+									<xforms:label xml:lang="et">Isikukood</xforms:label>
+								</xforms:output>
+								<xforms:trigger appearance="minimal">
+									<xforms:label xml:lang="et">Detailid</xforms:label>
+									<xforms:label xml:lang="en">Details</xforms:label>
+									<xforms:action events:event="DOMActivate">
+										<xforms:setvalue ref="instance('personDetails.input')/SOAP-ENV:Body/tns:personDetails/request/ssn" value="context()/ssn"/>
+										<xforms:send submission="personDetails.submission"/>
+									</xforms:action>
+								</xforms:trigger>
+							</xforms:repeat>
+						</xforms:group>
+					</xforms:group>
+				</xforms:group>
+				<xforms:group ref="instance('personList.output')/SOAP-ENV:Body/tns:personListResponse[not(response/*)]"
+                          class="info">
+					<xhtml:span xml:lang="et">Andmeid ei tulnud.</xhtml:span>
+					<xhtml:span xml:lang="en">Service returned no data.</xhtml:span>
+				</xforms:group>
+				<xforms:group ref="instance('personList.output')/SOAP-ENV:Body/SOAP-ENV:Fault"
+                          class="fault">
+					<xforms:output ref="faultstring"/>
+				</xforms:group>
+				<xforms:group class="actions">
+					<xforms:trigger>
+						<xforms:label xml:lang="et">Uuesti</xforms:label>
+						<xforms:label xml:lang="en">Again</xforms:label>
+						<xforms:toggle events:event="DOMActivate" case="personList.request"/>
+					</xforms:trigger>
+				</xforms:group>
+			</xforms:case>
+			<xforms:case id="personDetails.response">
+				<xforms:group ref="instance('personDetails.output')/SOAP-ENV:Header"
+                          class="serviceid">
+					<xforms:output ref="xrd:id">
+						<xforms:label xml:lang="et">Päringu id</xforms:label>
+						<xforms:label xml:lang="en">Query id</xforms:label>
+					</xforms:output>
+				</xforms:group>
+				<xforms:group ref="instance('personDetails.output')/SOAP-ENV:Body">
+					<xforms:group ref="tns:personDetailsResponse">
+						<xforms:group ref="response">
+							<xforms:output ref="faultCode"/>
+							<xforms:output ref="faultString"/>
+							<xforms:group ref="personDetailInfo">
+								<xforms:output ref="givenName">
+									<xforms:label xml:lang="en">Given name</xforms:label>
+									<xforms:label xml:lang="et">Eesnimi</xforms:label>
+								</xforms:output>
+								<xforms:output ref="surname">
+									<xforms:label xml:lang="en">Surname</xforms:label>
+									<xforms:label xml:lang="et">Perenimi</xforms:label>
+								</xforms:output>
+								<xforms:output ref="ssn">
+									<xforms:label xml:lang="en">Personal ID code</xforms:label>
+									<xforms:label xml:lang="et">Isikukood</xforms:label>
+								</xforms:output>
+								<xforms:output ref="username">
+									<xforms:label xml:lang="en">Username</xforms:label>
+									<xforms:label xml:lang="et">Kasutajanimi</xforms:label>
+								</xforms:output>
+								<xforms:output ref="created">
+									<xforms:label xml:lang="en">Entry created</xforms:label>
+									<xforms:label xml:lang="et">Sissekanne loodud</xforms:label>
+								</xforms:output>
+							</xforms:group>
+						</xforms:group>
+					</xforms:group>
+				</xforms:group>
+				<xforms:group ref="instance('personDetails.output')/SOAP-ENV:Body/tns:personDetailsResponse[not(response/*)]"
+                          class="info">
+					<xhtml:span xml:lang="et">Andmeid ei tulnud.</xhtml:span>
+					<xhtml:span xml:lang="en">Service returned no data.</xhtml:span>
+				</xforms:group>
+				<xforms:group ref="instance('personDetails.output')/SOAP-ENV:Body/SOAP-ENV:Fault"
+                          class="fault">
+					<xforms:output ref="faultstring"/>
+				</xforms:group>
+				<xforms:group class="actions">
+					<xforms:trigger>
+						<xforms:label xml:lang="et">Tagasi</xforms:label>
+						<xforms:label xml:lang="en">Back</xforms:label>
+						<xforms:toggle events:event="DOMActivate" case="personList.response"/>
+					</xforms:trigger>
+				</xforms:group>
+			</xforms:case>
+		</xforms:switch>
+	</xhtml:body>
+</xhtml:html>

@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app id="misp2" version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+    <display-name>MISP2</display-name>
+    
+	<!-- Intercepts undhandled Tomcat exceptions and redirects to error page -->
+    <filter>
+        <filter-name>unhandled-exception-handler-filter</filter-name>
+        <filter-class>
+            ee.aktors.misp2.filters.UnhandledExceptionHandlerFilter
+        </filter-class>
+    </filter>
+     <filter-mapping>
+       <filter-name>unhandled-exception-handler-filter</filter-name>
+       <url-pattern>/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
+    
+    <filter>
+        <filter-name>Spring OpenEntityManagerInViewFilter</filter-name>
+        <filter-class>
+            org.springframework.orm.jpa.support.OpenEntityManagerInViewFilter
+        </filter-class>
+    </filter>
+    
+	<filter>
+	    <filter-name>struts-prepare</filter-name>
+	    <filter-class>org.apache.struts2.dispatcher.filter.StrutsPrepareFilter</filter-class>
+	</filter>
+	<filter>
+	    <filter-name>login-check</filter-name>
+	    <filter-class>ee.aktors.misp2.filters.LoginCheckFilter</filter-class>
+	</filter>
+	
+ 
+  
+    <!-- Set X-Frame-Options to DENY -->
+    <!-- <filter>
+        <filter-name>headerFilter</filter-name>
+        <filter-class>ee.aktors.tomcat.filter.HeaderFilter</filter-class>
+        <init-param>
+          <param-name>X-Frame-Options</param-name>
+          <param-value>DENY</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>headerFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>-->
+    
+    <filter-mapping>
+        <filter-name>login-check</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter>
+        <filter-name>orbeon-xforms-filter</filter-name>
+        <filter-class>org.orbeon.oxf.servlet.OrbeonXFormsFilter</filter-class>
+        <init-param>
+            <param-name>oxf.xforms.renderer.context</param-name>
+            <param-value>/orbeon</param-value>
+        </init-param>
+    </filter>
+	<filter>
+	    <filter-name>sitemesh</filter-name>
+	    <filter-class>com.opensymphony.sitemesh.webapp.SiteMeshFilter</filter-class>
+	</filter>
+    
+	<filter>
+       <filter-name>UrlRewriteFilter</filter-name>
+       <filter-class>org.tuckey.web.filters.urlrewrite.UrlRewriteFilter</filter-class>
+    </filter>
+    
+    <jsp-config>
+        <jsp-property-group>
+        	<url-pattern>*.jsp</url-pattern>
+            <page-encoding>UTF-8</page-encoding>
+        </jsp-property-group>
+    </jsp-config>
+    <!-- Any web resource under /xforms-jsp is processed by the XForms engine -->
+	<filter>
+	    <filter-name>struts-execute</filter-name>
+	    <filter-class>org.apache.struts2.dispatcher.filter.StrutsExecuteFilter</filter-class>
+	</filter>
+    
+    <filter>
+        <filter-name>safe-xforms-request-filter</filter-name>
+        <filter-class>
+            ee.aktors.misp2.filters.SafeOrbeonRequestFilter
+        </filter-class>
+    </filter>
+    <filter>
+        <filter-name>PDFFilter</filter-name>
+        <filter-class>
+            ee.aktors.misp2.filters.PDFFilter
+        </filter-class>
+    </filter>
+    
+    <filter-mapping>
+        <filter-name>Spring OpenEntityManagerInViewFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>struts-prepare</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>   
+
+	<!-- Apply safe xforms filter twice: to mappings /xforms-jsp and /orbeon -->
+    <filter-mapping>
+        <filter-name>safe-xforms-request-filter</filter-name>
+        <url-pattern>/xforms-jsp/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>safe-xforms-request-filter</filter-name>
+        <url-pattern>/orbeon/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>	
+    
+    <filter-mapping>
+       <filter-name>PDFFilter</filter-name>
+       <url-pattern>/xforms-jsp/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>orbeon-xforms-filter</filter-name>
+        <url-pattern>/xforms-jsp/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>orbeon-xforms-filter</filter-name>
+        <url-pattern>/orbeon/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>sitemesh</filter-name>
+        <url-pattern>/pages/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
+    <filter-mapping>
+        <filter-name>sitemesh</filter-name>
+        <url-pattern>/admin/*</url-pattern>
+        <dispatcher>REQUEST</dispatcher>
+        <dispatcher>FORWARD</dispatcher>
+        <dispatcher>INCLUDE</dispatcher>
+    </filter-mapping>
+    
+ 	
+   
+    <filter-mapping>
+        <filter-name>struts-execute</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+    <filter-mapping>
+       <filter-name>UrlRewriteFilter</filter-name>
+       <url-pattern>/admin/*</url-pattern>
+    </filter-mapping>
+
+    <listener>
+        <listener-class>
+            org.springframework.web.context.ContextLoaderListener
+        </listener-class>
+    </listener>
+    
+<!--     <listener> -->
+<!--     <listener-class>org.apache.struts2.dispatcher.ng.listener.StrutsListener</listener-class> -->
+<!-- 	</listener> -->
+    
+	
+<!--     <listener> -->
+<!--         <listener-class> -->
+<!--             ee.aktors.misp2.util.SessionCounter -->
+<!--         </listener-class> -->
+<!--     </listener> -->
+    <servlet>
+        <description>
+        </description>
+        <display-name>classifier</display-name>
+        <servlet-name>classifier</servlet-name>
+        <servlet-class>
+    		ee.aktors.misp2.servlet.ClassifierServlet
+        </servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>classifier</servlet-name>
+        <url-pattern>/classifier</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <description>
+        </description>
+        <display-name>loadCertification</display-name>
+        <servlet-name>loadCertification</servlet-name>
+        <servlet-class>
+    	ee.aktors.misp2.servlet.LoadCertificationServlet
+        </servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>loadCertification</servlet-name>
+        <url-pattern>/loadCertification</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <description>
+        </description>
+        <display-name>ssnValidation</display-name>
+        <servlet-name>ssnValidation</servlet-name>
+        <servlet-class>
+    	ee.aktors.misp2.servlet.SSNValidation
+        </servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>ssnValidation</servlet-name>
+        <url-pattern>/ssnValidation</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <description>
+        </description>
+        <display-name>XSLServlet</display-name>
+        <servlet-name>XSLServlet</servlet-name>
+        <servlet-class>
+    	ee.aktors.misp2.servlet.XSLServlet
+        </servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>XSLServlet</servlet-name>
+        <url-pattern>/getXSLT</url-pattern>
+    </servlet-mapping>
+    <servlet>
+        <description>
+        </description>
+        <display-name>XMLDifferenceServlet</display-name>
+        <servlet-name>XMLDifferenceServlet</servlet-name>
+        <servlet-class>
+    	ee.aktors.misp2.servlet.XMLDifferenceServlet
+        </servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>XMLDifferenceServlet</servlet-name>
+        <url-pattern>/getXMLDifference</url-pattern>
+    </servlet-mapping> 
+    <servlet>
+    	<description>
+    	servlet for echoing xml</description>
+    	<display-name>EchoServlet</display-name>
+    	<servlet-name>EchoServlet</servlet-name>
+    	<servlet-class>ee.aktors.misp2.servlet.EchoServlet</servlet-class>
+    </servlet>
+    <servlet>
+    	<description>
+    	</description>
+    	<display-name>DigiDocServlet</display-name>
+    	<servlet-name>DigiDocServlet</servlet-name>
+    	<servlet-class>ee.aktors.misp2.servlet.DigiDocServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+    	<servlet-name>EchoServlet</servlet-name>
+    	<url-pattern>/echo</url-pattern>
+    </servlet-mapping>
+    <servlet-mapping>
+    	<servlet-name>DigiDocServlet</servlet-name>
+    	<url-pattern>/parseDigiDoc</url-pattern>
+    </servlet-mapping>
+    <!-- 
+    	Mediator servlet acts as a SOAP-proxy between client and security server.
+    	It logs query, handles attachments and overwrites client and user headers.
+    	The same servlet is used for X-Road version 4, 5 and 6. -->
+    <servlet>
+        <description>
+        </description>
+        <display-name>MediatorServlet</display-name>
+        <servlet-name>MediatorServlet</servlet-name>
+        <servlet-class>ee.aktors.misp2.servlet.mediator.MediatorServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+    	<servlet-name>MediatorServlet</servlet-name>
+    	<!-- Servlet path is accessed in Java code with MediatorServlet.SERVLET_PATH -->
+    	<url-pattern>/mediator</url-pattern>
+    </servlet-mapping> 
+    
+    <servlet>
+    	<description>
+    	</description>
+    	<display-name>PDFServlet</display-name>
+    	<servlet-name>PDFServlet</servlet-name>
+    	<servlet-class>ee.aktors.misp2.servlet.PDFServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+    	<servlet-name>PDFServlet</servlet-name>
+    	<url-pattern>/generate-pdf</url-pattern>
+    </servlet-mapping>
+    <session-config>
+        <!-- Timeout is given from global conf-->
+<!--         <session-timeout>30</session-timeout> -->
+        <!-- Tracking mode: COOKIE stops Tomcat from appending JSESSIONID to URL-->
+        <tracking-mode>COOKIE</tracking-mode>
+    </session-config>
+    <welcome-file-list>
+        <welcome-file>/pages/index.html</welcome-file>
+        <welcome-file>kasutusjuhend.html</welcome-file> <!-- required for user guide -->
+    </welcome-file-list>
+    <error-page>
+        <error-code>404</error-code>
+        <location>/pages/faults/404.jsp</location>
+    </error-page>
+    <error-page>
+        <error-code>403</error-code>
+        <location>/pages/faults/403.jsp</location>
+    </error-page>
+    <mime-mapping>  
+    	<extension>xhtml</extension>  
+    	<mime-type>text/html;charset=UTF-8</mime-type>  
+    </mime-mapping>
+    <mime-mapping>  
+    	<extension>js</extension>  
+    	<mime-type>application/javascript;charset=UTF-8</mime-type>  
+    </mime-mapping>
+<!---->
+    <security-constraint>
+        <web-resource-collection>
+            <web-resource-name>Deny Direct Access</web-resource-name>
+            <description>Deny direct access to JSPs by associating them with denied role</description>
+            <url-pattern>*.jsp</url-pattern>
+        </web-resource-collection>
+        <auth-constraint>
+            <role-name>Denied</role-name>
+        </auth-constraint>
+    </security-constraint>
+    <security-role>
+        <role-name>Denied</role-name>
+    </security-role>
+</web-app>
