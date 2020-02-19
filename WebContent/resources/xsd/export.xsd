@@ -53,10 +53,11 @@
 														<xs:complexType>
 															<xs:all>
 																<xs:element name="name" type="xs:string"/>
-																<xs:element name="producerXroadInstance" type="xs:string" minOccurs="0"/>
-																<xs:element name="producerMemberClass" type="xs:string" minOccurs="0"/>
+																<xs:element name="producerXroadInstance" type="xs:string" minOccurs="0" maxOccurs="1"/>
+																<xs:element name="producerMemberClass" type="xs:string" minOccurs="0" maxOccurs="1"/>
 																<xs:element name="producerShortName" type="xs:string"/>
-																<xs:element name="producerSubsystemCode" type="xs:string" minOccurs="0"/>
+																<xs:element name="producerSubsystemCode" type="xs:string" minOccurs="0" maxOccurs="1"/>
+																<xs:element name="producerProtocol" type="xs:string" minOccurs="0" maxOccurs="1"/>
 															</xs:all>
 														</xs:complexType>
 													</xs:element>
@@ -164,10 +165,11 @@
 										<xs:complexType>
 											<xs:all>
 												<xs:element name="name" type="xs:string"/>
-												<xs:element name="producerXroadInstance" type="xs:string" minOccurs="0"/>
-												<xs:element name="producerMemberClass" type="xs:string" minOccurs="0"/>
+												<xs:element name="producerXroadInstance" type="xs:string" minOccurs="0" maxOccurs="1"/>
+												<xs:element name="producerMemberClass" type="xs:string" minOccurs="0" maxOccurs="1"/>
 												<xs:element name="producerShortName" type="xs:string"/>
-												<xs:element name="producerSubsystemCode" type="xs:string" minOccurs="0"/>
+												<xs:element name="producerSubsystemCode" type="xs:string" minOccurs="0" maxOccurs="1"/>
+												<xs:element name="producerProtocol" type="xs:string" minOccurs="0" maxOccurs="1"/>
 												<!-- If groupQuery is related to group's org, then subOrgCode will not be set. 
 												If group's org is superOrg and groupQuery is related to subOrg, then subOrgCode will be set to subOrg's code -->
 												<xs:element name="subOrgCode" type="xs:string" minOccurs="0"/>

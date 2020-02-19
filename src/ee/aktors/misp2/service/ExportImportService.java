@@ -24,7 +24,6 @@
 
 package ee.aktors.misp2.service;
 
-import ee.aktors.misp2.model.Producer.ProtocolType;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -39,6 +38,8 @@ import java.util.Map.Entry;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang.ObjectUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.springframework.transaction.annotation.Transactional;
 import org.w3c.dom.Document;
@@ -80,6 +81,7 @@ import ee.aktors.misp2.util.ZipUtil;
  */
 @Transactional
 public class ExportImportService extends BaseService {
+    private static Logger logger = LogManager.getLogger(ExportImportService.class);
 
     private OrgService orgService;
     private UserService userService;
@@ -110,6 +112,8 @@ public class ExportImportService extends BaseService {
     public File getExportFile(Portal portal, boolean includeSubOrgsAndGroups, boolean includeGroupPersons,
             boolean includeGroupQueries, boolean includeTopics, boolean includeQueries, Org chosenSubOrg)
             throws FileNotFoundException, SAXException, IOException, XMLUtilException, MispException {
+
+        logger.info("Exporting portal '" + portal.getShortName() + "' data.");
         File tempDir = FileUtil.getTempDir();
 
         Document doc = XMLUtil.getEmptyDocument();
@@ -201,6 +205,7 @@ public class ExportImportService extends BaseService {
     public void importFile(File importFile, Portal portal, boolean includeSubOrgsAndGroups,
             boolean includeGroupPersons, boolean includeGroupQueries, boolean includeTopics, boolean includeQueries)
             throws IOException, XMLUtilException, MispException, SAXException, BusinessException, Exception {
+        logger.info("Importing data to '" + portal.getShortName() + "' portal.");
         File tempDir = FileUtil.getTempDir();
         ZipUtil.unzip(importFile, tempDir);
 
@@ -502,7 +507,6 @@ public class ExportImportService extends BaseService {
             producersWithXforms.putAll(queryImportData.getComplexProducersWithXforms());
             for (Entry<Producer, List<Xforms>> entry : producersWithXforms.entrySet()) {
                 int producerId = entry.getKey().getId();
-
                 List<Integer> xformIds = new ArrayList<Integer>();
                 producerIdsWithXformIds.put(producerId, xformIds);
                 for (Xforms xform : entry.getValue()) {
@@ -660,14 +664,22 @@ public class ExportImportService extends BaseService {
             groupQueryElement.appendChild(doc.createElementNS(ns, "producerSubsystemCode")).appendChild(
                     doc.createTextNode(subsystemCode));
         }
+        if (producer.getProtocol() != null) {
+            groupQueryElement.appendChild(doc.createElementNS(ns, "producerProtocol")).appendChild(
+                    doc.createTextNode(producer.getProtocol().toString()));
+        }
     }
 
-    private Producer getTempProducerFromXml(Element groupsElement) {
+    private Producer getTempProducerFromXml(Element groupsElement, Portal portal) {
         Producer tmpProducer = new Producer();
         
         // set xroad instance of producer
         String producerXroadInstance = XMLUtil.getTagValue(groupsElement, "producerXroadInstance");
-        // if it is empty, set to null for consistent handling of non-existent values
+        // use portal client x-road instance as default value for X-Road v6 protocol
+        if (portal.isV6() && StringUtils.isEmpty(producerXroadInstance)) {
+            producerXroadInstance = portal.getClientXroadInstance();
+        }
+        // if X-Road instance is still empty, set it to null
         if (StringUtils.isEmpty(producerXroadInstance)) {
             producerXroadInstance = null;
         }
@@ -695,6 +707,17 @@ public class ExportImportService extends BaseService {
         }
         tmpProducer.setSubsystemCode(producerSubsystemCode);
 
+        // set subsystem code producer field
+        String producerProtocolStr = XMLUtil.getTagValue(groupsElement, "producerProtocol");
+        Producer.ProtocolType producerProtocol;
+        // if it is empty, set to null for consistent handling of non-existent values
+        if (StringUtils.isBlank(producerProtocolStr)) {
+            producerProtocol = Producer.ProtocolType.SOAP;
+        } else {
+            producerProtocol = Producer.ProtocolType.valueOf(producerProtocolStr);
+        }
+        tmpProducer.setProtocol(producerProtocol);
+
         return tmpProducer;
     }
 
@@ -702,18 +725,8 @@ public class ExportImportService extends BaseService {
             boolean includeGroupQueries) {
         if (includeGroupQueries) {
             for (Element groupQueryElement : XMLUtil.getChildren(groupQueriesElement, "groupQuery")) {
-                String name = XMLUtil.getTagValue(groupQueryElement, "name");
-                String openapiServiceCode = XMLUtil.getTagValue(groupQueryElement, "openapiServiceCode");
-
-                Producer producer = producerService.findProducer(getTempProducerFromXml(groupQueryElement), portal);
-
-                if (producer == null)
-                    continue;
-                Query query = queryService.findQueryByName(name, producer, openapiServiceCode);
-                if (query == null)
-                    continue;
+                Query query = findImportedQuery(groupQueryElement, portal);
                 Org org = getGroupOrg(group, portal, XMLUtil.getTagValue(groupQueryElement, "subOrgCode"));
-
                 OrgQuery orgQuery = queryService.findOrgQueryByOrgIdAndQueryId(org.getId(), query.getId());
                 orgQuery = (orgQuery != null ? orgQuery : new OrgQuery());
                 queryService.saveOrgQuery(orgQuery, org, query);
@@ -726,6 +739,35 @@ public class ExportImportService extends BaseService {
         }
     }
 
+    private Query findImportedQuery(Element groupQueryElement, Portal portal) {
+        String name = XMLUtil.getTagValue(groupQueryElement, "name");
+        String openapiServiceCode = XMLUtil.getTagValue(groupQueryElement, "openapiServiceCode");
+
+        Producer tempProducer = getTempProducerFromXml(groupQueryElement, portal);
+        Producer producer = producerService.findProducer(tempProducer, portal);
+
+        String producerIdentifier = tempProducer.getProtocol() + " - "
+                + tempProducer.getXroadIdentifier();
+        if (producer == null) {
+            throw new RuntimeException("Imported producer '" + producerIdentifier
+                    + "' not found from DB during import. Input " + tempProducer
+                    + " | " + XMLUtil.nodeToString(groupQueryElement));
+        }
+        Query query = queryService.findQueryByName(name, producer, openapiServiceCode);
+        if (query == null) {
+            String openapiServiceCodeStr = "";
+            if (StringUtils.isNotBlank(openapiServiceCode)) {
+                openapiServiceCodeStr = "(service code: " + openapiServiceCode + ")";
+            }
+            throw new RuntimeException("Imported query '" + name + "' " + openapiServiceCodeStr
+                    + " not found from DB during import. Input producer " + producerIdentifier
+                    + " | id=" + producer.getId()
+                    + " | " + XMLUtil.nodeToString(groupQueryElement));
+        }
+        return query;
+    }
+
+
     private void saveTopicNames(Element topicNamesElement, Topic topic) {
         for (Element nameElement : XMLUtil.getChildren(topicNamesElement, "name")) {
             String lang = nameElement.getAttribute("lang");
@@ -737,14 +779,7 @@ public class ExportImportService extends BaseService {
 
     private void saveTopicQueries(Element topicQueriesElement, Topic topic, Portal portal) {
         for (Element topicQueryElement : XMLUtil.getChildren(topicQueriesElement, "topicQuery")) {
-            String name = XMLUtil.getTagValue(topicQueryElement, "name");
-            String openapiServiceCode = XMLUtil.getTagValue(topicQueryElement, "openapiServiceCode");
-            Producer producer = producerService.findProducer(getTempProducerFromXml(topicQueryElement), portal);
-            if (producer == null)
-                continue;
-            Query query = queryService.findQueryByName(name, producer, openapiServiceCode);
-            if (query == null)
-                continue;
+            Query query = findImportedQuery(topicQueryElement, portal);
             QueryTopic queryTopic = topicService.findQueryTopic(topic.getId(), query.getId());
             queryTopic = (queryTopic != null ? queryTopic : new QueryTopic());
             topicService.saveQueryTopic(queryTopic, query, topic);

@@ -470,23 +470,20 @@ public class QueryService extends BaseService {
      */
     public Query findQueryByName(String name, Producer p, String openapiServiceCode) {
         try {
+            HashMap<String, Object> params = new HashMap<String, Object>();
             String sql = "select q FROM Query q"
                          + " where q.name=:query_name and q.producer.id=" + p.getId();
-
+            params.put("query_name", name);
             if(StringUtils.isNotBlank(openapiServiceCode)) {
                 sql += " and q.openapiServiceCode=:openapiServiceCode";
+                params.put("openapiServiceCode", openapiServiceCode);
             } else {
-                sql += " and q.openapiServiceCode is null";
+                sql += " and (q.openapiServiceCode is null or q.openapiServiceCode = '')";
             }
 
             // FIXME: in v6 service name and version separator is a colon, not dot, s need to replace that
             // right now service names with . or versions with . do not work!
-            javax.persistence.Query q = getEntityManager()
-                .createQuery(sql)
-                .setParameter("query_name", name);
-            if(StringUtils.isNotBlank(openapiServiceCode)) {
-                q.setParameter("openapiServiceCode", openapiServiceCode);
-            }
+            javax.persistence.Query q = createQuery(sql, params);
             return (Query) q.getSingleResult();
         } catch (NoResultException e) {
             return null;

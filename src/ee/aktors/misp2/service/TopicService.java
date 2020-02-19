@@ -25,7 +25,9 @@
 package ee.aktors.misp2.service;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.persistence.NoResultException;
 
@@ -58,11 +60,15 @@ public class TopicService extends BaseService {
      */
     public Topic findTopic(Portal portal, String name, Integer excludeTopicId) {
         try {
-            return (Topic) getEntityManager()
-                    .createQuery(
-                            "SELECT t FROM Topic t WHERE t.portal=:portal AND t.name=:name AND t.id!=:excludeTopicId")
-                    .setParameter("portal", portal).setParameter("name", name)
-                    .setParameter("excludeTopicId", excludeTopicId).getSingleResult();
+            Map<String, Object> params = new HashMap<String, Object>();
+            String hql = "SELECT t FROM Topic t WHERE t.portal=:portal AND t.name=:name";
+            params.put("portal", portal);
+            params.put("name", name);
+            if (excludeTopicId != null) {
+                hql += " AND t.id!=:excludeTopicId";
+                params.put("excludeTopicId", excludeTopicId);
+            }
+            return (Topic) createQuery(hql, params).getSingleResult();
         } catch (NoResultException nre) {
             return null;
         }
