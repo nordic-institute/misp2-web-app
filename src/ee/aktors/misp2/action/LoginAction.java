@@ -24,32 +24,7 @@
 
 package ee.aktors.misp2.action;
 
-import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.security.auth.x500.X500Principal;
-import javax.servlet.http.HttpServletRequest;
-
-import ee.aktors.misp2.service.crypto.MobileIdService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.struts2.ServletActionContext;
-import org.apache.struts2.StrutsStatics;
-import org.apache.struts2.dispatcher.SessionMap;
-import org.bouncycastle.util.encoders.Base64;
-import org.digidoc4j.CertificateValidator;
-import org.digidoc4j.CertificateValidatorBuilder;
-
 import com.opensymphony.xwork2.ActionContext;
-
 import ee.aktors.misp2.beans.Auth;
 import ee.aktors.misp2.beans.Auth.AUTH_TYPE;
 import ee.aktors.misp2.configuration.DigiDoc4jConfiguration;
@@ -60,17 +35,33 @@ import ee.aktors.misp2.model.OrgPerson;
 import ee.aktors.misp2.model.Person;
 import ee.aktors.misp2.service.PortalService;
 import ee.aktors.misp2.service.UserService;
-import ee.aktors.misp2.util.Const;
-import ee.aktors.misp2.util.CountryUtil;
-import ee.aktors.misp2.util.PasswordUtil;
-import ee.aktors.misp2.util.Roles;
-import ee.aktors.misp2.util.SessionCounter;
-import ee.aktors.misp2.util.mobileid.MobileIdAuthenticator;
+import ee.aktors.misp2.service.crypto.MobileIdService;
+import ee.aktors.misp2.util.*;
 import ee.aktors.misp2.util.mobileid.MobileIdSessionData;
 import ee.sk.digidoc.DigiDocException;
 import ee.sk.digidoc.SignedDoc;
 import ee.sk.digidoc.factory.NotaryFactory;
 import ee.sk.utils.ConfigManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.StrutsStatics;
+import org.apache.struts2.dispatcher.SessionMap;
+import org.bouncycastle.util.encoders.Base64;
+import org.digidoc4j.CertificateValidator;
+import org.digidoc4j.CertificateValidatorBuilder;
+
+import javax.security.auth.x500.X500Principal;
+import javax.servlet.http.HttpServletRequest;
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.*;
+
+import static org.apache.logging.log4j.Level.DEBUG;
 
 /**
  */
@@ -348,10 +339,11 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
      */
     @HTTPMethods(methods = { HTTPMethod.POST })
     public String loginUsingCertificate() throws Exception {
-        getClientX509Certificate();
+        HttpServletRequest request = (HttpServletRequest) ActionContext.getContext().get(HTTP_REQUEST);
+        cert = getValidAuthenticationClientX509Certificate(request);
         if (cert != null) { // if it is not null then login with id
-            if (LogManager.getLogger(LoginAction.class).isDebugEnabled()) {
-                LogManager.getLogger(LoginAction.class).debug("Users login certificate: " + cert);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Users login certificate: " + cert);
             }
 
             Person user = serviceUser.findPersonByB64encCert(new String(Base64.encode(cert.getEncoded())));
@@ -423,18 +415,56 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
         return cert;
     }
 
-    private void getClientX509Certificate() {
-        HttpServletRequest req = (HttpServletRequest) ActionContext.getContext().get(HTTP_REQUEST);
-        Object certificate = null;
-        certificate = req.getAttribute("javax.servlet.request.X509Certificate");
-        if (certificate != null) {
-            certificate = ((Object[]) certificate)[0];
+    private X509Certificate getValidAuthenticationClientX509Certificate(HttpServletRequest request) {
+        List<String> x509CertificateExtensions;
+        // TODO: get them from config!
+        ArrayList<String>  allowedIssuerNames = new ArrayList<>();
+        allowedIssuerNames.add("ESTEID");
+        Object attribute  = request.getAttribute("javax.servlet.request.X509Certificate") ;
+        if (!(attribute instanceof Object[])) {
+            LOG.error("Authentication certificate attribute not array");
+            return null;
         }
-        cert = (X509Certificate) certificate;
+        X509Certificate certificate = (X509Certificate) ((Object[])attribute)[0];
+
+        if (certificate == null) {
+            LOG.error("Authentication certificate attribute array 1st item not X509 Certificate");
+            return null;
+        }
+        try {
+            x509CertificateExtensions = certificate.getExtendedKeyUsage();
+        } catch (CertificateParsingException e) {
+            LOG.catching(DEBUG, e);
+            LOG.error("Can't parse extended key usage from X509 certificate:" + certificate );
+            return null;
+        }
+        for (String extension : x509CertificateExtensions) {
+                    LOG.debug(" included extension:" + extension);
+        }
+        if (!( x509CertificateExtensions.contains("TLS Web Client Authentication"))) {
+            LOG.error("Certificate {} does not contain extended Key usage for TLS Web Client Authentication", certificate);
+            /* TODO: add end user error text from properties */
+            addActionError("Certificate does not contain extended Key usage for TLS Web Client Authentication");
+            return null;
+        }
+
+        String issuerX500Name = certificate.getIssuerX500Principal().getName();
+
+        if (allowedIssuerNames.stream()
+                .noneMatch(issuerX500Name::contains)
+        ) {
+            LOG.error("No trusted certificate issuer found from:".concat( issuerX500Name));
+            /* TODO: add end user error text from properties */
+            addActionError("No trusted issuer for client certificate:".concat(issuerX500Name));
+            return null;
+        }
+
+        return certificate;
+
     }
 
     private Map<String, String> parseSubjectDn(String dn) {
-        Map<String, String> tmp = new HashMap<String, String>();
+        Map<String, String> tmp = new HashMap<>();
 
         for (String s : dn.split(", ")) {
             int pos = s.indexOf('=');
@@ -469,7 +499,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
      * Change session ID, keeping entries in original session map.
      */
     private void renewSessionId() {
-        Map<String, Object> prevSession = new HashMap<String, Object>(session);
+        Map<String, Object> prevSession = new HashMap<>(session);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Changing session ID. Copying keys: " + prevSession);
         }
@@ -510,7 +540,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
 
     /**
      * Perform OCSP verification check for given certificate. Uses jDigiDoc library
-     * {@link ee.sk.digidoc.factory.NotaryFactory#checkCertificate(cert) notaryFactory.checkCertificate} method.
+     *  method.
      *
      * @param certIn  user session certificate that gets validated with OCSP request
      * @return #true if cert is valid, #false if OCSP query failed (cert is not valid or OCSP check has configuration
