@@ -68,9 +68,9 @@ import static org.apache.logging.log4j.Level.DEBUG;
 public class LoginAction extends SecureLoggedAction implements StrutsStatics {
 
     private static final long serialVersionUID = 1L;
-    private DigiDoc4jConfiguration digiDoc4jConfiguration;
-    private UserService serviceUser;
-    private MobileIdService mobileIdService;
+    private final DigiDoc4jConfiguration digiDoc4jConfiguration;
+    private final UserService serviceUser;
+    private final MobileIdService mobileIdService;
 //    private PortalService portalService;
     private String redirectActionName;
     private String actionName;
@@ -86,7 +86,6 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
     private String overtakeCode;
     private boolean overtakeSbmt;
 
-    private X509Certificate cert;
     private static final Logger LOG = LogManager.getLogger(LoginAction.class);
 
     /**
@@ -119,13 +118,6 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
         }
     }
 
-    /*
-    @Override
-    public void prepare() throws Exception {
-        super.prepare();
-    }
-    */
-
     /**
      * @return  ERROE if login fails, SUCCESS otherwise
      */
@@ -148,11 +140,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                 addActionError(getText("text.fail.login"));
                 return ERROR;
             }
-        } catch (NoSuchAlgorithmException e) {
-            LOG.error("Failed logging in admin.", e);
-            addActionError(getText("text.fail.login"));
-            return ERROR;
-        } catch (UnsupportedEncodingException e) {
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             LOG.error("Failed logging in admin.", e);
             addActionError(getText("text.fail.login"));
             return ERROR;
@@ -340,7 +328,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
     @HTTPMethods(methods = { HTTPMethod.POST })
     public String loginUsingCertificate() throws Exception {
         HttpServletRequest request = (HttpServletRequest) ActionContext.getContext().get(HTTP_REQUEST);
-        cert = getValidAuthenticationClientX509Certificate(request);
+        X509Certificate cert = getValidAuthenticationClientX509Certificate(request);
         if (cert != null) { // if it is not null then login with id
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Users login certificate: " + cert);
@@ -417,9 +405,10 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
 
     private X509Certificate getValidAuthenticationClientX509Certificate(HttpServletRequest request) {
         List<String> x509CertificateExtensions;
-        // TODO: get them from config!
-        ArrayList<String>  allowedIssuerNames = new ArrayList<>();
-        allowedIssuerNames.add("ESTEID");
+        String allowedIssuerX500NamePattern = CONFIG.getString(
+                "auth.certificate.issuerX500NamePattern",
+                "ESTEID"
+        );
         Object attribute  = request.getAttribute("javax.servlet.request.X509Certificate") ;
         if (!(attribute instanceof Object[])) {
             LOG.error("Authentication certificate attribute not array");
@@ -450,10 +439,8 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
 
         String issuerX500Name = certificate.getIssuerX500Principal().getName();
 
-        if (allowedIssuerNames.stream()
-                .noneMatch(issuerX500Name::contains)
-        ) {
-            LOG.error("No trusted certificate issuer found from:".concat( issuerX500Name));
+        if (! issuerX500Name.contains(allowedIssuerX500NamePattern)) {
+            LOG.error("No trusted certificate issuer found from:"+issuerX500Name);
             /* TODO: add end user error text from properties */
             addActionError("No trusted issuer for client certificate:".concat(issuerX500Name));
             return null;
@@ -559,6 +546,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                     javax.security.auth.x500.X500Principal.RFC1779));
             String subjectDN = certIn.getSubjectDN().getName();
             LOG.debug("OCSP check issuer CA: " + issuerCA + " | OCSP check subjectDN: " + subjectDN);
+            //noinspection deprecation
             notaryFactory.checkCertificate(certIn);
             LOG.debug("OCSP check yielded postitive result.");
 
