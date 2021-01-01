@@ -286,7 +286,6 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                     req.getSession().setAttribute(uuid, mobileIdSessionData);
                     req.setAttribute("UUID", uuid);
                     req.setAttribute("challengeCode", mobileIdSessionData.getChallenge());
-                    return SUCCESS;
                 } else { // this will wait until login is complete. If authentication fails, returns ERROR
                     MobileIdSessionData mobileIdSessionData = (MobileIdSessionData) req.getSession().getAttribute(uuid);
                     session.put(Const.SESSION_MID_USER_DATA, mobileIdSessionData);
@@ -311,8 +310,8 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                     Auth auth = new Auth(AUTH_TYPE.MOBILE_ID);
                     setUserLoggedIn(auth, user);
                     SessionCounter.getInstance().increaseCounter(user.getSsn());
-                    return SUCCESS;
                 }
+                return SUCCESS;
             }
         } catch (Exception e) {
             LOG.error(e.getMessage());
@@ -407,48 +406,56 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
 
     private X509Certificate getValidAuthenticationClientX509Certificate(HttpServletRequest request) {
         List<String> x509CertificateExtensions;
+        Optional<X509Certificate> certificate = Optional.empty();
+        String error = "";
         String allowedIssuerX500NamePattern = CONFIG.getString(
                 "auth.certificate.issuerX500NamePattern",
                 "ESTEID"
         );
         Object attribute = request.getAttribute("javax.servlet.request.X509Certificate");
         if (!(attribute instanceof Object[])) {
-            LOG.error("Authentication certificate attribute not array");
-            return null;
-        }
-        X509Certificate certificate = (X509Certificate) ((Object[]) attribute)[0];
+            error = "Authentication certificate attribute not array";
 
-        if (certificate == null) {
-            LOG.error("Authentication certificate attribute array 1st item not X509 Certificate");
-            return null;
+        } else {
+            certificate = Arrays.stream(((Object[]) attribute)).findFirst()
+                    .filter(object -> object instanceof X509Certificate)
+                    .map(certificateInObject -> (X509Certificate) certificateInObject);
         }
-        try {
-            x509CertificateExtensions = certificate.getExtendedKeyUsage();
-        } catch (CertificateParsingException e) {
-            LOG.catching(DEBUG, e);
-            LOG.error("Can't parse extended key usage from X509 certificate:" + certificate);
-            return null;
-        }
-        for (String extension : x509CertificateExtensions) {
-            LOG.debug(" included extension:" + extension);
-        }
-        if (!(x509CertificateExtensions.contains("TLS Web Client Authentication"))) {
-            LOG.error("Certificate {} does not contain extended Key usage for TLS Web Client Authentication", certificate);
-            /* TODO: add end user error text from properties */
-            addActionError("Certificate does not contain extended Key usage for TLS Web Client Authentication");
-            return null;
-        }
+        if (certificate.isPresent()) {
+            try {
 
-        String issuerX500Name = certificate.getIssuerX500Principal().getName();
+                x509CertificateExtensions = certificate.get().getExtendedKeyUsage();
+                LOG.debug("Found certificate {}", certificate);
+                if (!(x509CertificateExtensions.contains("TLS Web Client Authentication"))) {
+                    error = "Certificate {} does not contain extended Key usage for TLS Web Client Authentication  ";
+                }
+                X500Principal principal = certificate.get().getIssuerX500Principal();
+                if (principal != null) {
+                    String issuerX500Name = principal.getName();
 
-        if (!issuerX500Name.contains(allowedIssuerX500NamePattern)) {
-            LOG.error("No trusted certificate issuer found from:" + issuerX500Name);
-            /* TODO: add end user error text from properties */
-            addActionError("No trusted issuer for client certificate:".concat(issuerX500Name));
-            return null;
+                    LOG.debug("Certificate issued by:{}", issuerX500Name);
+                    if (!issuerX500Name.contains(allowedIssuerX500NamePattern)) {
+                        LOG.debug("No trusted certificate like {} issuer found from:{}",
+                                allowedIssuerX500NamePattern,
+                                issuerX500Name
+                        );
+                        error = error.concat("No trusted issuer in certificate");
+                    }
+                } else {
+                    LOG.error("no issuer found from certificate");
+                    error = error.concat("no issuer found from certificate ");
+                }
+            } catch (CertificateParsingException e) {
+                LOG.catching(DEBUG, e);
+                LOG.error("Can't parse extended key usage from X509 certificate:" + certificate);
+                error = error.concat("Can't parse extended key usage from X509 certificate  ");
+            }
+            if (error.isEmpty()) {
+                return certificate.get();
+            }
         }
-
-        return certificate;
+        LOG.debug("errors collected in the end:{}", error);
+        return  null;
 
     }
 
