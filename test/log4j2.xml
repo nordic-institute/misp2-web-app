@@ -2,7 +2,7 @@
 <Configuration>
 	<Appenders>
 		<Console name="STDOUT" target="SYSTEM_OUT">
-			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%c{1},%p] %M; %m%n" />
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%c{2},%p] %M; %m%n" />
 		</Console>
 	</Appenders>
 	
@@ -10,5 +10,6 @@
 		<Root level="debug">
 			<AppenderRef ref="STDOUT" />
 		</Root>
+		<Logger name="com.opensymphony.xwork2.config" level="trace" />
 	</Loggers>
 </Configuration>

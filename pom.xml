@@ -414,19 +414,7 @@
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>build-helper-maven-plugin</artifactId>
 				<executions>
-					<!-- Add source directory -->
-					<execution>
-						<id>add-source-directory</id>
-						<phase>generate-sources</phase>
-						<goals>
-							<goal>add-source</goal>
-						</goals>
-						<configuration>
-							<sources>
-								<source>src/</source>
-							</sources>
-						</configuration>
-					</execution>
+
 					<!-- Add test source directory -->
 					<execution>
 						<id>add-test-source</id>
