@@ -30,6 +30,7 @@ import static org.junit.Assert.*;
 import java.util.LinkedHashSet;
 import java.util.List;
 
+import ee.aktors.misp2.util.TestFileUtil;
 import org.apache.commons.configuration.ConfigurationException;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -37,7 +38,6 @@ import org.junit.Test;
 import ee.aktors.misp2.model.Portal;
 import ee.aktors.misp2.model.Producer;
 import ee.aktors.misp2.provider.ConfigurationProvider;
-import ee.aktors.misp2.util.FileUtil;
 import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
 import ee.aktors.misp2.util.xroad.soap.XRoad5SOAPMessageBuilder;
 import ee.aktors.misp2.util.xroad.soap.XRoad6SOAPMessageBuilder;
@@ -58,7 +58,7 @@ public class XRoadUtilTest {
         // initialize config
         ConfigurationProvider.setConfig(
                 new org.apache.commons.configuration.PropertiesConfiguration(
-                        FileUtil.getConfigPathForTest("config.cfg")));
+                        TestFileUtil.getConfigPathForTest("config.cfg")));
     }
 
     /**

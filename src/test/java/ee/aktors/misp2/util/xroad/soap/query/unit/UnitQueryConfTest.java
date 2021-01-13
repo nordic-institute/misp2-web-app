@@ -30,6 +30,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.util.LinkedHashMap;
 
+import ee.aktors.misp2.util.TestFileUtil;
 import org.apache.commons.configuration.ConfigurationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -63,9 +64,9 @@ public class UnitQueryConfTest {
     public void setUp() throws ConfigurationException {
         // initialize config
         orgConf = new org.apache.commons.configuration
-                .PropertiesConfiguration(FileUtil.getConfigPathForTest("orgportal-conf.cfg"));
+                .PropertiesConfiguration(TestFileUtil.getConfigPathForTest("orgportal-conf.cfg"));
         univConf = new org.apache.commons.configuration
-                .PropertiesConfiguration(FileUtil.getConfigPathForTest("uniportal-conf.cfg"));
+                .PropertiesConfiguration(TestFileUtil.getConfigPathForTest("uniportal-conf.cfg"));
         unitQueryConf = new UnitQueryConf(orgConf, univConf);
     }
 

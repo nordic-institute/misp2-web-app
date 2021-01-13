@@ -170,7 +170,7 @@ public class ComplexQueryAnalyzerTest {
         logger.trace("Test parsing from config.cfg.");
         org.apache.commons.configuration.PropertiesConfiguration conf =
                 new org.apache.commons.configuration.PropertiesConfiguration(
-                FileUtil.getConfigPathForTest("config.cfg"));
+                TestFileUtil.getConfigPathForTest("config.cfg"));
         complexQueryAnalyzer.parse(conf);
 
         assertEquals("Parsing based on conf also works", noOfSubQueries,

@@ -119,19 +119,7 @@ public final class FileUtil {
         return className;
     }
 
-    /**
-     * Get file input stream from /src/ directory NB! Only for use in unit-tests.
-     * 
-     * @param fileName
-     *            file path from /src/ folder.
-     * @return file path from given directory
-     */
-    public static String getConfigPathForTest(String fileName) {
-        String currentPath = getCurrentClassPath();
-        String configPath = currentPath.split("target")[0] + "src/" + fileName;
-        LOGGER.trace("Config path: " + configPath);
-        return configPath;
-    }
+
 
     /**
      * Get file name with the following format

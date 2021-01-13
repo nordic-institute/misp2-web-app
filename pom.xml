@@ -140,6 +140,23 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-junit-plugin</artifactId>
+			<version>${struts.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>javax.servlet.jsp-api</artifactId>
+			<version>2.3.3</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.struts</groupId>
 			<artifactId>struts2-sitemesh-plugin</artifactId>
 			<version>${struts.version}</version>
 		</dependency>
@@ -411,39 +428,22 @@
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.5</version>
 				<executions>
-
-					<!-- Add test source directory -->
 					<execution>
-						<id>add-test-source</id>
-						<phase>generate-test-sources</phase>
+						<id>default-prepare-agent</id>
 						<goals>
-							<goal>add-test-source</goal>
+							<goal>prepare-agent</goal>
 						</goals>
-						<configuration>
-							<sources>
-								<source>test/</source>
-							</sources>
-						</configuration>
-					</execution> 
-					<!-- Add /test directory also as resource directory,
-					     meaning resource files can be read from it as well -->
+					</execution>
 					<execution>
-						<id>add-test-resource</id>
-						<phase>generate-test-sources</phase>
+						<id>default-report</id>
 						<goals>
-							<goal>add-test-resource</goal>
+							<goal>report</goal>
 						</goals>
-						<configuration>
-							<resources>
-								<resource>
-									<directory>test</directory>
-								</resource>
-							</resources>
-						</configuration>
-					</execution> 
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
