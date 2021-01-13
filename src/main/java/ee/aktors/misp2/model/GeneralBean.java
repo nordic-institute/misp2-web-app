@@ -74,7 +74,7 @@ public abstract class GeneralBean implements BeanInterface, Serializable, Clonea
         if (session != null && getUsername() == null) {
             Person p = (Person) session.get(Const.SESSION_USER_HANDLE);
             if (p != null)
-                setUsername(p.getSsn() == null ? "admin" : p.getSsn());
+                setUsername(p.getSsn() == null ? "../src/main/webapp/admin" : p.getSsn());
         } else if (session == null && getUsername() == null) {
             LogManager.getLogger(BaseService.class).warn("Session is null. Username not set.");
         }

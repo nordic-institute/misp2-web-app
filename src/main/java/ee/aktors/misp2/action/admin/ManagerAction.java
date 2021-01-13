@@ -264,7 +264,7 @@ public class ManagerAction extends SecureLoggedAction implements Validateable {
                 }
             }
             t3.getT3sec().setUserTo(person.getSsn());
-            t3.getT3sec().setUserFrom("admin");
+            t3.getT3sec().setUserFrom("../src/main/webapp/admin");
 
             if (!log(t3)) {
                 addActionError(getText("text.fail.save.log"));
@@ -296,7 +296,7 @@ public class ManagerAction extends SecureLoggedAction implements Validateable {
         // --- Log portal manager setting
         T3SecWrapper t3 = initT3(LogQuery.MANAGER_SETTING);
         t3.getT3sec().setUserTo(person.getSsn());
-        t3.getT3sec().setUserFrom("admin");
+        t3.getT3sec().setUserFrom("../src/main/webapp/admin");
         if (!log(t3)) {
             addActionError(getText("text.fail.save.log"));
             LOGGER.warn("Setting manager failed because of logging problems.");
@@ -358,7 +358,7 @@ public class ManagerAction extends SecureLoggedAction implements Validateable {
         // --- Log portal manager setting
         T3SecWrapper t3 = initT3(LogQuery.MANAGER_DELETE);
         t3.getT3sec().setUserTo(orgPerson.getPersonId().getSsn());
-        t3.getT3sec().setUserFrom("admin");
+        t3.getT3sec().setUserFrom("../src/main/webapp/admin");
         if (!log(t3)) {
             addActionError(getText("text.fail.delete.log"));
             LOGGER.warn("Deleting manager failed because of logging problems.");

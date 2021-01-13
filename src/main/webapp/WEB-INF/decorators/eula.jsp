@@ -178,7 +178,7 @@
 					line-height: 1.5em;
 				}
 			</style>
-			<link rel="stylesheet" type="text/css" href="<s:url value='/resources/EE/css/eula-markdown.css' encode='false'/>" />
+			<link rel="stylesheet" type="text/css" href="<s:url value='/../src/main/webapp/resources/EE/css/eula-markdown.css' encode='false'/>" />
             <div id="eula-overlay" class="eula" style="display:inline;">
                 <div id="eula-hidden-vars" class="hidden">
 					<span id="error-sending-eula-request"><s:text name="error.dataexchange.UNSPECIFIED" /></span>

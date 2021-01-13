@@ -280,7 +280,7 @@
 	      <artifactId>esteidtestcerts</artifactId>
 	      <version>3.7.2.652</version>
 	      <scope>system</scope>
-		  <systemPath>${project.basedir}/WebContent/WEB-INF/lib/esteidtestcerts.jar</systemPath>
+		  <systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/esteidtestcerts.jar</systemPath>
 	    </dependency>
 	    
 		<dependency>
@@ -298,28 +298,28 @@
 			<artifactId>orbeon</artifactId>
 			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${project.basedir}/WebContent/WEB-INF/lib/orbeon-xforms-filter.jar</systemPath>
+			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/orbeon-xforms-filter.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>core-renderer</groupId>
 			<artifactId>core-renderer</artifactId>
 			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${project.basedir}/WebContent/WEB-INF/lib/core-renderer.jar</systemPath>
+			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/core-renderer.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>iaikPkcs11Wrapper</groupId>
 			<artifactId>iaikPkcs11Wrapper</artifactId>
 			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${project.basedir}/WebContent/WEB-INF/lib/iaikPkcs11Wrapper.jar</systemPath>
+			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/iaikPkcs11Wrapper.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>iText</groupId>
 			<artifactId>iText</artifactId>
 			<scope>system</scope>
 			<version>2.1.7</version>
-			<systemPath>${project.basedir}/WebContent/WEB-INF/lib/iText-2.1.7.jar</systemPath>
+			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/iText-2.1.7.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -381,13 +381,13 @@
 	
 	<build>
 		<plugins>
-			<plugin>
+	<!--		<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
 				<configuration>
 					<webappDirectory>${project.build.directory}/misp2</webappDirectory>
 					<warName>misp2</warName>
-					<webXml>WebContent/WEB-INF/web.xml</webXml>
+					<webXml>src/main/webapp/WEB-INF/web.xml</webXml>
 					<webResources>
 						<resource>
 							<directory>WebContent</directory>
@@ -402,7 +402,7 @@
 						</resource>
 					</webResources>
 				</configuration>
-			</plugin>
+			</plugin>-->
 			<plugin>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<configuration>

@@ -107,8 +107,8 @@ public class VersionAction extends BaseAction {
         
         String rootPath;
          // in case deployed in external Tomcat server
-        if (classPath.contains("/WEB-INF/")) {
-            rootPath = getBeforeLast(classPath, "/WEB-INF/") + "/";
+        if (classPath.contains("/../src/main/webapp/WEB-INF/")) {
+            rootPath = getBeforeLast(classPath, "/../src/main/webapp/WEB-INF/") + "/";
         }
         // in case deployed internally in Eclipse
         else if (classPath.contains("/classes/")) {
