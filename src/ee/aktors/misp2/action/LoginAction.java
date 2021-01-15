@@ -423,11 +423,12 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
         }
         if (certificate.isPresent()) {
             try {
-
-                x509CertificateExtensions = certificate.get().getExtendedKeyUsage();
                 LOG.debug("Found certificate {}", certificate);
-                if (!(x509CertificateExtensions.contains("TLS Web Client Authentication"))) {
-                    error = "Certificate {} does not contain extended Key usage for TLS Web Client Authentication  ";
+                x509CertificateExtensions = certificate.get().getExtendedKeyUsage();
+                LOG.debug("X509 extensions of the certifcate:{}",
+                        (x509CertificateExtensions != null) ? x509CertificateExtensions : "none");
+                if (x509CertificateExtensions == null  || !(x509CertificateExtensions.contains("TLS Web Client Authentication"))) {
+                    error = "Certificate does not contain extended Key usage for TLS Web Client Authentication  ";
                 }
                 X500Principal principal = certificate.get().getIssuerX500Principal();
                 if (principal != null) {
