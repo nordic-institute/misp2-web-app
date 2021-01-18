@@ -68,6 +68,9 @@ import static org.apache.logging.log4j.Level.DEBUG;
  */
 public class LoginAction extends SecureLoggedAction implements StrutsStatics {
 
+    // OID for extKeyUsage/TLS Web client authentication
+    // by PKIX https://tools.ietf.org/html/rfc2459
+    static final String CLIENT_AUTHENTICATION_OID =	"1.3.6.1.5.5.7.3.2";
     private static final long serialVersionUID = 1L;
     private final DigiDoc4jConfiguration digiDoc4jConfiguration;
     private final UserService serviceUser;
@@ -427,8 +430,8 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                 x509CertificateExtensions = certificate.get().getExtendedKeyUsage();
                 LOG.debug("X509 extensions of the certifcate:{}",
                         (x509CertificateExtensions != null) ? x509CertificateExtensions : "none");
-                if (x509CertificateExtensions == null  || !(x509CertificateExtensions.contains("TLS Web Client Authentication"))) {
-                    error = "Certificate does not contain extended Key usage for TLS Web Client Authentication  ";
+                if (x509CertificateExtensions == null  || !(x509CertificateExtensions.contains(CLIENT_AUTHENTICATION_OID))) {
+                    error = "Certificate does not contain extended Key usage for Client Authentication  ";
                 }
                 X500Principal principal = certificate.get().getIssuerX500Principal();
                 if (principal != null) {
