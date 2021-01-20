@@ -38,10 +38,7 @@ import ee.aktors.misp2.service.UserService;
 import ee.aktors.misp2.service.crypto.MobileIdService;
 import ee.aktors.misp2.util.*;
 import ee.aktors.misp2.util.mobileid.MobileIdSessionData;
-import ee.sk.digidoc.DigiDocException;
 import ee.sk.digidoc.SignedDoc;
-import ee.sk.digidoc.factory.NotaryFactory;
-import ee.sk.utils.ConfigManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
@@ -426,24 +423,15 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
             LOG.debug("X509 extensions of the certifcate:{}",
                     (x509CertificateExtensions != null) ? x509CertificateExtensions : "none");
             if (x509CertificateExtensions == null || !(x509CertificateExtensions.contains(CLIENT_AUTHENTICATION_OID))) {
-
-
-                LOG.warn("Login tried with invalid Authentication ID card! - " +
-                        "Can't find Extended Key Usage field of Client Authentication from ID card login certificate -");
-                return false;
+                throw new RuntimeException("Can't find Extended Key Usage field of Client Authentication from ID card login certificate -");
             }
             X500Principal principal = certificate.getIssuerX500Principal();
             if (principal == null) {
-                LOG.warn("Login tried with invalid Authentication ID card! - no issuer found from ID card certificate");
-                return false;
+                throw new RuntimeException("No issuer found from ID card certificate");
             }
             String issuerX500Name = principal.getName();
             if (issuerX500Name == null) {
-                LOG.warn("Login tried with invalid Authentication ID card! - No Certificate issuer Name found: {}"
-                        , certificate
-                );
-                return false;
-
+                throw new RuntimeException("No Certificate issuer Name found");
             }
             LOG.debug("Certificate issued by:{}", issuerX500Name);
             if (!issuerX500Name.contains(allowedIssuerX500NamePattern)) {
@@ -451,16 +439,15 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                         allowedIssuerX500NamePattern,
                         issuerX500Name
                 );
-                LOG.warn("Login tried with invalid Authentication ID card! - No trusted issuer in certificate: {}", certificate);
-                return false;
+                throw new RuntimeException("No trusted issuer in certificate:");
             }
-        } catch (CertificateParsingException e) {
-            LOG.catching(DEBUG, e);
-            LOG.warn("Login tried with invalid Authentication ID card! - Can't parse extended key usage from X509 certificate:" + certificate);
-            return false;
         } catch (Throwable throwable) {
             LOG.catching(DEBUG, throwable);
-            LOG.warn("Login tried with invalid Authentication ID card! - cert was {}", certificate);
+            LOG.warn(
+                    "Login tried with invalid Authentication ID card! - {} ... because the certificate was {}",
+                    throwable.getMessage(),
+                    certificate
+            );
             return false;
         }
         return true;
