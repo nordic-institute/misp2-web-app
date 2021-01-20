@@ -215,6 +215,10 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                         LOG.debug("Users login certificate: " + certPrivate);
                     }
                     boolean checkOCSPNeeded;
+                    // checks validity of the presented Certificate, adds errors if needed
+                  /*  if (!isCertificateValidForIDCardLogin(certPrivate)) {
+                        return ERROR;
+                    }*/
                     try {
                         checkOCSPNeeded = CONFIG.getBoolean("auth.IDCard.OCSPCheck");
                     } catch (java.util.NoSuchElementException e) {
@@ -224,7 +228,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
 
                     // if OCSP check is needed, call isValidCertificate() which adds errors if needed and returns false if errors
                     // were found
-                    if (checkOCSPNeeded && !isValidCertificate(certPrivate))
+                    if (checkOCSPNeeded && !isOCSPCheckedOK(certPrivate))
                         return ERROR;
 
                     // Get the Distinguished Name for the user.
@@ -332,7 +336,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
     @HTTPMethods(methods = {HTTPMethod.POST})
     public String loginUsingCertificate() throws Exception {
         HttpServletRequest request = (HttpServletRequest) ActionContext.getContext().get(HTTP_REQUEST);
-        X509Certificate cert = getValidAuthenticationClientX509Certificate(request);
+        X509Certificate cert = getClientX509CertificateFromAttribute(request);
         if (cert != null) { // if it is not null then login with id
             if (LOG.isDebugEnabled()) {
                 LOG.debug("Users login certificate: " + cert);
@@ -376,7 +380,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
         return SUCCESS;
     }
 
-    private static X509Certificate getClientX509Certificate(HttpServletRequest req) {
+    private X509Certificate getClientX509Certificate(HttpServletRequest req) {
         X509Certificate cert = null;
 
         String clientCertReqHeader = CONFIG.getString("auth.client_cert_req_header_name");
@@ -398,69 +402,18 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                 LOG.warn("Couldn't find client cert from request header: " + clientCertReqHeader);
             }
         } else {
-            X509Certificate[] certs = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
-            if (certs != null) {
-                cert = certs[0];
-            }
+            cert = getClientX509CertificateFromAttribute(req);
         }
-
         return cert;
     }
 
-    private X509Certificate getValidAuthenticationClientX509Certificate(HttpServletRequest request) {
-        List<String> x509CertificateExtensions;
-        Optional<X509Certificate> certificate = Optional.empty();
-        String error = "";
-        String allowedIssuerX500NamePattern = CONFIG.getString(
-                "auth.certificate.issuerX500NamePattern",
-                "ESTEID"
-        );
-        Object attribute = request.getAttribute("javax.servlet.request.X509Certificate");
-        if (!(attribute instanceof Object[])) {
-            error = "Authentication certificate attribute not array";
-
-        } else {
-            certificate = Arrays.stream(((Object[]) attribute)).findFirst()
-                    .filter(object -> object instanceof X509Certificate)
-                    .map(certificateInObject -> (X509Certificate) certificateInObject);
-        }
-        if (certificate.isPresent()) {
-            try {
-                LOG.debug("Found certificate {}", certificate);
-                x509CertificateExtensions = certificate.get().getExtendedKeyUsage();
-                LOG.debug("X509 extensions of the certifcate:{}",
-                        (x509CertificateExtensions != null) ? x509CertificateExtensions : "none");
-                if (x509CertificateExtensions == null  || !(x509CertificateExtensions.contains(CLIENT_AUTHENTICATION_OID))) {
-                    error = "Certificate does not contain extended Key usage for Client Authentication  ";
-                }
-                X500Principal principal = certificate.get().getIssuerX500Principal();
-                if (principal != null) {
-                    String issuerX500Name = principal.getName();
-
-                    LOG.debug("Certificate issued by:{}", issuerX500Name);
-                    if (!issuerX500Name.contains(allowedIssuerX500NamePattern)) {
-                        LOG.debug("No trusted certificate like {} issuer found from:{}",
-                                allowedIssuerX500NamePattern,
-                                issuerX500Name
-                        );
-                        error = error.concat("No trusted issuer in certificate");
+    private X509Certificate getClientX509CertificateFromAttribute(HttpServletRequest req) {
+        X509Certificate certificate = null;
+        X509Certificate certsAttribute[] = (X509Certificate[])  req.getAttribute("javax.servlet.request.X509Certificate");
+        if (certsAttribute != null) {
+            certificate = certsAttribute[0];
                     }
-                } else {
-                    LOG.error("no issuer found from certificate");
-                    error = error.concat("no issuer found from certificate ");
-                }
-            } catch (CertificateParsingException e) {
-                LOG.catching(DEBUG, e);
-                LOG.error("Can't parse extended key usage from X509 certificate:" + certificate);
-                error = error.concat("Can't parse extended key usage from X509 certificate  ");
-            }
-            if (error.isEmpty()) {
-                return certificate.get();
-            }
-        }
-        LOG.debug("errors collected in the end:{}", error);
-        return  null;
-
+        return certificate;
     }
 
     private Map<String, String> parseSubjectDn(String dn) {
@@ -516,7 +469,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
      * @return True if certificate is valid, false if OCSP query failed (certificate is not valid or OCSP verification
      * has a configuration problem).
      */
-    public boolean isValidCertificate(X509Certificate certificate) {
+    public boolean isOCSPCheckedOK(X509Certificate certificate) {
         try {
             String issuerCA = SignedDoc
                     .getCommonName(certificate.getIssuerX500Principal().getName(X500Principal.RFC1779));
