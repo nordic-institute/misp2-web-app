@@ -24,32 +24,7 @@
 
 package ee.aktors.misp2.action;
 
-import java.io.ByteArrayInputStream;
-import java.io.UnsupportedEncodingException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.UUID;
-
-import javax.security.auth.x500.X500Principal;
-import javax.servlet.http.HttpServletRequest;
-
-import ee.aktors.misp2.service.crypto.MobileIdService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.struts2.ServletActionContext;
-import org.apache.struts2.StrutsStatics;
-import org.apache.struts2.dispatcher.SessionMap;
-import org.bouncycastle.util.encoders.Base64;
-import org.digidoc4j.CertificateValidator;
-import org.digidoc4j.CertificateValidatorBuilder;
-
 import com.opensymphony.xwork2.ActionContext;
-
 import ee.aktors.misp2.beans.Auth;
 import ee.aktors.misp2.beans.Auth.AUTH_TYPE;
 import ee.aktors.misp2.configuration.DigiDoc4jConfiguration;
@@ -60,27 +35,44 @@ import ee.aktors.misp2.model.OrgPerson;
 import ee.aktors.misp2.model.Person;
 import ee.aktors.misp2.service.PortalService;
 import ee.aktors.misp2.service.UserService;
-import ee.aktors.misp2.util.Const;
-import ee.aktors.misp2.util.CountryUtil;
-import ee.aktors.misp2.util.PasswordUtil;
-import ee.aktors.misp2.util.Roles;
-import ee.aktors.misp2.util.SessionCounter;
-import ee.aktors.misp2.util.mobileid.MobileIdAuthenticator;
+import ee.aktors.misp2.service.crypto.MobileIdService;
+import ee.aktors.misp2.util.*;
 import ee.aktors.misp2.util.mobileid.MobileIdSessionData;
-import ee.sk.digidoc.DigiDocException;
 import ee.sk.digidoc.SignedDoc;
-import ee.sk.digidoc.factory.NotaryFactory;
-import ee.sk.utils.ConfigManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
+import org.apache.struts2.StrutsStatics;
+import org.apache.struts2.dispatcher.SessionMap;
+import org.bouncycastle.util.encoders.Base64;
+import org.digidoc4j.CertificateValidator;
+import org.digidoc4j.CertificateValidatorBuilder;
+
+import javax.security.auth.x500.X500Principal;
+import javax.servlet.http.HttpServletRequest;
+import java.io.ByteArrayInputStream;
+import java.io.UnsupportedEncodingException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
+import java.util.*;
+
+import static org.apache.logging.log4j.Level.DEBUG;
 
 /**
+ *
  */
 public class LoginAction extends SecureLoggedAction implements StrutsStatics {
 
+    // OID for extKeyUsage/TLS Web client authentication
+    // by PKIX https://tools.ietf.org/html/rfc2459
+    static final String CLIENT_AUTHENTICATION_OID = "1.3.6.1.5.5.7.3.2";
     private static final long serialVersionUID = 1L;
-    private DigiDoc4jConfiguration digiDoc4jConfiguration;
-    private UserService serviceUser;
-    private MobileIdService mobileIdService;
-//    private PortalService portalService;
+    private final DigiDoc4jConfiguration digiDoc4jConfiguration;
+    private final UserService serviceUser;
+    private final MobileIdService mobileIdService;
+    //    private PortalService portalService;
     private String redirectActionName;
     private String actionName;
     // -- Common login
@@ -95,12 +87,11 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
     private String overtakeCode;
     private boolean overtakeSbmt;
 
-    private X509Certificate cert;
     private static final Logger LOG = LogManager.getLogger(LoginAction.class);
 
     /**
      * @param portalService not used
-     * @param userService to inject
+     * @param userService   to inject
      */
     public LoginAction(DigiDoc4jConfiguration digiDoc4jConfiguration, PortalService portalService,
                        UserService userService, MobileIdService mobileIdService) {
@@ -113,7 +104,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
     /**
      * @return ERROR if already logged in, SUCCESS otherwise
      */
-    @HTTPMethods(methods = { HTTPMethod.GET })
+    @HTTPMethods(methods = {HTTPMethod.GET})
     public String showLogin() {
         if (user != null) {
             String an = (String) session.get(Const.SESSION_PREVIOUS_ACTION);
@@ -128,17 +119,10 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
         }
     }
 
-    /*
-    @Override
-    public void prepare() throws Exception {
-        super.prepare();
-    }
-    */
-
     /**
-     * @return  ERROE if login fails, SUCCESS otherwise
+     * @return ERROE if login fails, SUCCESS otherwise
      */
-    @HTTPMethods(methods = { HTTPMethod.POST })
+    @HTTPMethods(methods = {HTTPMethod.POST})
     public String loginAdmin() {
         Admin admin;
         Person user;
@@ -157,11 +141,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                 addActionError(getText("text.fail.login"));
                 return ERROR;
             }
-        } catch (NoSuchAlgorithmException e) {
-            LOG.error("Failed logging in admin.", e);
-            addActionError(getText("text.fail.login"));
-            return ERROR;
-        } catch (UnsupportedEncodingException e) {
+        } catch (NoSuchAlgorithmException | UnsupportedEncodingException e) {
             LOG.error("Failed logging in admin.", e);
             addActionError(getText("text.fail.login"));
             return ERROR;
@@ -172,7 +152,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
     /**
      * @return ERROR if password incorrect or internal error, SUCCESS otherwise
      */
-    @HTTPMethods(methods = { HTTPMethod.POST })
+    @HTTPMethods(methods = {HTTPMethod.POST})
     public String loginUsingForm() {
         try {
             if (CONFIG.getBoolean("auth.password")) {
@@ -182,7 +162,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                     user = serviceUser.findPersonBySSN(username);
                     if (user != null
                             && PasswordUtil.encryptPassword(password, user.getPasswordSalt())
-                                    .equals(user.getPassword())) {
+                            .equals(user.getPassword())) {
                         setUserLoggedIn(auth, user);
                         SessionCounter.getInstance().increaseCounter(user.getSsn());
                         return SUCCESS;
@@ -216,10 +196,11 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
 
     /**
      * Should be logically only POST, but need to be able to redirect (GET)
-     *  to it in order to allow cross-site ID-card login
+     * to it in order to allow cross-site ID-card login
+     *
      * @return SUCCESS if logging in is successful, ERROR otherwise
      */
-    @HTTPMethods(methods = { HTTPMethod.GET, HTTPMethod.POST })
+    @HTTPMethods(methods = {HTTPMethod.GET, HTTPMethod.POST})
     public String loginUsingIDCard() {
         try {
             if (CONFIG.getBoolean("auth.IDCard")) {
@@ -230,17 +211,21 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Users login certificate: " + certPrivate);
                     }
+                    if (!isCertificateValidForIDCardLogin(certPrivate)) {
+                        addActionError(getText("text.fail.login") + " " + getText("text.clientCertNotFound"));
+                        return ERROR;
+                    }
                     boolean checkOCSPNeeded;
                     try {
                         checkOCSPNeeded = CONFIG.getBoolean("auth.IDCard.OCSPCheck");
                     } catch (java.util.NoSuchElementException e) {
                         checkOCSPNeeded = false; // in case configuration parameter is missing, default to false - no
-                                                 // OCSP checking
+                        // OCSP checking
                     }
 
                     // if OCSP check is needed, call isValidCertificate() which adds errors if needed and returns false if errors
                     // were found
-                    if (checkOCSPNeeded && !isValidCertificate(certPrivate))
+                    if (checkOCSPNeeded && !isOCSPCheckedOK(certPrivate))
                         return ERROR;
 
                     // Get the Distinguished Name for the user.
@@ -283,7 +268,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
     /**
      * @return SUCCESS if logging in is successful, ERROR otherwise
      */
-    @HTTPMethods(methods = { HTTPMethod.POST })
+    @HTTPMethods(methods = {HTTPMethod.POST})
     public String loginUsingMobileID() {
         HttpServletRequest req = (HttpServletRequest) ActionContext.getContext().get(HTTP_REQUEST);
         try {
@@ -305,7 +290,6 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                     req.getSession().setAttribute(uuid, mobileIdSessionData);
                     req.setAttribute("UUID", uuid);
                     req.setAttribute("challengeCode", mobileIdSessionData.getChallenge());
-                    return SUCCESS;
                 } else { // this will wait until login is complete. If authentication fails, returns ERROR
                     MobileIdSessionData mobileIdSessionData = (MobileIdSessionData) req.getSession().getAttribute(uuid);
                     session.put(Const.SESSION_MID_USER_DATA, mobileIdSessionData);
@@ -330,8 +314,8 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                     Auth auth = new Auth(AUTH_TYPE.MOBILE_ID);
                     setUserLoggedIn(auth, user);
                     SessionCounter.getInstance().increaseCounter(user.getSsn());
-                    return SUCCESS;
                 }
+                return SUCCESS;
             }
         } catch (Exception e) {
             LOG.error(e.getMessage());
@@ -346,12 +330,13 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
      * @return INPUT if user not found, ERROR if login fails, SUCCESS otherwise
      * @throws Exception if encryption fails
      */
-    @HTTPMethods(methods = { HTTPMethod.POST })
+    @HTTPMethods(methods = {HTTPMethod.POST})
     public String loginUsingCertificate() throws Exception {
-        getClientX509Certificate();
+        HttpServletRequest request = (HttpServletRequest) ActionContext.getContext().get(HTTP_REQUEST);
+        X509Certificate cert = getClientX509CertificateFromAttribute(request);
         if (cert != null) { // if it is not null then login with id
-            if (LogManager.getLogger(LoginAction.class).isDebugEnabled()) {
-                LogManager.getLogger(LoginAction.class).debug("Users login certificate: " + cert);
+            if (LOG.isDebugEnabled()) {
+                LOG.debug("Users login certificate: " + cert);
             }
 
             Person user = serviceUser.findPersonByB64encCert(new String(Base64.encode(cert.getEncoded())));
@@ -362,7 +347,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                     user = serviceUser.findPersonBySSN(countryCode + ssn);
                     if (user != null
                             && PasswordUtil.encryptPassword(overtakeCode, user.getOvertakeCodeSalt()).equals(
-                                    user.getOvertakeCode())) {
+                            user.getOvertakeCode())) {
                         String generatedOvertakeCode = serviceUser.generateOvertakeCode();
                         user.setOvertakeCodeSalt(PasswordUtil.getSalt());
                         user.setOvertakeCode(PasswordUtil.encryptPassword(generatedOvertakeCode,
@@ -392,7 +377,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
         return SUCCESS;
     }
 
-    private static X509Certificate getClientX509Certificate(HttpServletRequest req) {
+    private X509Certificate getClientX509Certificate(HttpServletRequest req) {
         X509Certificate cert = null;
 
         String clientCertReqHeader = CONFIG.getString("auth.client_cert_req_header_name");
@@ -414,27 +399,62 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                 LOG.warn("Couldn't find client cert from request header: " + clientCertReqHeader);
             }
         } else {
-            X509Certificate[] certs = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
-            if (certs != null) {
-                cert = certs[0];
-            }
+            cert = getClientX509CertificateFromAttribute(req);
         }
-
         return cert;
     }
 
-    private void getClientX509Certificate() {
-        HttpServletRequest req = (HttpServletRequest) ActionContext.getContext().get(HTTP_REQUEST);
-        Object certificate = null;
-        certificate = req.getAttribute("javax.servlet.request.X509Certificate");
-        if (certificate != null) {
-            certificate = ((Object[]) certificate)[0];
+    private X509Certificate getClientX509CertificateFromAttribute(HttpServletRequest req) {
+        X509Certificate certificate = null;
+        X509Certificate[] certsAttribute = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
+        if (certsAttribute != null) {
+            certificate = certsAttribute[0];
         }
-        cert = (X509Certificate) certificate;
+        return certificate;
+    }
+
+    private Boolean isCertificateValidForIDCardLogin(X509Certificate certificate) {
+        String allowedIssuerX500NamePattern = CONFIG.getString(
+                "auth.certificate.issuerX500NamePattern",
+                "ESTEID"
+        );
+        try {
+            List<String> x509CertificateExtensions = certificate.getExtendedKeyUsage();
+            LOG.debug("X509 extensions of the certifcate:{}",
+                    (x509CertificateExtensions != null) ? x509CertificateExtensions : "none");
+            if (x509CertificateExtensions == null || !(x509CertificateExtensions.contains(CLIENT_AUTHENTICATION_OID))) {
+                throw new RuntimeException("Can't find Extended Key Usage field of Client Authentication from ID card login certificate -");
+            }
+            X500Principal principal = certificate.getIssuerX500Principal();
+            if (principal == null) {
+                throw new RuntimeException("No issuer found from ID card certificate");
+            }
+            String issuerX500Name = principal.getName();
+            if (issuerX500Name == null) {
+                throw new RuntimeException("No Certificate issuer Name found");
+            }
+            LOG.debug("Certificate issued by:{}", issuerX500Name);
+            if (!issuerX500Name.contains(allowedIssuerX500NamePattern)) {
+                LOG.debug("No trusted certificate like {} issuer found from:{}",
+                        allowedIssuerX500NamePattern,
+                        issuerX500Name
+                );
+                throw new RuntimeException("No trusted issuer in certificate:");
+            }
+        } catch (Throwable throwable) {
+            LOG.catching(DEBUG, throwable);
+            LOG.warn(
+                    "Login tried with invalid Authentication ID card! - {} ... because the certificate was {}",
+                    throwable.getMessage(),
+                    certificate
+            );
+            return false;
+        }
+        return true;
     }
 
     private Map<String, String> parseSubjectDn(String dn) {
-        Map<String, String> tmp = new HashMap<String, String>();
+        Map<String, String> tmp = new HashMap<>();
 
         for (String s : dn.split(", ")) {
             int pos = s.indexOf('=');
@@ -453,7 +473,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
 
     private void setUserLoggedIn(Auth a, Person user) {
         renewSessionId();
-        
+
         if (CONFIG.getBoolean("auth.sslid")) {
             HttpServletRequest request = (HttpServletRequest) ActionContext.getContext().get(HTTP_REQUEST);
             String sslID = (String) request.getAttribute("javax.servlet.request.ssl_session");
@@ -469,11 +489,11 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
      * Change session ID, keeping entries in original session map.
      */
     private void renewSessionId() {
-        Map<String, Object> prevSession = new HashMap<String, Object>(session);
+        Map<String, Object> prevSession = new HashMap<>(session);
         if (LOG.isDebugEnabled()) {
             LOG.debug("Changing session ID. Copying keys: " + prevSession);
         }
-        ((SessionMap<String, Object>)session).invalidate();
+        ((SessionMap<String, Object>) session).invalidate();
         session = ActionContext.getContext().getSession();
         session.putAll(prevSession);
     }
@@ -482,12 +502,11 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
      * Perform OCSP verification for given certificate. Uses DigiDoc4j library
      * {@link org.digidoc4j.CertificateValidator#validate(X509Certificate)} method.
      *
-     * @param certificate
-     *            User session certificate that gets validated with OCSP request.
+     * @param certificate User session certificate that gets validated with OCSP request.
      * @return True if certificate is valid, false if OCSP query failed (certificate is not valid or OCSP verification
-     *         has a configuration problem).
+     * has a configuration problem).
      */
-    public boolean isValidCertificate(X509Certificate certificate) {
+    public boolean isOCSPCheckedOK(X509Certificate certificate) {
         try {
             String issuerCA = SignedDoc
                     .getCommonName(certificate.getIssuerX500Principal().getName(X500Principal.RFC1779));
@@ -506,53 +525,6 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
         }
 
         return false;
-    }
-
-    /**
-     * Perform OCSP verification check for given certificate. Uses jDigiDoc library
-     * {@link ee.sk.digidoc.factory.NotaryFactory#checkCertificate(cert) notaryFactory.checkCertificate} method.
-     *
-     * @param certIn  user session certificate that gets validated with OCSP request
-     * @return #true if cert is valid, #false if OCSP query failed (cert is not valid or OCSP check has configuration
-     *         problem
-     */
-    public boolean checkOCSP(X509Certificate certIn) {
-        // TODO Remove checkOCSP in a future release, since the application now uses DigiDoc4j's OCSP verification
-        Integer errorCode = null;
-        try {
-
-            NotaryFactory notaryFactory;
-            notaryFactory = ConfigManager.instance().getNotaryFactory();
-            notaryFactory.init();
-
-            String issuerCA = SignedDoc.getCommonName(certIn.getIssuerX500Principal().getName(
-                    javax.security.auth.x500.X500Principal.RFC1779));
-            String subjectDN = certIn.getSubjectDN().getName();
-            LOG.debug("OCSP check issuer CA: " + issuerCA + " | OCSP check subjectDN: " + subjectDN);
-            notaryFactory.checkCertificate(certIn);
-            LOG.debug("OCSP check yielded postitive result.");
-
-        } catch (DigiDocException e) {
-            errorCode = e.getCode();
-            if (errorCode == null)
-                errorCode = -1;
-
-            if (errorCode == DigiDocException.ERR_CERT_REVOKED) {
-                // Certificate is not valid
-                addActionError(getText("login.errors.id_card.ocsp.certificate_is_not_valid"));
-                LOG.error("OCSP check failed: Cert is not valid. DigiDocException.code=" + errorCode, e);
-            } else if (errorCode == DigiDocException.ERR_CERT_UNKNOWN) {
-                // Certificate is unknown
-                addActionError(getText("login.errors.id_card.ocsp.certificate_is_unknown"));
-                LOG.error("OCSP check failed: Cert is unknown. DigiDocException.code=" + errorCode, e);
-            } else {
-                // any other error
-                addActionError(getText("login.errors.id_card.ocsp.check_failed"));
-                LOG.error("OCSP check failed: unspecified reason. DigiDocException.code=" + errorCode, e);
-            }
-
-        }
-        return errorCode == null;
     }
 
     /**
