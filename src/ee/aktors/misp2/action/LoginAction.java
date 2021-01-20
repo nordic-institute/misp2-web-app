@@ -214,11 +214,11 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                     if (LOG.isDebugEnabled()) {
                         LOG.debug("Users login certificate: " + certPrivate);
                     }
-                    boolean checkOCSPNeeded;
-                    // checks validity of the presented Certificate, adds errors if needed
-                  /*  if (!isCertificateValidForIDCardLogin(certPrivate)) {
+                    if (!isCertificateValidForIDCardLogin(certPrivate)) {
+                        addActionError(getText("text.fail.login") + " " + getText("text.clientCertNotFound"));
                         return ERROR;
-                    }*/
+                    }
+                    boolean checkOCSPNeeded;
                     try {
                         checkOCSPNeeded = CONFIG.getBoolean("auth.IDCard.OCSPCheck");
                     } catch (java.util.NoSuchElementException e) {
@@ -409,11 +409,61 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
 
     private X509Certificate getClientX509CertificateFromAttribute(HttpServletRequest req) {
         X509Certificate certificate = null;
-        X509Certificate certsAttribute[] = (X509Certificate[])  req.getAttribute("javax.servlet.request.X509Certificate");
+        X509Certificate[] certsAttribute = (X509Certificate[])  req.getAttribute("javax.servlet.request.X509Certificate");
         if (certsAttribute != null) {
             certificate = certsAttribute[0];
                     }
         return certificate;
+    }
+
+    private Boolean isCertificateValidForIDCardLogin(X509Certificate certificate) {
+        String allowedIssuerX500NamePattern = CONFIG.getString(
+                "auth.certificate.issuerX500NamePattern",
+                "ESTEID"
+        );
+        try {
+            List<String>x509CertificateExtensions = certificate.getExtendedKeyUsage();
+            LOG.debug("X509 extensions of the certifcate:{}",
+                    (x509CertificateExtensions != null) ? x509CertificateExtensions : "none");
+            if (x509CertificateExtensions == null  || !(x509CertificateExtensions.contains(CLIENT_AUTHENTICATION_OID))) {
+
+
+                LOG.warn("Login tried with invalid Authentication ID card! - " +
+                        "Can't find Extended Key Usage field of Client Authentication from ID card login certificate -");
+                return false;
+            }
+            X500Principal principal = certificate.getIssuerX500Principal();
+            if (principal == null) {
+                LOG.warn("Login tried with invalid Authentication ID card! - no issuer found from ID card certificate");
+                return false;
+            }
+            String issuerX500Name = principal.getName();
+            if (issuerX500Name == null) {
+                LOG.warn("Login tried with invalid Authentication ID card! - No Certificate issuer Name found: {}"
+                        ,certificate
+                );
+                return false;
+
+            }
+            LOG.debug("Certificate issued by:{}", issuerX500Name);
+            if (!issuerX500Name.contains(allowedIssuerX500NamePattern)) {
+                LOG.debug("No trusted certificate like {} issuer found from:{}",
+                        allowedIssuerX500NamePattern,
+                        issuerX500Name
+                );
+                LOG.warn("Login tried with invalid Authentication ID card! - No trusted issuer in certificate: {}",certificate);
+                return false;
+            }
+        } catch (CertificateParsingException e) {
+            LOG.catching(DEBUG, e);
+            LOG.warn("Login tried with invalid Authentication ID card! - Can't parse extended key usage from X509 certificate:" + certificate);
+            return false;
+        } catch (Throwable throwable) {
+            LOG.catching(DEBUG, throwable);
+            LOG.warn("Login tried with invalid Authentication ID card! - cert was {}", certificate);
+            return false;
+        }
+        return true;
     }
 
     private Map<String, String> parseSubjectDn(String dn) {
@@ -488,54 +538,6 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
         }
 
         return false;
-    }
-
-    /**
-     * Perform OCSP verification check for given certificate. Uses jDigiDoc library
-     * method.
-     *
-     * @param certIn user session certificate that gets validated with OCSP request
-     * @return #true if cert is valid, #false if OCSP query failed (cert is not valid or OCSP check has configuration
-     * problem
-     */
-    public boolean checkOCSP(X509Certificate certIn) {
-        // TODO Remove checkOCSP in a future release, since the application now uses DigiDoc4j's OCSP verification
-        Integer errorCode = null;
-        try {
-
-            NotaryFactory notaryFactory;
-            notaryFactory = ConfigManager.instance().getNotaryFactory();
-            notaryFactory.init();
-
-            String issuerCA = SignedDoc.getCommonName(certIn.getIssuerX500Principal().getName(
-                    javax.security.auth.x500.X500Principal.RFC1779));
-            String subjectDN = certIn.getSubjectDN().getName();
-            LOG.debug("OCSP check issuer CA: " + issuerCA + " | OCSP check subjectDN: " + subjectDN);
-            //noinspection deprecation
-            notaryFactory.checkCertificate(certIn);
-            LOG.debug("OCSP check yielded postitive result.");
-
-        } catch (DigiDocException e) {
-            errorCode = e.getCode();
-            if (errorCode == null)
-                errorCode = -1;
-
-            if (errorCode == DigiDocException.ERR_CERT_REVOKED) {
-                // Certificate is not valid
-                addActionError(getText("login.errors.id_card.ocsp.certificate_is_not_valid"));
-                LOG.error("OCSP check failed: Cert is not valid. DigiDocException.code=" + errorCode, e);
-            } else if (errorCode == DigiDocException.ERR_CERT_UNKNOWN) {
-                // Certificate is unknown
-                addActionError(getText("login.errors.id_card.ocsp.certificate_is_unknown"));
-                LOG.error("OCSP check failed: Cert is unknown. DigiDocException.code=" + errorCode, e);
-            } else {
-                // any other error
-                addActionError(getText("login.errors.id_card.ocsp.check_failed"));
-                LOG.error("OCSP check failed: unspecified reason. DigiDocException.code=" + errorCode, e);
-            }
-
-        }
-        return errorCode == null;
     }
 
     /**
