@@ -70,7 +70,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
 
     // OID for extKeyUsage/TLS Web client authentication
     // by PKIX https://tools.ietf.org/html/rfc2459
-    static final String CLIENT_AUTHENTICATION_OID =	"1.3.6.1.5.5.7.3.2";
+    static final String CLIENT_AUTHENTICATION_OID = "1.3.6.1.5.5.7.3.2";
     private static final long serialVersionUID = 1L;
     private final DigiDoc4jConfiguration digiDoc4jConfiguration;
     private final UserService serviceUser;
@@ -409,10 +409,10 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
 
     private X509Certificate getClientX509CertificateFromAttribute(HttpServletRequest req) {
         X509Certificate certificate = null;
-        X509Certificate[] certsAttribute = (X509Certificate[])  req.getAttribute("javax.servlet.request.X509Certificate");
+        X509Certificate[] certsAttribute = (X509Certificate[]) req.getAttribute("javax.servlet.request.X509Certificate");
         if (certsAttribute != null) {
             certificate = certsAttribute[0];
-                    }
+        }
         return certificate;
     }
 
@@ -422,10 +422,10 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                 "ESTEID"
         );
         try {
-            List<String>x509CertificateExtensions = certificate.getExtendedKeyUsage();
+            List<String> x509CertificateExtensions = certificate.getExtendedKeyUsage();
             LOG.debug("X509 extensions of the certifcate:{}",
                     (x509CertificateExtensions != null) ? x509CertificateExtensions : "none");
-            if (x509CertificateExtensions == null  || !(x509CertificateExtensions.contains(CLIENT_AUTHENTICATION_OID))) {
+            if (x509CertificateExtensions == null || !(x509CertificateExtensions.contains(CLIENT_AUTHENTICATION_OID))) {
 
 
                 LOG.warn("Login tried with invalid Authentication ID card! - " +
@@ -440,7 +440,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
             String issuerX500Name = principal.getName();
             if (issuerX500Name == null) {
                 LOG.warn("Login tried with invalid Authentication ID card! - No Certificate issuer Name found: {}"
-                        ,certificate
+                        , certificate
                 );
                 return false;
 
@@ -451,7 +451,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                         allowedIssuerX500NamePattern,
                         issuerX500Name
                 );
-                LOG.warn("Login tried with invalid Authentication ID card! - No trusted issuer in certificate: {}",certificate);
+                LOG.warn("Login tried with invalid Authentication ID card! - No trusted issuer in certificate: {}", certificate);
                 return false;
             }
         } catch (CertificateParsingException e) {
