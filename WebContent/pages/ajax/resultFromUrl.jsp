@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/plaintext; charset=UTF-8" pageEncoding="UTF-8"%><%@taglib prefix="s" uri="/struts-tags" %><%--
   ~ The MIT License
+  ~ Copyright (c) 2020- Nordic Institute for Interoperability Solutions (NIIS)
   ~ Copyright (c) 2019 Estonian Information System Authority (RIA)
   ~
   ~ Permission is hereby granted, free of charge, to any person obtaining a copy
