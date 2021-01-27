@@ -305,11 +305,11 @@
     </welcome-file-list>
     <error-page>
         <error-code>404</error-code>
-        <location>/../src/main/webapp/pages/faults/404.jsp</location>
+        <location>/pages/faults/404.jsp</location>
     </error-page>
     <error-page>
         <error-code>403</error-code>
-        <location>/../src/main/webapp/pages/faults/403.jsp</location>
+        <location>/pages/faults/403.jsp</location>
     </error-page>
     <mime-mapping>  
     	<extension>xhtml</extension>  
