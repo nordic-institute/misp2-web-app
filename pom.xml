@@ -140,6 +140,23 @@
 		</dependency>
 		<dependency>
 			<groupId>org.apache.struts</groupId>
+			<artifactId>struts2-junit-plugin</artifactId>
+			<version>${struts.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.servlet.jsp</groupId>
+			<artifactId>javax.servlet.jsp-api</artifactId>
+			<version>2.3.3</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.struts</groupId>
 			<artifactId>struts2-sitemesh-plugin</artifactId>
 			<version>${struts.version}</version>
 		</dependency>
@@ -280,7 +297,7 @@
 	      <artifactId>esteidtestcerts</artifactId>
 	      <version>3.7.2.652</version>
 	      <scope>system</scope>
-		  <systemPath>${project.basedir}/WebContent/WEB-INF/lib/esteidtestcerts.jar</systemPath>
+		  <systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/esteidtestcerts.jar</systemPath>
 	    </dependency>
 	    
 		<dependency>
@@ -298,28 +315,28 @@
 			<artifactId>orbeon</artifactId>
 			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${project.basedir}/WebContent/WEB-INF/lib/orbeon-xforms-filter.jar</systemPath>
+			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/orbeon-xforms-filter.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>core-renderer</groupId>
 			<artifactId>core-renderer</artifactId>
 			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${project.basedir}/WebContent/WEB-INF/lib/core-renderer.jar</systemPath>
+			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/core-renderer.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>iaikPkcs11Wrapper</groupId>
 			<artifactId>iaikPkcs11Wrapper</artifactId>
 			<scope>system</scope>
 			<version>1.0</version>
-			<systemPath>${project.basedir}/WebContent/WEB-INF/lib/iaikPkcs11Wrapper.jar</systemPath>
+			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/iaikPkcs11Wrapper.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>iText</groupId>
 			<artifactId>iText</artifactId>
 			<scope>system</scope>
 			<version>2.1.7</version>
-			<systemPath>${project.basedir}/WebContent/WEB-INF/lib/iText-2.1.7.jar</systemPath>
+			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/iText-2.1.7.jar</systemPath>
 		</dependency>
 		<dependency>
 			<groupId>javax.servlet</groupId>
@@ -381,81 +398,40 @@
 	
 	<build>
 		<plugins>
-			<plugin>
+            <plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
+				<version>2.2</version>
 				<configuration>
-					<webappDirectory>${project.build.directory}/misp2</webappDirectory>
 					<warName>misp2</warName>
-					<webXml>WebContent/WEB-INF/web.xml</webXml>
-					<webResources>
-						<resource>
-							<directory>WebContent</directory>
-							<filtering>false</filtering>
-						</resource>
-						<resource>
-							<directory>src/</directory>
-							<targetPath>WEB-INF/classes</targetPath>
-							<excludes>
-								<exclude>**/*.java</exclude>
-							</excludes>
-						</resource>
-					</webResources>
 				</configuration>
-			</plugin>
+            </plugin>
 			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.1</version>
 				<configuration>
 					<source>1.8</source>
 					<target>1.8</target>
 				</configuration>
 			</plugin>
 			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>build-helper-maven-plugin</artifactId>
+				<groupId>org.jacoco</groupId>
+				<artifactId>jacoco-maven-plugin</artifactId>
+				<version>0.8.5</version>
 				<executions>
-					<!-- Add source directory -->
 					<execution>
-						<id>add-source-directory</id>
-						<phase>generate-sources</phase>
+						<id>default-prepare-agent</id>
 						<goals>
-							<goal>add-source</goal>
+							<goal>prepare-agent</goal>
 						</goals>
-						<configuration>
-							<sources>
-								<source>src/</source>
-							</sources>
-						</configuration>
 					</execution>
-					<!-- Add test source directory -->
 					<execution>
-						<id>add-test-source</id>
-						<phase>generate-test-sources</phase>
+						<id>default-report</id>
 						<goals>
-							<goal>add-test-source</goal>
+							<goal>report</goal>
 						</goals>
-						<configuration>
-							<sources>
-								<source>test/</source>
-							</sources>
-						</configuration>
-					</execution> 
-					<!-- Add /test directory also as resource directory,
-					     meaning resource files can be read from it as well -->
-					<execution>
-						<id>add-test-resource</id>
-						<phase>generate-test-sources</phase>
-						<goals>
-							<goal>add-test-resource</goal>
-						</goals>
-						<configuration>
-							<resources>
-								<resource>
-									<directory>test</directory>
-								</resource>
-							</resources>
-						</configuration>
-					</execution> 
+					</execution>
 				</executions>
 			</plugin>
 		</plugins>
