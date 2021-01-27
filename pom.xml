@@ -484,6 +484,71 @@
 					</execution>
 				</executions>
 			</plugin>
+			<plugin>
+				<groupId>org.eclipse.jetty</groupId>
+				<artifactId>jetty-maven-plugin</artifactId>
+				<version>9.4.35.v20201120</version>
+				<configuration>
+					<useTestScope>true</useTestScope>
+				</configuration>
+			</plugin>
+
+
+			<plugin>
+				<groupId>io.fabric8</groupId>
+				<artifactId>docker-maven-plugin</artifactId>
+				<version>0.34.1</version>
+				<configuration>
+
+					<images>
+						<!-- A single's image configuration -->
+						<image>
+							<name>postgres:10-alpine</name>
+							<alias>postgres</alias>
+							<run>
+
+								<env>
+									<POSTGRES_PASSWORD>secret</POSTGRES_PASSWORD>
+									<POSTGRES_DB>misp2db</POSTGRES_DB>
+									<POSTGRES_HOST_AUTH_METHOD>trust</POSTGRES_HOST_AUTH_METHOD>
+								</env>
+								<ports>
+									<port>15432:5432</port>
+								</ports>
+								<volumes>
+										<bind>${project.basedir}/test/resources/sql:/docker-entrypoint-initdb.d</bind>
+								</volumes>
+
+							</run>
+
+
+						</image>
+
+					</images>
+				</configuration>
+
+				<!-- Connect start/stop to pre- and
+                     post-integration-test phase, respectively if you want to start
+                     your docker containers during integration tests -->
+				<executions>
+					<execution>
+						<id>start</id>
+						<phase>pre-integration-test</phase>
+						<goals>
+							<goal>start</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>stop</id>
+						<phase>post-integration-test</phase>
+						<goals>
+							<goal>stop</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+
+
 		</plugins>
 	</build>
 </project>
