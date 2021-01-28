@@ -11,6 +11,6 @@
 			<AppenderRef ref="STDOUT" />
 		</Root>
 		<Logger name="com.opensymphony.xwork2.config" level="info" />
-		<Logger name="org.springframework.jdbc.datasource" level="debug" />
+		<Logger name="ee.aktors.misp2" level="trace" />
 	</Loggers>
 </Configuration>
