@@ -15,7 +15,9 @@
         <log4j2.version>2.11.1</log4j2.version>
         <digidoc4j.version>2.1.0</digidoc4j.version>
         <misp2.it-test.jdbc_port>15432</misp2.it-test.jdbc_port>
+        <misp2.it-test.jetty_port>8989</misp2.it-test.jetty_port>
         <misp2.development.jdbc_port>25432</misp2.development.jdbc_port>
+        <misp2.development.jetty_port>8009</misp2.development.jetty_port>
         <misp2.development.local>false</misp2.development.local>
     </properties>
 
@@ -514,6 +516,14 @@
                             <goal>integration-test</goal>
                             <goal>verify</goal>
                         </goals>
+                        <configuration>
+                            <systemProperties>
+                                <property>
+                                    <name>misp2.it-test.jetty_port</name>
+                                    <value>${misp2.it-test.jetty_port}</value>
+                                </property>
+                            </systemProperties>
+                        </configuration>
                     </execution>
                 </executions>
             </plugin>
@@ -528,11 +538,14 @@
                     </webAppConfig>
                     <jettyProperties>
                         <property>
-                            <jetty.port>8999</jetty.port>
+                            <jetty.port>${misp2.development.jdbc_port}</jetty.port>
                         </property>
                     </jettyProperties>
                     <stopPort>20134</stopPort>
                     <stopKey>misp2-stop</stopKey>
+                    <httpConnector>
+                        <port>${misp2.development.jetty_port}</port>
+                    </httpConnector>
                 </configuration>
                 <executions>
                     <execution>
@@ -550,6 +563,9 @@
                                     <value>${misp2.it-test.jdbc_port}</value>
                                 </systemProperty>
                             </systemProperties>
+                            <httpConnector>
+                                <port>${misp2.it-test.jetty_port}</port>
+                            </httpConnector>
                         </configuration>
                     </execution>
                     <execution>
