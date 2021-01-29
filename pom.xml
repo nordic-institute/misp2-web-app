@@ -526,6 +526,11 @@
                     <webAppConfig>
                         <contextPath>/misp2</contextPath>
                     </webAppConfig>
+                    <jettyProperties>
+                        <property>
+                            <jetty.port>8999</jetty.port>
+                        </property>
+                    </jettyProperties>
                     <stopPort>20134</stopPort>
                     <stopKey>misp2-stop</stopKey>
                 </configuration>
