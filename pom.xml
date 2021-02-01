@@ -576,7 +576,7 @@
                         </goals>
                     </execution>
                     <execution>
-                        <id>run-test-jetty</id>
+                        <id>default-cli</id>
                         <phase>none</phase>
                         <goals>
                             <goal>run</goal>
