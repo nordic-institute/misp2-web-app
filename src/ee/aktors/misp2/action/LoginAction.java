@@ -61,7 +61,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -128,7 +127,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
     }
 
     /**
-     * @return ERROE if login fails, SUCCESS otherwise
+     * @return ERROR if login fails, SUCCESS otherwise
      */
     @HTTPMethods(methods = {HTTPMethod.POST})
     public String loginAdmin() {
@@ -479,12 +478,13 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                 "1.3.6.1.4.1.51455.1.1.1"
         };
         byte[] extensionValue = certificate.getExtensionValue(
-                Extension.certificatePolicies.getId()
-        );
-        LOG.debug("extensionvaluef to parse:{}", extensionValue);
+                Extension.certificatePolicies.getId());
+        Objects.requireNonNull(extensionValue, "No certificate policy extension found");
+        LOG.debug("extensionvalue to parse:{}", extensionValue);
         CertificatePolicies policies = CertificatePolicies.getInstance(
                 JcaX509ExtensionUtils.parseExtensionValue(extensionValue)
         );
+        Objects.requireNonNull(policies, "Certificate policy extension value was empty");
         LOG.debug("policies found:{}", policies);
         Set<String> policyIds = Arrays.stream(policies.getPolicyInformation())
                 .map(PolicyInformation::getPolicyIdentifier)
@@ -492,7 +492,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                 .collect(Collectors.toSet());
         LOG.debug("policy OID's contained:{}", policyIds);
         return Arrays.stream(validIssuancePolicyOIDs)
-                .anyMatch( oid -> policyIds.contains(oid));
+                .anyMatch(policyIds::contains);
     }
 
     private Map<String, String> parseSubjectDn(String dn) {
