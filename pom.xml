@@ -478,6 +478,10 @@
     <profiles>
         <profile>
             <id>it-test</id>
+            <properties>
+                <JDBC_PORT>${misp2.it-test.jdbc_port}</JDBC_PORT>
+                <JDBC_HOST>172.17.0.1</JDBC_HOST>
+            </properties>
             <build>
                 <plugins>
                 <plugin>
@@ -503,6 +507,35 @@
                                             ${project.basedir}/src/test/resources/db/initdb.d:/docker-entrypoint-initdb.d
                                         </bind>
                                     </volumes>
+                                </run>
+                            </image>
+                            <image>
+                                <name>tomcat:8</name>
+                                <alias>tomcat-it-service</alias>
+                                <run>
+                                    <ports>
+                                        <port>${misp2.it-test.misp2_port}:8080</port>
+                                    </ports>
+                                    <links>
+                                        <link>postgres-test:db</link>
+                                    </links>
+                                    <env>
+                                        <JPDA_ADDRESS>8000</JPDA_ADDRESS>
+                                        <JPDA_TRANSPORT>dt_socket</JPDA_TRANSPORT>
+                                    </env>
+                                    <labels>
+                                        <version>${project.version}</version>
+                                        <artifactId>${project.artifactId}-it</artifactId>
+                                    </labels>
+                                    <volumes>
+                                        <bind>
+                                            <volume>${project.build.directory}/${project.build.finalName}:/usr/local/tomcat/webapps/${project.artifactId}</volume>
+                                            <volume>${project.basedir}/src/test/docker/entry.sh:/tmp/entry.sh</volume>
+                                        </bind>
+                                    </volumes>
+                                    <cmd>
+                                        <shell>/bin/bash -x /tmp/entry.sh run</shell>
+                                    </cmd>
                                 </run>
                             </image>
                         </images>
@@ -549,73 +582,6 @@
                                 <properties>
                                     <JDBC_PORT>${misp2.it-test.jdbc_port}</JDBC_PORT>
                                 </properties>
-                            </configuration>
-                        </execution>
-                    </executions>
-                </plugin>
-                <plugin>
-                    <groupId>org.eclipse.jetty</groupId>
-                    <artifactId>jetty-maven-plugin</artifactId>
-                    <version>9.4.35.v20201120</version>
-                    <configuration>
-                        <useTestScope>true</useTestScope>
-                        <webAppConfig>
-                            <contextPath>/misp2</contextPath>
-                        </webAppConfig>
-                        <jettyProperties>
-                            <property>
-                                <jetty.port>${misp2.development.jdbc_port}</jetty.port>
-                            </property>
-                        </jettyProperties>
-                        <stopPort>20134</stopPort>
-                        <stopKey>misp2-stop</stopKey>
-                        <httpConnector>
-                            <port>${misp2.development.misp2_port}</port>
-                        </httpConnector>
-                    </configuration>
-                    <executions>
-                        <execution>
-                            <id>start-IT-jetty</id>
-                            <phase>pre-integration-test</phase>
-                            <goals>
-                                <goal>start</goal>
-                            </goals>
-                            <configuration>
-                                <scanIntervalSeconds>0</scanIntervalSeconds>
-                                <useTestScope>true</useTestScope>
-                                <systemProperties>
-                                    <systemProperty>
-                                        <name>JDBC_PORT</name>
-                                        <value>${misp2.it-test.jdbc_port}</value>
-                                    </systemProperty>
-                                </systemProperties>
-                                <httpConnector>
-                                    <port>${misp2.it-test.misp2_port}</port>
-                                </httpConnector>
-                            </configuration>
-                        </execution>
-                        <execution>
-                            <id>stop-IT-jetty></id>
-                            <phase>post-integration-test</phase>
-                            <goals>
-                                <goal>stop</goal>
-                            </goals>
-                        </execution>
-                        <execution>
-                            <id>default-cli</id>
-                            <phase>none</phase>
-                            <goals>
-                                <goal>run</goal>
-                            </goals>
-                            <configuration>
-                                <scanIntervalSeconds>0</scanIntervalSeconds>
-                                <useTestScope>true</useTestScope>
-                                <systemProperties>
-                                    <systemProperty>
-                                        <name>JDBC_PORT</name>
-                                        <value>${misp2.development.jdbc_port}</value>
-                                    </systemProperty>
-                                </systemProperties>
                             </configuration>
                         </execution>
                     </executions>

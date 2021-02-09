@@ -13,8 +13,8 @@ import static org.junit.Assert.assertEquals;
 
 public class Misp2StartupTestIT {
     private String misp2Port = Objects.requireNonNull(
-            System.getProperty("misp2.it-test.jetty_port"),
-            "misp2.it-test.jetty_port systemproperty needs to be defined"
+            System.getProperty("misp2.development.misp2_port"),
+            "misp2.development.misp2_port system property needs to be defined"
     );
     final String baseUrlString = "http://localhost:"+ misp2Port +"/misp2";
 
