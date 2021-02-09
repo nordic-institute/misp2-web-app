@@ -14,6 +14,7 @@
         <postgresql.version>42.2.5</postgresql.version>
         <log4j2.version>2.11.1</log4j2.version>
         <digidoc4j.version>2.1.0</digidoc4j.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <misp2.it-test.jdbc_port>15432</misp2.it-test.jdbc_port>
         <misp2.it-test.jetty_port>8989</misp2.it-test.jetty_port>
         <misp2.development.jdbc_port>25432</misp2.development.jdbc_port>
