@@ -45,6 +45,11 @@ import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
 import org.apache.struts2.StrutsStatics;
 import org.apache.struts2.dispatcher.SessionMap;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
+import org.bouncycastle.asn1.x509.CertificatePolicies;
+import org.bouncycastle.asn1.x509.Extension;
+import org.bouncycastle.asn1.x509.PolicyInformation;
+import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.digidoc4j.CertificateValidator;
 import org.digidoc4j.CertificateValidatorBuilder;
@@ -52,12 +57,13 @@ import org.digidoc4j.CertificateValidatorBuilder;
 import javax.security.auth.x500.X500Principal;
 import javax.servlet.http.HttpServletRequest;
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateFactory;
-import java.security.cert.CertificateParsingException;
 import java.security.cert.X509Certificate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static org.apache.logging.log4j.Level.DEBUG;
 
@@ -121,7 +127,7 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
     }
 
     /**
-     * @return ERROE if login fails, SUCCESS otherwise
+     * @return ERROR if login fails, SUCCESS otherwise
      */
     @HTTPMethods(methods = {HTTPMethod.POST})
     public String loginAdmin() {
@@ -442,6 +448,9 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
                 );
                 throw new RuntimeException("No trusted issuer in certificate:");
             }
+            if (!hasValidIssuancePolicy(certificate)) {
+                throw new RuntimeException("No trusted issuance policy found in certificate:");
+            }
         } catch (Throwable throwable) {
             LOG.catching(DEBUG, throwable);
             LOG.warn(
@@ -452,6 +461,38 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
             return false;
         }
         return true;
+    }
+
+    private Boolean hasValidIssuancePolicy( X509Certificate certificate) throws IOException {
+        // https://github.com/SK-EID/smart-id-documentation/wiki/Secure-Implementation-Guide#only-accept-certificates-with-trusted-issuance-policy
+        final String[] validIssuancePolicyOIDs = {
+                "1.3.6.1.4.1.10015.1.1",
+                "1.3.6.1.4.1.10015.1.2",
+                "1.3.6.1.4.1.51361.1.1.1",
+                "1.3.6.1.4.1.51361.1.1.2",
+                "1.3.6.1.4.1.51361.1.1.3",
+                "1.3.6.1.4.1.51361.1.1.4",
+                "1.3.6.1.4.1.51361.1.1.5",
+                "1.3.6.1.4.1.51361.1.1.6",
+                "1.3.6.1.4.1.51361.1.1.7",
+                "1.3.6.1.4.1.51455.1.1.1"
+        };
+        byte[] extensionValue = certificate.getExtensionValue(
+                Extension.certificatePolicies.getId());
+        Objects.requireNonNull(extensionValue, "No certificate policy extension found");
+        LOG.debug("extensionvalue to parse:{}", extensionValue);
+        CertificatePolicies policies = CertificatePolicies.getInstance(
+                JcaX509ExtensionUtils.parseExtensionValue(extensionValue)
+        );
+        Objects.requireNonNull(policies, "Certificate policy extension value was empty");
+        LOG.debug("policies found:{}", policies);
+        Set<String> policyIds = Arrays.stream(policies.getPolicyInformation())
+                .map(PolicyInformation::getPolicyIdentifier)
+                .map(ASN1ObjectIdentifier::getId)
+                .collect(Collectors.toSet());
+        LOG.debug("policy OID's contained:{}", policyIds);
+        return Arrays.stream(validIssuancePolicyOIDs)
+                .anyMatch(policyIds::contains);
     }
 
     private Map<String, String> parseSubjectDn(String dn) {
