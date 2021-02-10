@@ -13,7 +13,7 @@ import static org.junit.Assert.assertEquals;
 
 public class Misp2StartupTestIT {
     private String misp2Port = Objects.requireNonNull(
-            System.getProperty("misp2.development.misp2_port"),
+            System.getProperty("misp2.it-test.misp2_port"),
             "misp2.development.misp2_port system property needs to be defined"
     );
     final String baseUrlString = "http://localhost:"+ misp2Port +"/misp2";
@@ -27,14 +27,13 @@ public class Misp2StartupTestIT {
         assertEquals("misp2 endpoint should reply status 200",
                 HttpStatus.OK.value(), connection.getResponseCode()
         );
-        url = new URL(baseUrlString + "misp/admin");
+        url = new URL(baseUrlString );
         connection = (HttpURLConnection) url.openConnection();
-        assertEquals("admin endpoint should reply with status 200",
+        assertEquals("/misp2 endpoint should reply with status 200",
                 HttpStatus.OK.value(), connection.getResponseCode()
         );
     }
     @Test
-    @Ignore("Ignored because fails with java.lang.NoSuchFieldException: session")
     public void serviceAdminEndpointResponds200() throws Exception {
 
         URL url = new URL( baseUrlString +"/admin");

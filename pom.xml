@@ -17,6 +17,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <misp2.it-test.jdbc_port>15432</misp2.it-test.jdbc_port>
         <misp2.it-test.misp2_port>8989</misp2.it-test.misp2_port>
+        <misp2.it-test.docker_host_ip>172.17.0.1</misp2.it-test.docker_host_ip>
         <misp2.development.jdbc_port>25432</misp2.development.jdbc_port>
         <misp2.development.misp2_port>8009</misp2.development.misp2_port>
         <misp2.development.local>false</misp2.development.local>
@@ -480,7 +481,7 @@
             <id>it-test</id>
             <properties>
                 <JDBC_PORT>${misp2.it-test.jdbc_port}</JDBC_PORT>
-                <JDBC_HOST>172.17.0.1</JDBC_HOST>
+                <JDBC_HOST>${misp2.it-test.docker_host_ip}</JDBC_HOST>
             </properties>
             <build>
                 <plugins>
@@ -536,6 +537,15 @@
                                     <cmd>
                                         <shell>/bin/bash -x /tmp/entry.sh run</shell>
                                     </cmd>
+                                    <wait>
+                                        <http>
+                                            <url>http://localhost:${misp2.it-test.misp2_port}/misp2</url>
+                                        </http>
+                                        <time>15000</time>
+                                    </wait>
+                                    <log>
+                                        <enabled>true</enabled>
+                                    </log>
                                 </run>
                             </image>
                         </images>
@@ -594,7 +604,7 @@
             <id>local</id>
             <properties>
                 <JDBC_PORT>${misp2.development.jdbc_port}</JDBC_PORT>
-                <JDBC_HOST>172.17.0.1</JDBC_HOST>
+                <JDBC_HOST>${misp2.it-test.docker_host_ip}</JDBC_HOST>
             </properties>
             <build>
                 <plugins>
@@ -651,6 +661,15 @@
                                         <cmd>
                                             <shell>/bin/bash -x /tmp/entry.sh run</shell>
                                         </cmd>
+                                        <wait>
+                                            <http>
+                                                <url>http://localhost:${misp2.development.misp2_port}/misp2</url>
+                                            </http>
+                                            <time>15000</time>
+                                        </wait>
+                                        <log>
+                                            <enabled>true</enabled>
+                                        </log>
                                     </run>
                                 </image>
                             </images>
