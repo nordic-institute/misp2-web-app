@@ -7,13 +7,13 @@
     <packaging>war</packaging>
 
     <properties>
-        <struts.version>2.5.17</struts.version>
+        <struts.version>2.5.26</struts.version>
         <!-- Spring version is tied to Struts version -->
-        <spring.version>4.3.13.RELEASE</spring.version>
-        <hibernate.version>5.3.6.Final</hibernate.version>
-        <postgresql.version>42.2.5</postgresql.version>
-        <log4j2.version>2.11.1</log4j2.version>
-        <digidoc4j.version>2.1.0</digidoc4j.version>
+        <spring.version>5.3.3</spring.version>
+        <hibernate.version>6.0.0.Alpha6</hibernate.version>
+        <postgresql.version>42.2.18.jre7</postgresql.version>
+        <log4j2.version>2.14.0</log4j2.version>
+        <digidoc4j.version>4.1.0</digidoc4j.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <misp2.it-test.jdbc_port>15432</misp2.it-test.jdbc_port>
         <misp2.it-test.misp2_port>8989</misp2.it-test.misp2_port>

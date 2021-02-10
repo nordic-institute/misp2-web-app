@@ -39,7 +39,6 @@ import ee.aktors.misp2.service.UserService;
 import ee.aktors.misp2.service.crypto.MobileIdService;
 import ee.aktors.misp2.util.*;
 import ee.aktors.misp2.util.mobileid.MobileIdSessionData;
-import ee.sk.digidoc.SignedDoc;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
@@ -53,6 +52,7 @@ import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.digidoc4j.CertificateValidator;
 import org.digidoc4j.CertificateValidatorBuilder;
+import org.digidoc4j.ddoc.SignedDoc;
 
 import javax.security.auth.x500.X500Principal;
 import javax.servlet.http.HttpServletRequest;
@@ -568,6 +568,15 @@ public class LoginAction extends SecureLoggedAction implements StrutsStatics {
 
         return false;
     }
+
+    /**
+     * Perform OCSP verification check for given certificate. Uses jDigiDoc library
+     * method.
+     *
+     * @param certIn user session certificate that gets validated with OCSP request
+     * @return #true if cert is valid, #false if OCSP query failed (cert is not valid or OCSP check has configuration
+     * problem
+     */
 
     /**
      * @return the redirectActionName
