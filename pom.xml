@@ -11,9 +11,10 @@
         <!-- Spring version is tied to Struts version -->
         <spring.version>5.3.3</spring.version>
         <hibernate.version>5.4.28.Final</hibernate.version>
-        <postgresql.version>42.2.18.jre7</postgresql.version>
+        <postgresql.version>42.2.18</postgresql.version>
         <log4j2.version>2.14.0</log4j2.version>
-        <digidoc4j.version>4.1.0</digidoc4j.version>
+        <digidoc4j.version>2.1.1</digidoc4j.version>
+        <selenium.version>3.141.59</selenium.version>
         <commonmark-ext.version>0.14.0</commonmark-ext.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <misp2.it-test.jdbc_port>15432</misp2.it-test.jdbc_port>
@@ -387,6 +388,31 @@
             <artifactId>openapi-parser</artifactId>
             <version>1.5.31</version>
         </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-firefox-driver</artifactId>
+            <version>${selenium.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-api</artifactId>
+            <version>${selenium.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.seleniumhq.selenium</groupId>
+            <artifactId>selenium-java</artifactId>
+            <version>${selenium.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>24.0-jre</version>
+            <scope>test</scope>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -551,6 +577,7 @@
                             <phase>post-integration-test</phase>
                             <configuration>
                                 <stopNamePattern>postgres-test**</stopNamePattern>
+                                <keepContainer>true</keepContainer>
                             </configuration>
                             <goals>
                                 <goal>stop</goal>
@@ -569,12 +596,11 @@
                                 <goal>verify</goal>
                             </goals>
                             <configuration>
-                                <systemProperties>
-                                    <property>
-                                        <name>misp2.it-test.misp2_port</name>
-                                        <value>${misp2.it-test.misp2_port}</value>
-                                    </property>
-                                </systemProperties>
+                                <systemPropertyVariables>
+                                    <misp2.it-test.misp2_port>${misp2.it-test.misp2_port}</misp2.it-test.misp2_port>
+                                    <misp2.it-test.username>misp2</misp2.it-test.username>
+                                    <misp2.it-test.password>secret</misp2.it-test.password>
+                                </systemPropertyVariables>
                                 <properties>
                                     <JDBC_PORT>${misp2.it-test.jdbc_port}</JDBC_PORT>
                                 </properties>
@@ -605,7 +631,6 @@
                                     <name>postgres:10-alpine</name>
                                     <alias>postgres-dev</alias>
                                     <run>
-                                        <skip>${misp2.development.local}</skip>
                                         <env>
                                             <POSTGRES_PASSWORD>secret</POSTGRES_PASSWORD>
                                             <POSTGRES_HOST_AUTH_METHOD>trust</POSTGRES_HOST_AUTH_METHOD>
@@ -695,6 +720,22 @@
                                 </goals>
                                 <phase>verify</phase>
                             </execution>
+                            <execution>
+                                <id>default-cli</id>
+                                <goals>
+                                    <goal>use-latest-versions</goal>
+                                </goals>
+                                <phase>none</phase>
+                                <configuration>
+                                    <excludes>
+                                        <exclude>org.seleniumhq.selenium:*:*:*:*</exclude>
+                                        <exclude>dom4j:dom4j:*:*:*</exclude>
+                                    </excludes>
+                                    <allowMajorUpdates>false</allowMajorUpdates>
+                                    <allowMinorUpdates>false</allowMinorUpdates>
+                                    <allowSnapshots>false</allowSnapshots>
+                                </configuration>
+                            </execution>
                         </executions>
 
                     </plugin>
@@ -708,6 +749,7 @@
                             <enableExperimental>false</enableExperimental>
                             <nodeAuditAnalyzerEnabled>false</nodeAuditAnalyzerEnabled>
                             <nodeAnalyzerEnabled>false</nodeAnalyzerEnabled>
+                            <skipTestScope>true</skipTestScope>
                             <suppressionFiles>
                                 <suppressionFile>${project.basedir}/code-control/dependency-check-suppressions.xml
                                 </suppressionFile>
