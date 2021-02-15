@@ -38,7 +38,7 @@ import ee.aktors.misp2.service.crypto.DigitalSigningService;
 import ee.aktors.misp2.util.Const;
 import ee.aktors.misp2.util.JsonUtil;
 
-import eu.europa.esig.dss.spi.DSSUtils;
+import eu.europa.esig.dss.DSSUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -53,7 +53,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.xml.bind.DatatypeConverter;
 import java.io.IOException;
 
-import static eu.europa.esig.dss.enumerations.DigestAlgorithm.SHA256;
+import static eu.europa.esig.dss.DigestAlgorithm.SHA256;
 
 
 /**

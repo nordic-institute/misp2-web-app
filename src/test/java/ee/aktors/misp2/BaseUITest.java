@@ -14,6 +14,7 @@ public class BaseUITest {
 
   protected WebDriver driver;
   protected String baseUrl;
+  protected String ssUrl;
   protected boolean serverBeforeConfiguration = false;
   protected String username;
   protected String password;
@@ -25,6 +26,11 @@ public class BaseUITest {
     String misp2Port = Objects.requireNonNull(
             System.getProperty("misp2.it-test.misp2_port"),
             "misp2.development.misp2_port property needs to be defined"
+    );
+
+    ssUrl = Objects.requireNonNull(
+            System.getProperty("misp2.it-test.ss_url"),
+            "misp2.it-test.ss_url property needs to be defined"
     );
     baseUrl = "http://localhost:"+ misp2Port +"/misp2";
     username = Objects.requireNonNull(System.getProperty("misp2.it-test.username"),"misp2.it-test.username property needed");

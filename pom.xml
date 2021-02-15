@@ -20,6 +20,7 @@
         <misp2.it-test.jdbc_port>15432</misp2.it-test.jdbc_port>
         <misp2.it-test.misp2_port>8989</misp2.it-test.misp2_port>
         <misp2.it-test.docker_host_ip>172.17.0.1</misp2.it-test.docker_host_ip>
+        <misp2.it-test.ss_url>http://dev-ss1.i.x-road.rocks:4000</misp2.it-test.ss_url>
         <misp2.development.jdbc_port>25432</misp2.development.jdbc_port>
         <misp2.development.misp2_port>8009</misp2.development.misp2_port>
         <misp2.development.local>false</misp2.development.local>
@@ -600,6 +601,7 @@
                                     <misp2.it-test.misp2_port>${misp2.it-test.misp2_port}</misp2.it-test.misp2_port>
                                     <misp2.it-test.username>misp2</misp2.it-test.username>
                                     <misp2.it-test.password>secret</misp2.it-test.password>
+                                    <misp2.it-test.ss_url>${misp2.it-test.ss_url}</misp2.it-test.ss_url>
                                 </systemPropertyVariables>
                                 <properties>
                                     <JDBC_PORT>${misp2.it-test.jdbc_port}</JDBC_PORT>
