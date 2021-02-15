@@ -24,6 +24,7 @@
         <misp2.development.jdbc_port>25432</misp2.development.jdbc_port>
         <misp2.development.misp2_port>8009</misp2.development.misp2_port>
         <misp2.development.local>false</misp2.development.local>
+        <misp2.development.debug_port>5005</misp2.development.debug_port>
         <JDBC_PORT>5432</JDBC_PORT>
         <JDBC_HOST>localhost</JDBC_HOST>
     </properties>
@@ -533,10 +534,6 @@
                                     <links>
                                         <link>postgres-test:db</link>
                                     </links>
-                                    <env>
-                                        <JPDA_ADDRESS>8000</JPDA_ADDRESS>
-                                        <JPDA_TRANSPORT>dt_socket</JPDA_TRANSPORT>
-                                    </env>
                                     <labels>
                                         <version>${project.version}</version>
                                         <artifactId>${project.artifactId}-it</artifactId>
@@ -653,13 +650,13 @@
                                     <run>
                                         <ports>
                                             <port>${misp2.development.misp2_port}:8080</port>
+                                            <port>${misp2.development.debug_port}:${misp2.development.debug_port}</port>
                                         </ports>
                                         <links>
                                             <link>postgres-dev:db</link>
                                         </links>
                                         <env>
-                                            <JPDA_ADDRESS>8000</JPDA_ADDRESS>
-                                            <JPDA_TRANSPORT>dt_socket</JPDA_TRANSPORT>
+                                            <CATALINA_OPTS>-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=${misp2.development.debug_port}</CATALINA_OPTS>
                                         </env>
                                         <labels>
                                             <version>${project.version}</version>

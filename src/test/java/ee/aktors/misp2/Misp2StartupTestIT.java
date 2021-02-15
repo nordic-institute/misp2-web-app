@@ -68,9 +68,7 @@ public class Misp2StartupTestIT extends BaseUITest {
         driver.findElement(addPortalButtonSelector).click();
 
         driver.findElement(By.id("savePortal_portalNames_0__description")).sendKeys("Test Portal(ET)");
-        driver.findElement(By.id("savePortal_portalNames_1__description")).sendKeys("Test Portal(EN)");
         driver.findElement(By.id("savePortal_orgNames_0__description")).sendKeys("NIIS");
-        driver.findElement(By.id("savePortal_orgNames_1__description")).sendKeys("NIIS");
         driver.findElement(By.id("savePortal_org_code")).sendKeys("1111");
         driver.findElement(By.id("orgMemberClass-button")).click();
         List<WebElement> orgMemberClassElements = driver.findElements(By.cssSelector("#orgMemberClass-menu > li"));
