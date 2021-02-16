@@ -388,7 +388,7 @@
         <dependency>
             <groupId>com.networknt</groupId>
             <artifactId>openapi-parser</artifactId>
-            <version>1.5.31</version>
+            <version>1.6.30</version>
         </dependency>
         <dependency>
             <groupId>org.seleniumhq.selenium</groupId>
@@ -411,7 +411,7 @@
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>24.0-jre</version>
+            <version>30.1-jre</version>
             <scope>test</scope>
         </dependency>
 
