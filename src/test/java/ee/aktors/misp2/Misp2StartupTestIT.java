@@ -67,8 +67,8 @@ public class Misp2StartupTestIT extends BaseUITest {
         );
         driver.findElement(addPortalButtonSelector).click();
 
-        driver.findElement(By.id("savePortal_portalNames_0__description")).sendKeys("Test Portal(ET)");
-        driver.findElement(By.id("savePortal_orgNames_0__description")).sendKeys("NIIS");
+        driver.findElement(By.id("savePortal_portalNames_0__description")).sendKeys("Test Portal");
+        driver.findElement(By.id("savePortal_orgNames_0__description")).sendKeys("NIIS2");
         driver.findElement(By.id("savePortal_org_code")).sendKeys("1111");
         driver.findElement(By.id("orgMemberClass-button")).click();
         List<WebElement> orgMemberClassElements = driver.findElements(By.cssSelector("#orgMemberClass-menu > li"));
@@ -87,8 +87,6 @@ public class Misp2StartupTestIT extends BaseUITest {
         driver.findElement(By.id("savePortal_btnSubmit")).click();
         List<WebElement> errorBoxElements = driver.findElements(By.className("error"));
         assertTrue("No Error boxes should be found",errorBoxElements.size() == 0 );
-        File screenshot = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(screenshot, new File("resultScreen.png"));
     }
 
     public void AdminLogin() {

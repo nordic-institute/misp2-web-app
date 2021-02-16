@@ -519,7 +519,7 @@
                                     </ports>
                                     <volumes>
                                         <bind>
-                                            ${project.basedir}/src/test/resources/db/initdb.d:/docker-entrypoint-initdb.d
+                                            ${project.basedir}/src/test/resources/db/it-test-initdb.d:/docker-entrypoint-initdb.d
                                         </bind>
                                     </volumes>
                                 </run>

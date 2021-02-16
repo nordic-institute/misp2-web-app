@@ -18,6 +18,7 @@ public class BaseUITest {
   protected boolean serverBeforeConfiguration = false;
   protected String username;
   protected String password;
+  protected String testSSN = "EE49002124277";
 
   @Before
   public void setUp() {
