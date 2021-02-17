@@ -486,6 +486,15 @@
                 <JDBC_HOST>${misp2.it-test.docker_host_ip}</JDBC_HOST>
             </properties>
             <build>
+                <resources>
+                    <resource>
+                        <directory>${project.basedir}/src/test/resources</directory>
+                        <includes>
+                            <include>config.cfg</include>
+                        </includes>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
                 <plugins>
                 <plugin>
                     <groupId>io.fabric8</groupId>
@@ -606,7 +615,42 @@
                 <JDBC_HOST>${misp2.it-test.docker_host_ip}</JDBC_HOST>
             </properties>
             <build>
+                <resources>
+                    <resource>
+                        <directory>${project.basedir}/src/test/resources</directory>
+                        <includes>
+                            <include>config.cfg</include>
+                        </includes>
+                        <filtering>true</filtering>
+                    </resource>
+                </resources>
                 <plugins>
+                    <plugin>
+                        <groupId>org.apache.maven.plugins</groupId>
+                        <artifactId>maven-resources-plugin</artifactId>
+                        <version>3.1.0</version>
+                        <executions>
+                            <execution>
+                                <id>test-version-config</id>
+                                <phase>pre-integration-test</phase>
+                                <goals>
+                                    <goal>copy-resources</goal>
+                                </goals>
+                                <configuration>
+                                    <outputDirectory>${project.build.directory}/${project.build.finalName}/WEB-INF/classes</outputDirectory>
+                                    <resources>
+                                        <resource>
+                                            <directory>src/test/resources</directory>
+                                            <includes>
+                                                <include>config.cfg</include>
+                                            </includes>
+                                            <filtering>true</filtering>
+                                        </resource>
+                                    </resources>
+                                </configuration>
+                            </execution>
+                        </executions>
+                    </plugin>
                     <plugin>
                         <groupId>io.fabric8</groupId>
                         <artifactId>docker-maven-plugin</artifactId>
@@ -663,7 +707,7 @@
                                             <http>
                                                 <url>http://localhost:${misp2.development.misp2_port}/misp2</url>
                                             </http>
-                                            <time>15000</time>
+                                            <time>30000</time>
                                         </wait>
                                         <log>
                                             <enabled>true</enabled>
