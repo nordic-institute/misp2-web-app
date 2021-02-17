@@ -59,10 +59,7 @@ public class Misp2StartupTestIT extends BaseUITest {
         
         createPortal();
         driver.manage().timeouts().implicitlyWait( 5, TimeUnit.SECONDS);
-        List<WebElement> errorBoxElements = driver.findElements(By.className("error"));
-        assertTrue("No Error boxes should be found",errorBoxElements.size() == 0 );
-        
-//        addManager();
+        assertNotNull("Save Successfull -notify should appear", driver.findElement(By.className("ok")));
 
     }
 
