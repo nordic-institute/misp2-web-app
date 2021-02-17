@@ -59,4 +59,18 @@ public class BaseUITest {
       return false;
     }
   }
+
+  public void userLogin() {
+    driver.get(baseUrl+"/login.action");
+    driver.findElement(By.id("formLogin_username")).sendKeys(testSSN);
+    driver.findElement(By.id("formLogin_password")).sendKeys(password);
+    driver.findElement(By.id("formLogin_submit")).click();
+  }
+
+  public void adminLogin() {
+    driver.get(baseUrl+"/admin");
+    driver.findElement(By.id("loginAdmin_username")).sendKeys(username);
+    driver.findElement(By.id("loginAdmin_password")).sendKeys(password);
+    driver.findElement(By.id("loginAdmin_submit")).click();
+  }
 }
