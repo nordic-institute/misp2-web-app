@@ -39,7 +39,6 @@ import ee.aktors.misp2.service.UserService;
 import ee.aktors.misp2.service.crypto.MobileIdService;
 import ee.aktors.misp2.util.*;
 import ee.aktors.misp2.util.mobileid.MobileIdSessionData;
-import ee.sk.digidoc.SignedDoc;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.struts2.ServletActionContext;
@@ -53,6 +52,7 @@ import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.util.encoders.Base64;
 import org.digidoc4j.CertificateValidator;
 import org.digidoc4j.CertificateValidatorBuilder;
+import org.digidoc4j.ddoc.SignedDoc;
 
 
 import javax.security.auth.x500.X500Principal;
