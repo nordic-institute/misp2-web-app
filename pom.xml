@@ -15,7 +15,7 @@
         <log4j2.version>2.14.0</log4j2.version>
         <digidoc4j.version>2.1.1</digidoc4j.version>
         <selenium.version>3.141.59</selenium.version>
-        <commonmark-ext.version>0.17.0</commonmark-ext.version>
+        <commonmark-ext.version>0.17.1</commonmark-ext.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <misp2.it-test.jdbc_port>15432</misp2.it-test.jdbc_port>
         <misp2.it-test.misp2_port>8989</misp2.it-test.misp2_port>
