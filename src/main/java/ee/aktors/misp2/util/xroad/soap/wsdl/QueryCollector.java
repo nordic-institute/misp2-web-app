@@ -28,10 +28,10 @@ package ee.aktors.misp2.util.xroad.soap.wsdl;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.jsoup.helper.StringUtil;
 
 import ee.aktors.misp2.model.Query;
 import ee.aktors.misp2.service.QueryService;
+import org.jsoup.internal.StringUtil;
 
 /**
  * Container for query list, initialized from comma-separated list of {@link Query} entity IDs.

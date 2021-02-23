@@ -238,7 +238,7 @@ public class OpenApiFormBuilder {
     }
 
     private Element appendComment(Element parentNode, String commentText) {
-        return parentNode.appendChild(new Comment(commentText, ""));
+        return parentNode.appendChild(new Comment(commentText));
         
     }
 
