@@ -12,6 +12,8 @@ import org.openqa.selenium.firefox.FirefoxDriver;
 
 public class BaseUITest {
 
+  protected static final String MOBILE_ID_DEMO_NUMBER_1 = "+37200000566";
+  protected static final String MODILE_ID_DEMO_SSN_1 = "60001018800";
   protected WebDriver driver;
   protected String baseUrl;
   protected String ssUrl;
@@ -65,6 +67,13 @@ public class BaseUITest {
     driver.findElement(By.id("formLogin_username")).sendKeys(testSSN);
     driver.findElement(By.id("formLogin_password")).sendKeys(password);
     driver.findElement(By.id("formLogin_submit")).click();
+  }
+
+  public void mobileIDLogin() {
+    driver.get(baseUrl+"/login.action");
+    driver.findElement(By.name("mobileNr")).sendKeys(MOBILE_ID_DEMO_NUMBER_1);
+    driver.findElement(By.name("personalCode")).sendKeys(MODILE_ID_DEMO_SSN_1);
+    driver.findElement(By.id("mobileIDLoginStart_0")).click();
   }
 
   public void adminLogin() {
