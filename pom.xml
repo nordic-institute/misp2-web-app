@@ -639,6 +639,7 @@
                                             <directory>src/test/resources</directory>
                                             <includes>
                                                 <include>config.cfg</include>
+                                                <include>log4j2.xml</include>
                                             </includes>
                                             <filtering>true</filtering>
                                         </resource>
