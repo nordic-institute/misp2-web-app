@@ -1,17 +1,15 @@
 package ee.aktors.misp2;
 
 import org.junit.Test;
-import org.openqa.selenium.By;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import java.util.concurrent.TimeUnit;
+import static junit.framework.TestCase.assertTrue;
 
 public class MobileIdIT extends BaseUITest {
 
-
     @Test
     public void mobileIdLoginSucceeds() throws Exception {
-
         mobileIDLogin();
-
+        driver.manage().timeouts().implicitlyWait( 5, TimeUnit.SECONDS);
+        assertTrue(isTextPresent("No portals assigned to you"));
     }
 }
