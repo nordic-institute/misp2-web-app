@@ -490,6 +490,13 @@
                         </includes>
                         <filtering>true</filtering>
                     </resource>
+                    <resource>
+                        <directory>${project.basedir}/src/test/resources/certs</directory>
+                        <includes>
+                            <include>mobiili_id_trust_store.p12</include>
+                        </includes>
+                        <filtering>false</filtering>
+                    </resource>
                 </resources>
                 <plugins>
                 <plugin>
@@ -642,6 +649,13 @@
                                                 <include>log4j2.xml</include>
                                             </includes>
                                             <filtering>true</filtering>
+                                        </resource>
+                                        <resource>
+                                            <directory>src/test/resources/certs</directory>
+                                            <includes>
+                                                <include>mobiili_id_trust_store.p12</include>
+                                            </includes>
+                                            <filtering>false</filtering>
                                         </resource>
                                     </resources>
                                 </configuration>
