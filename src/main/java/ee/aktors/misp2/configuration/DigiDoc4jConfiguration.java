@@ -104,7 +104,7 @@ public class DigiDoc4jConfiguration implements ExternallyConfigured {
         mobileIdClientBuilder.withTrustStore(trustStore);
 
         midClient =   mobileIdClientBuilder.build();
-        LOG.debug("Launched MidClient with params host:{}, name: {}, trusStore: {}",
+        LOG.debug("Launched MidClient with params host:{}, name: {}, truststore: {}",
                 getMidHost(),
                 getMidPartyName(),
                 certAliases
