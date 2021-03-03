@@ -64,5 +64,32 @@ public class Misp2ServletCheckIT extends BaseUITest {
 
     }
 
+    @Test
+    public void generatePDFCheck() throws Exception {
+        userLogin();
+        URL url = new URL(baseUrl + "/generate-pdf");
+        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+        connection.setRequestProperty("Content-Type","text/html");
+        connection.setDoOutput(true);
+        connection.setRequestMethod("POST");
+        String htmlContent = "<html>\n" +
+                "<head>\n" +
+                "<title>TEst</title>\n" +
+                "</head>\n" +
+                "<body>\n" +
+                "\n" +
+                "TEsting html'''''äöäääää\n" +
+                "\n" +
+                "</body>\n" +
+                "</html>";
+
+
+        assertEquals("misp2 /generate-pdf endpoint should reply status 200",
+                HttpStatus.OK.value(), connection.getResponseCode()
+        );
+        assertEquals("application/pdf", connection.getContentType());
+
+    }
+
     // TODO: echo
 }
