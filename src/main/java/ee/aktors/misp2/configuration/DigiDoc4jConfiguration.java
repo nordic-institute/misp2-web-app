@@ -41,17 +41,15 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
 import java.util.Objects;
 
 public class DigiDoc4jConfiguration implements ExternallyConfigured {
 
     private static final Logger LOG = LogManager.getLogger(DigiDoc4jConfiguration.class);
 
-    private Configuration digiDoc4jConfiguration;
+    private final Configuration digiDoc4jConfiguration;
 
-    private MidClient midClient;
+    private final MidClient midClient;
 
     private static final String PARAM_TEST_MODE = "digidoc4j.test";
     private static final String PARAM_OCSP_SOURCE = "digidoc4j.ocsp";
@@ -78,14 +76,14 @@ public class DigiDoc4jConfiguration implements ExternallyConfigured {
         digiDoc4jConfiguration.setOcspSource(getOcspSource());
         digiDoc4jConfiguration.setTrustedTerritories(getTrustedTerritories());
         LOG.debug("Launched DigiDoc4j in {} mode", digiDoc4jMode);
-        String certAliases = "no Trust Store loading failed!";
+        String certAliases;
 
          MidClient.MobileIdClientBuilder mobileIdClientBuilder= MidClient.newBuilder()
             .withHostUrl(getMidHost())
             .withRelyingPartyUUID(getMidPartyUuid())
             .withRelyingPartyName(getMidPartyName())
             .withLongPollingTimeoutSeconds(getMidPollingTimeoutSeconds());
-        KeyStore trustStore = null;
+        KeyStore trustStore;
         try (InputStream is = DigiDoc4jConfiguration.class.getResourceAsStream(getParamMidTrustStorePath())) {
             trustStore = KeyStore.getInstance("PKCS12");
             trustStore.load(is, getParamMidTrustStorePassword().toCharArray());
