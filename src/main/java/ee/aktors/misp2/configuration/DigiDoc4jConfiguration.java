@@ -85,9 +85,8 @@ public class DigiDoc4jConfiguration implements ExternallyConfigured {
             .withRelyingPartyUUID(getMidPartyUuid())
             .withRelyingPartyName(getMidPartyName())
             .withLongPollingTimeoutSeconds(getMidPollingTimeoutSeconds());
-        InputStream is = DigiDoc4jConfiguration.class.getResourceAsStream(getParamMidTrustStorePath());
         KeyStore trustStore = null;
-        try {
+        try (InputStream is = DigiDoc4jConfiguration.class.getResourceAsStream(getParamMidTrustStorePath())) {
             trustStore = KeyStore.getInstance("PKCS12");
             trustStore.load(is, getParamMidTrustStorePassword().toCharArray());
             certAliases = Collections.list(trustStore.aliases()).stream()
