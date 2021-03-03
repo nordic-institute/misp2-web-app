@@ -94,7 +94,7 @@ public class MobileIdService {
 					.fetchFinalAuthenticationSessionStatus(response.getSessionID());
 			MidAuthentication authentication = midClient.createMobileIdAuthentication(sessionStatus, authenticationHash);
 
-			MidAuthenticationResponseValidator validator = new MidAuthenticationResponseValidator();
+			MidAuthenticationResponseValidator validator = new MidAuthenticationResponseValidator(midClient);
 			authenticationResult = validator.validate(authentication);
 
 		}
