@@ -250,21 +250,11 @@
     	<servlet-name>EchoServlet</servlet-name>
     	<servlet-class>ee.aktors.misp2.servlet.EchoServlet</servlet-class>
     </servlet>
-    <servlet>
-    	<description>
-    	</description>
-    	<display-name>DigiDocServlet</display-name>
-    	<servlet-name>DigiDocServlet</servlet-name>
-    	<servlet-class>ee.aktors.misp2.servlet.DigiDocServlet</servlet-class>
-    </servlet>
     <servlet-mapping>
     	<servlet-name>EchoServlet</servlet-name>
     	<url-pattern>/echo</url-pattern>
     </servlet-mapping>
-    <servlet-mapping>
-    	<servlet-name>DigiDocServlet</servlet-name>
-    	<url-pattern>/parseDigiDoc</url-pattern>
-    </servlet-mapping>
+
     <!-- 
     	Mediator servlet acts as a SOAP-proxy between client and security server.
     	It logs query, handles attachments and overwrites client and user headers.

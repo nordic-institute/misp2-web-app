@@ -64,40 +64,6 @@ public class Misp2ServletCheckIT extends BaseUITest {
 
     }
 
-    // TODO: echo
-
-    @Test
-    public void parseDigiDocCheck() throws Exception {
-        userLogin();
-        URL url = new URL(baseUrl + "/parseDigiDoc");
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        // TODO: why the content-type does not get through to DigiDocServlet?
-        connection.setRequestProperty("Content-Type","text/xml");
-        connection.setRequestMethod("POST");
-        connection.setDoOutput(true);
-
-
-        OutputStreamWriter writer = new OutputStreamWriter(
-                connection.getOutputStream()
-        );
-        writer.write("<?xml version=\"1.0\" encoding=\"UTF-8\" ?>  " +
-                "<SignedDoc format=\"DIGIDOC-XML\" version=\"1.3\"             " +
-                "xmlns=\"http://www.sk.ee/DigiDoc/v1.3.0#\">   " +
-                "<DataFile>My data file</DataFile>" +
-                "<Signature /> " +
-                "</SignedDoc> ");
-        writer.flush();
-        writer.close();
-
-        assertEquals("misp2 /parseDigiDoc endpoint should reply status 200",
-                HttpStatus.OK.value(), connection.getResponseCode()
-        );
-        assertEquals("text/plain", connection.getContentType());
-
-    }
-
-    // TODO: mediator
-
     @Test
     public void generatePDFCheck() throws Exception {
         userLogin();
@@ -125,4 +91,5 @@ public class Misp2ServletCheckIT extends BaseUITest {
 
     }
 
+    // TODO: echo
 }
