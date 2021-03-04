@@ -58,17 +58,17 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.logging.log4j.LogManager;
+import org.docx4j.org.xhtmlrenderer.layout.SharedContext;
+import org.docx4j.org.xhtmlrenderer.pdf.ITextFSImage;
+import org.docx4j.org.xhtmlrenderer.pdf.ITextOutputDevice;
+import org.docx4j.org.xhtmlrenderer.pdf.ITextRenderer;
+import org.docx4j.org.xhtmlrenderer.pdf.PDFAsImage;
+import org.docx4j.org.xhtmlrenderer.resource.ImageResource;
+import org.docx4j.org.xhtmlrenderer.swing.NaiveUserAgent;
 import org.htmlcleaner.DomSerializer;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
 import org.w3c.dom.Document;
-import org.xhtmlrenderer.layout.SharedContext;
-import org.xhtmlrenderer.pdf.ITextFSImage;
-import org.xhtmlrenderer.pdf.ITextOutputDevice;
-import org.xhtmlrenderer.pdf.ITextRenderer;
-import org.xhtmlrenderer.pdf.PDFAsImage;
-import org.xhtmlrenderer.resource.ImageResource;
-import org.xhtmlrenderer.swing.NaiveUserAgent;
 
 /**
  * Pdf servlet
@@ -201,10 +201,10 @@ public class PDFServlet extends HttpServlet implements ExternallyConfigured {
                         _imageCache.put(uri, resource);
                     } catch (IOException e) {
                         e.printStackTrace();
-                    } catch (BadElementException e) {
-                        e.printStackTrace();
-                    } catch (URISyntaxException e) {
+                    }  catch (URISyntaxException e) {
                         // TODO Auto-generated catch block
+                        e.printStackTrace();
+                    } catch (BadElementException e) {
                         e.printStackTrace();
                     }
                 }

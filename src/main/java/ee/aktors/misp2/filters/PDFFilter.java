@@ -81,6 +81,13 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.docx4j.org.xhtmlrenderer.layout.SharedContext;
+import org.docx4j.org.xhtmlrenderer.pdf.ITextFSImage;
+import org.docx4j.org.xhtmlrenderer.pdf.ITextOutputDevice;
+import org.docx4j.org.xhtmlrenderer.pdf.ITextRenderer;
+import org.docx4j.org.xhtmlrenderer.pdf.PDFAsImage;
+import org.docx4j.org.xhtmlrenderer.resource.ImageResource;
+import org.docx4j.org.xhtmlrenderer.swing.NaiveUserAgent;
 import org.htmlcleaner.DomSerializer;
 import org.htmlcleaner.HtmlCleaner;
 import org.htmlcleaner.TagNode;
@@ -90,13 +97,6 @@ import org.jsoup.select.Elements;
 import org.w3c.dom.Document;
 import org.w3c.dom.ls.DOMImplementationLS;
 import org.w3c.dom.ls.LSSerializer;
-import org.xhtmlrenderer.layout.SharedContext;
-import org.xhtmlrenderer.pdf.ITextFSImage;
-import org.xhtmlrenderer.pdf.ITextOutputDevice;
-import org.xhtmlrenderer.pdf.ITextRenderer;
-import org.xhtmlrenderer.pdf.PDFAsImage;
-import org.xhtmlrenderer.resource.ImageResource;
-import org.xhtmlrenderer.swing.NaiveUserAgent;
 
 /**
  * filter for preprocessing XHTML with JSoup and generating PDF using XHTMLRenderer library

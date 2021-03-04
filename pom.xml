@@ -293,13 +293,6 @@
             <systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/orbeon-xforms-filter.jar</systemPath>
         </dependency>
         <dependency>
-            <groupId>core-renderer</groupId>
-            <artifactId>core-renderer</artifactId>
-            <scope>system</scope>
-            <version>1.0</version>
-            <systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/core-renderer.jar</systemPath>
-        </dependency>
-        <dependency>
             <groupId>iaikPkcs11Wrapper</groupId>
             <artifactId>iaikPkcs11Wrapper</artifactId>
             <scope>system</scope>
@@ -397,6 +390,11 @@
             <artifactId>guava</artifactId>
             <version>30.1-jre</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.docx4j</groupId>
+            <artifactId>xhtmlrenderer</artifactId><!--  supports xhtml import -->
+            <version>3.0.0</version>
         </dependency>
 
     </dependencies>
