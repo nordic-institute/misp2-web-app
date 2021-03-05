@@ -55,25 +55,16 @@ import java.net.URLConnection;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.text.Normalizer;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 import javax.mail.MessagingException;
 import javax.mail.internet.InternetAddress;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSession;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterConfig;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletOutputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
@@ -124,8 +115,7 @@ public class PDFFilter extends GetText implements Filter {
      * @see Filter#doFilter(ServletRequest, ServletResponse, FilterChain)
      */
     @Override
-    public void doFilter(ServletRequest req, ServletResponse resp, FilterChain filterChain) throws IOException,
-            ServletException {
+    public void doFilter(ServletRequest req, ServletResponse resp, FilterChain filterChain) throws IOException {
         HttpServletRequest request = (HttpServletRequest) req;
         HttpServletResponse response = (HttpServletResponse) resp;
         try {
@@ -188,7 +178,7 @@ public class PDFFilter extends GetText implements Filter {
                 String html = doc.html();
                 LOGGER.trace("PDF creation: 2. HTML after jsoup filtering:" + html);
 
-                ByteArrayInputStream input = new ByteArrayInputStream(html.getBytes("UTF-8"));
+                ByteArrayInputStream input = new ByteArrayInputStream(html.getBytes(StandardCharsets.UTF_8));
                 ByteArrayOutputStream output = new ByteArrayOutputStream();
                 // HTML to proper XHTML (IE innerHTML messes up xhtml)
                 HtmlCleaner cleaner = new HtmlCleaner();
@@ -206,12 +196,6 @@ public class PDFFilter extends GetText implements Filter {
                 queryDesc = Normalizer.normalize(queryDesc, Normalizer.Form.NFD).replaceAll("[^\\p{ASCII}]", "");
 
                 String pdfString = new String(output.toByteArray(), Charset.defaultCharset());
-                // logger.trace("PDF creation: 4. PDF content:" + pdfString);
-                /*
-                if (LOGGER.getLevel() == Level.TRACE) {
-                    ;
-                }
-                */
                 if (pdfString.contains("<rdf:RDF"))
                     LOGGER.trace("PDF creation: 4.1. <rdf:RDF detected which could be a sign of failure");
                 if (!("true".equals(sendPDF))) {
@@ -235,7 +219,7 @@ public class PDFFilter extends GetText implements Filter {
                     LOGGER.debug("You can find the pdf file from: " + file.getPath());
                     fos.close();
                     // email encrypted file as attachement
-                    if ("true".equals(sendPDF) && !(mail.isEmpty())) {
+                    if (!mail.isEmpty()) {
                         LOGGER.info("sending PDF by mail to " + mail);
                         mailSender = new MailSender();
                         sendFileToMail(file, mail, receiver, queryDesc);
@@ -289,7 +273,7 @@ public class PDFFilter extends GetText implements Filter {
         String queryString = req.getQueryString(); // d=789
 
         // Reconstruct original requesting URL
-        StringBuffer url = new StringBuffer();
+        StringBuilder url = new StringBuilder();
         url.append(scheme).append("://").append(serverName);
 
         if (serverPort != HTTP_PORT && serverPort != SSL_PORT) {
@@ -337,7 +321,7 @@ public class PDFFilter extends GetText implements Filter {
      *
      */
     public class MISPITextUserAgent extends NaiveUserAgent {
-        HttpServletRequest req;
+        final HttpServletRequest req;
         private ITextOutputDevice innerOutputDevice;
         private SharedContext innerSharedContext;
 
@@ -355,7 +339,7 @@ public class PDFFilter extends GetText implements Filter {
         @SuppressWarnings("unchecked")
         @Override
         public ImageResource getImageResource(String uri) {
-            ImageResource resource = null;
+            ImageResource resource;
             uri = resolveURI(uri);
             resource = (ImageResource) _imageCache.get(uri);
             if (resource == null) {
@@ -376,11 +360,7 @@ public class PDFFilter extends GetText implements Filter {
                             resource = new ImageResource(url.getPath(), new ITextFSImage(image));
                         }
                         _imageCache.put(uri, resource);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (BadElementException e) {
-                        e.printStackTrace();
-                    } catch (URISyntaxException e) {
+                    } catch (IOException | BadElementException | URISyntaxException e) {
                         e.printStackTrace();
                     }
                 }
@@ -399,7 +379,7 @@ public class PDFFilter extends GetText implements Filter {
                 Map<String, Object> session = ActionContext.getContext().getSession();
                 Portal portal = (Portal) session.get(Const.SESSION_PORTAL);
                 if (portal.getXroadVersionAsInt() == XROAD_VERSION.V4.getIndex()
-                        && new URL(uri).getProtocol().toUpperCase().equals("HTTPS")) {
+                        && new URL(uri).getProtocol().equalsIgnoreCase("HTTPS")) {
                     HttpsURLConnection.setDefaultHostnameVerifier(new NullHostnameVerifier());
                 }
                 URLConnection uc = new URL(uri).openConnection();
@@ -457,15 +437,15 @@ public class PDFFilter extends GetText implements Filter {
     private class BufferedServletResponse extends HttpServletResponseWrapper {
 
         private StreamWrapper output;
-        private ByteArrayOutputStream baos;
+        private final ByteArrayOutputStream baos;
         private PrintWriter writer;
-        private HashMap<String, String> headers;
+        private final HashMap<String, String> headers;
         private boolean committed;
 
         public BufferedServletResponse(HttpServletResponse originalResponse) {
             super(originalResponse);
             baos = new ByteArrayOutputStream();
-            headers = new HashMap<String, String>();
+            headers = new HashMap<>();
         }
 
         public ServletOutputStream getOutputStream() throws IOException {
@@ -497,8 +477,8 @@ public class PDFFilter extends GetText implements Filter {
         }
     }
 
-    private class StreamWrapper extends ServletOutputStream {
-        private OutputStream os;
+    private static class StreamWrapper extends ServletOutputStream {
+        private final OutputStream os;
 
         StreamWrapper(OutputStream os) {
             this.os = os;
@@ -507,13 +487,22 @@ public class PDFFilter extends GetText implements Filter {
         public void write(int b) throws IOException {
             os.write(b);
         }
-         /*
-        // @Override
+
+        @Override
         public boolean isReady() {
-            // TODO Auto-generated method stub
             return true;
         }
-        */
+
+        @Override
+        public void setWriteListener(WriteListener writeListener) {
+            Objects.requireNonNull(writeListener);
+            try {
+                writeListener.onWritePossible();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
     }
     @Override
     public void init(FilterConfig arg0) throws ServletException {
