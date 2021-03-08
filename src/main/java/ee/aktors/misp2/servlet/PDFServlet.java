@@ -172,7 +172,7 @@ public class PDFServlet extends HttpServlet implements ExternallyConfigured {
 
         /**
          *  (non-Javadoc)
-         * @see org.xhtmlrenderer.swing.NaiveUserAgent#getImageResource(java.lang.String)
+         * @see org.docx4j.org.xhtmlrenderer.swing.NaiveUserAgent#getImageResource(java.lang.String)
          * @param uri uri
          * @return image resource
          */
