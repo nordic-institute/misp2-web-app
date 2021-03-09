@@ -67,7 +67,6 @@ public class Misp2ServletCheckIT extends BaseUITest {
 
     }
 
-    @Ignore("Test is not ready yet.")
     @Test
     public void generatePDFCheck() throws Exception {
         final Integer MINIMUM_ACCEPTABLE_PDF_LENGTH = 2000;
