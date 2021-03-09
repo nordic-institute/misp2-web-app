@@ -12,6 +12,7 @@ import java.net.URL;
 import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class Misp2ServletCheckIT extends BaseUITest {
 
@@ -69,6 +70,8 @@ public class Misp2ServletCheckIT extends BaseUITest {
     @Ignore("Test is not ready yet.")
     @Test
     public void generatePDFCheck() throws Exception {
+        final Integer MINIMUM_ACCEPTABLE_PDF_LENGTH = 2000;
+        final String TEST_FILE_PATH = "xforms/aktorstest-complex-xroad-v6.xhtml";
         userLogin();
         StringBuilder urlBuilder = new StringBuilder(baseUrl);
         urlBuilder.append("/generate-pdf");
@@ -79,9 +82,9 @@ public class Misp2ServletCheckIT extends BaseUITest {
         connection.setDoInput(true);
         connection.setRequestMethod("POST");
         try (OutputStream outputStream = connection.getOutputStream();
-             InputStream testHtmlFileStream = this.getClass().getResourceAsStream("/xforms/aktorstest-complex-xroad-v6.xhtml")
+             InputStream testHtmlFileStream = this.getClass().getResourceAsStream("/"+TEST_FILE_PATH)
         ) {
-            Objects.requireNonNull(testHtmlFileStream,"xforms/aktorstest-complex-xroad-v6.xhtml could not be opened");
+            Objects.requireNonNull(testHtmlFileStream, TEST_FILE_PATH + " could not be opened!");
             IOUtils.copy(testHtmlFileStream,outputStream);
         }
 
@@ -89,6 +92,9 @@ public class Misp2ServletCheckIT extends BaseUITest {
                 HttpStatus.OK.value(), connection.getResponseCode()
         );
         assertEquals("application/pdf", connection.getContentType());
+        final Integer pdfLength = connection.getContentLength();
+        assertTrue("Too small pdf file generated, only " + pdfLength.toString() + " long",
+                pdfLength > MINIMUM_ACCEPTABLE_PDF_LENGTH);
 
     }
 
