@@ -290,14 +290,14 @@
             <artifactId>orbeon</artifactId>
             <scope>system</scope>
             <version>1.0</version>
-            <systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/orbeon-xforms-filter.jar</systemPath>
-        </dependency>
-        <dependency>
-            <groupId>core-renderer</groupId>
-            <artifactId>core-renderer</artifactId>
-            <scope>system</scope>
-            <version>1.0</version>
-            <systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/core-renderer.jar</systemPath>
+			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/orbeon-xforms-filter.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>core-renderer</groupId>
+			<artifactId>core-renderer</artifactId>
+			<scope>system</scope>
+			<version>1.0</version>
+			<systemPath>${project.basedir}/src/main/webapp/WEB-INF/lib/core-renderer.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>iaikPkcs11Wrapper</groupId>
@@ -398,7 +398,6 @@
             <version>30.1-jre</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 
     <build>

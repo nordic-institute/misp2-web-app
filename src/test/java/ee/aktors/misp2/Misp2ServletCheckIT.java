@@ -1,15 +1,18 @@
 package ee.aktors.misp2;
 
 import org.apache.commons.io.IOUtils;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.http.HttpStatus;
 
 
-import java.io.OutputStreamWriter;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.util.Objects;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class Misp2ServletCheckIT extends BaseUITest {
 
@@ -66,28 +69,31 @@ public class Misp2ServletCheckIT extends BaseUITest {
 
     @Test
     public void generatePDFCheck() throws Exception {
+        final Integer MINIMUM_ACCEPTABLE_PDF_LENGTH = 2000;
+        final String TEST_FILE_PATH = "xforms/aktorstest-complex-xroad-v6.xhtml";
         userLogin();
-        URL url = new URL(baseUrl + "/generate-pdf");
+        StringBuilder urlBuilder = new StringBuilder(baseUrl);
+        urlBuilder.append("/generate-pdf");
+        URL url = new URL(urlBuilder.toString() );
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestProperty("Content-Type","text/html");
+        connection.setRequestProperty("Content-Type","text/xhtml");
         connection.setDoOutput(true);
+        connection.setDoInput(true);
         connection.setRequestMethod("POST");
-        String htmlContent = "<html>\n" +
-                "<head>\n" +
-                "<title>TEst</title>\n" +
-                "</head>\n" +
-                "<body>\n" +
-                "\n" +
-                "TEsting html'''''äöäääää\n" +
-                "\n" +
-                "</body>\n" +
-                "</html>";
-
+        try (OutputStream outputStream = connection.getOutputStream();
+             InputStream testHtmlFileStream = this.getClass().getResourceAsStream("/"+TEST_FILE_PATH)
+        ) {
+            Objects.requireNonNull(testHtmlFileStream, TEST_FILE_PATH + " could not be opened!");
+            IOUtils.copy(testHtmlFileStream,outputStream);
+        }
 
         assertEquals("misp2 /generate-pdf endpoint should reply status 200",
                 HttpStatus.OK.value(), connection.getResponseCode()
         );
         assertEquals("application/pdf", connection.getContentType());
+        final Integer pdfLength = connection.getContentLength();
+        assertTrue("Too small pdf file generated, only " + pdfLength.toString() + " long",
+                pdfLength > MINIMUM_ACCEPTABLE_PDF_LENGTH);
 
     }
 

@@ -89,10 +89,10 @@ public class PDFServlet extends HttpServlet implements ExternallyConfigured {
         processRequest(request, response);
     }
 
-    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException,
+    protected void processRequest(HttpServletRequest request, HttpServletResponse response) throws
             IOException, ClassCastException {
         String filename = request.getParameter("filename");
-        if (filename == null || filename != null && filename.isEmpty()) {
+        if (filename == null || filename.isEmpty()) {
             filename = "paring";
         }
         try {
@@ -158,7 +158,7 @@ public class PDFServlet extends HttpServlet implements ExternallyConfigured {
      * scales it to the PDF needs prototype: org.xhtmlrenderer.pdf.ITextUserAgent
      *
      */
-    public class MISPITextUserAgent extends NaiveUserAgent {
+    public static class MISPITextUserAgent extends NaiveUserAgent {
         HttpServletRequest req;
         private ITextOutputDevice textOutputDevice;
         private SharedContext aSharedContext;
@@ -178,7 +178,7 @@ public class PDFServlet extends HttpServlet implements ExternallyConfigured {
          */
         @SuppressWarnings("unchecked")
         public ImageResource getImageResource(String uri) {
-            ImageResource resource = null;
+            ImageResource resource;
             uri = resolveURI(uri);
             resource = (ImageResource) _imageCache.get(uri);
             if (resource == null) {
@@ -199,12 +199,7 @@ public class PDFServlet extends HttpServlet implements ExternallyConfigured {
                             resource = new ImageResource(url.getPath(), new ITextFSImage(image));
                         }
                         _imageCache.put(uri, resource);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } catch (BadElementException e) {
-                        e.printStackTrace();
-                    } catch (URISyntaxException e) {
-                        // TODO Auto-generated catch block
+                    } catch (IOException | URISyntaxException | BadElementException e) {
                         e.printStackTrace();
                     }
                 }
@@ -223,7 +218,7 @@ public class PDFServlet extends HttpServlet implements ExternallyConfigured {
                 Portal portal = (Portal) session.getAttribute(Const.SESSION_PORTAL);
 
                 if (portal.getXroadVersionAsInt() == Const.XROAD_VERSION.V4.getIndex()
-                        && new URL(uri).getProtocol().toUpperCase().equals("HTTPS")) {
+                        && new URL(uri).getProtocol().equalsIgnoreCase("HTTPS")) {
                     HttpsURLConnection.setDefaultHostnameVerifier(new NullHostnameVerifier());
                 }
                 URLConnection uc = new URL(uri).openConnection();
