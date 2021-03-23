@@ -640,7 +640,7 @@ public class QueryAction extends QuickTipAction {
                         setQueryUUID(UUID.randomUUID().toString());
                         setQueryId(getQueryUUID());
                         File runXForms = new File(ServletActionContext.getServletContext().getRealPath("/")
-                                + "/../src/main/webapp/xforms-jsp/runq_" + getQuery().getName() + "_" + getQueryId() + ".xhtml");
+                                + "/xforms-jsp/runq_" + getQuery().getName() + "_" + getQueryId() + ".xhtml");
                         // create temporary file for xforms
                         if (runXForms.exists()) {
                             runXForms.delete();
