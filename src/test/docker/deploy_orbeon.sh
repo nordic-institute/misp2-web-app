@@ -10,11 +10,9 @@ if [[ ! -e orbeon.war ]] ; then
   cp --verbose ../../../../misp2-install-source/xtee-misp2-orbeon/war/orbeon.war . || (echo "can't find orbeon war" ; exit 1)
 fi
 echo "copy orbeon war to ${TOMCAT_WEB}/"
-# shellcheck disable=SC2086
-docker cp  orbeon.war ${CONTAINER}:${TOMCAT_WEB}/
+docker cp  orbeon.war "${CONTAINER}":${TOMCAT_WEB}/
 echo "waiting for orbeon war to be deployed"
-# shellcheck disable=SC2086
-while ! (docker exec ${CONTAINER} bash -c "ls ${TOMCAT_WEB}/orbeon/" > /dev/null 2>&1) ; do
+while ! (docker exec "${CONTAINER}" bash -c "ls ${TOMCAT_WEB}/orbeon/" > /dev/null 2>&1) ; do
     sleep 1
     echo -n  "."
 done
@@ -24,5 +22,3 @@ echo "copying  $(ls -m orbeon/) to ${ORBEON_CONFIG}"
 # shellcheck disable=SC2086
 docker cp  orbeon/ ${CONTAINER}:${ORBEON_CONFIG}
 
-#echo -e "contents of ${ORBEON_CONFIG}"
-#docker exec ${CONTAINER} bash -c "ls -m ${ORBEON_CONFIG}"
