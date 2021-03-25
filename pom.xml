@@ -582,6 +582,28 @@
                         </execution>
                     </executions>
                 </plugin>
+                    <plugin>
+                        <groupId>org.codehaus.mojo</groupId>
+                        <artifactId>exec-maven-plugin</artifactId>
+                        <version>1.6.0</version>
+                        <executions>
+                            <execution>
+                                <id>deploy orbeon</id>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <phase>pre-integration-test</phase>
+                            </execution>
+                        </executions>
+                        <configuration>
+                            <executable>${project.basedir}/src/test/docker/deploy_orbeon.sh</executable>
+                            <arguments>
+                                <argument>tomcat-it-service</argument>
+                            </arguments>
+                            <useMavenLogger>true</useMavenLogger>
+                            <workingDirectory>${project.basedir}/src/test/docker/</workingDirectory>
+                        </configuration>
+                    </plugin>
 
                 <plugin>
                     <artifactId>maven-failsafe-plugin</artifactId>
