@@ -87,7 +87,7 @@ public class HelpAction extends ActionSupport {
     
     private String getUserGuideFilePath(String lang, String targetDemographic, ServletContext servletContext) {
         return servletContext.getRealPath(
-                "/../src/main/webapp/pages/user_guide/" + targetDemographic + "/" + lang + "/kasutusjuhend.pdf");
+                "/pages/user_guide/" + targetDemographic + "/" + lang + "/kasutusjuhend.pdf");
     }
 
     /**

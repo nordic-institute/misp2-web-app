@@ -63,7 +63,7 @@ public class LoginCheckFilter implements Filter {
         HttpServletRequest request = (HttpServletRequest)req;
         HttpServletResponse response = (HttpServletResponse)resp;
         String servletPath = request.getServletPath();
-        if (servletPath.startsWith("/../src/main/webapp/xforms-jsp")
+        if (servletPath.startsWith("/xforms-jsp")
             || servletPath.startsWith("/orbeon")) {
             HttpSession session = request.getSession();
 
