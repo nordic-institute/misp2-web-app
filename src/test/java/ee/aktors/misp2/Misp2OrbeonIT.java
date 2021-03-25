@@ -67,9 +67,6 @@ public class Misp2OrbeonIT extends BaseUITest {
                 "Result box after Service Froms Update should appear",
                 textAppearsToElement(refreshedNotifySelector, "XForms refreshed")
         );
-        File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
-        FileUtils.copyFile(scrFile, new File("/tmp/contentboxes.png"));
-
 
         // Run the query
         Optional<WebElement> runLink = driver.findElements(By.tagName("tr")).stream().filter(
