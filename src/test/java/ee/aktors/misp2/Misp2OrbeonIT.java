@@ -8,18 +8,13 @@ import org.openqa.selenium.By;
 import org.openqa.selenium.OutputType;
 import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.pagefactory.ByChained;
 
-import javax.persistence.criteria.CriteriaBuilder;
 import java.io.File;
-import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class Misp2OrbeonIT extends BaseUITest {
@@ -68,7 +63,10 @@ public class Misp2OrbeonIT extends BaseUITest {
                 By.tagName("h3")
         );
 
-        assertTrue("Result box after Service Froms Update should appear", textAppearsToElement(refreshedNotifySelector, "XForms refreshed"));
+        assertTrue(
+                "Result box after Service Froms Update should appear",
+                textAppearsToElement(refreshedNotifySelector, "XForms refreshed")
+        );
         File scrFile = ((TakesScreenshot) driver).getScreenshotAs(OutputType.FILE);
         FileUtils.copyFile(scrFile, new File("/tmp/contentboxes.png"));
 
@@ -89,17 +87,15 @@ public class Misp2OrbeonIT extends BaseUITest {
     private boolean textAppearsToElement(By elementSelector, String text) {
         Objects.requireNonNull(elementSelector);
         Objects.requireNonNull(text);
-        final Integer MILLISECONDS_TO_SLEEP = 3000;
+        final int MILLISECONDS_TO_SLEEP = 3000;
         for (int round = 0, maxWaitingRounds = 10; round < maxWaitingRounds; round++) {
             if (driver.findElements(elementSelector).stream()
-                    .filter(webElement -> webElement.getText().toLowerCase().contains(text.toLowerCase()))
-                    .findFirst().isPresent()) {
+                    .anyMatch(webElement -> webElement.getText().toLowerCase().contains(text.toLowerCase()))) {
                 return true;
             }
             try {
                 Thread.sleep(MILLISECONDS_TO_SLEEP);
-            } catch (InterruptedException e) {
-                continue;
+            } catch (InterruptedException ignored) {
             }
         }
         return false;
