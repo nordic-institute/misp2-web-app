@@ -14,6 +14,7 @@ public class BaseUITest {
 
   protected static final String MOBILE_ID_DEMO_NUMBER_1 = "+37200000566";
   protected static final String MODILE_ID_DEMO_SSN_1 = "60001018800";
+  protected static final Long defaultImplicitWaitTimeout = 30L;
   protected WebDriver driver;
   protected String baseUrl;
   protected String ssUrl;
@@ -40,7 +41,7 @@ public class BaseUITest {
     password = Objects.requireNonNull(System.getProperty("misp2.it-test.password"),"misp2.it-test.password property needed");
     serverBeforeConfiguration = Boolean
         .parseBoolean(System.getProperty("server.before.configuration"));
-    driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS );
+    driver.manage().timeouts().implicitlyWait(defaultImplicitWaitTimeout, TimeUnit.SECONDS );
   }
 
   @After
