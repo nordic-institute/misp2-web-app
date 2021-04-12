@@ -320,11 +320,6 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>backport-util-concurrent</groupId>
-            <artifactId>backport-util-concurrent</artifactId>
-            <version>3.1</version>
-        </dependency>
-        <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>javax.mail-api</artifactId>
             <version>1.6.2</version>
@@ -600,7 +595,6 @@
                             <arguments>
                                 <argument>tomcat-it-service</argument>
                             </arguments>
-                            <useMavenLogger>true</useMavenLogger>
                             <workingDirectory>${project.basedir}/src/test/docker/</workingDirectory>
                         </configuration>
                     </plugin>

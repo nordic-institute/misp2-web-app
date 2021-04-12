@@ -25,16 +25,10 @@
 
 package ee.aktors.misp2.beans;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import com.opensymphony.xwork2.ActionContext;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import ee.aktors.misp2.model.Org;
 import ee.aktors.misp2.model.OrgPerson;
 import ee.aktors.misp2.model.Portal;

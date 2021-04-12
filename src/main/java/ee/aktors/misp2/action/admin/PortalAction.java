@@ -25,11 +25,7 @@
 
 package ee.aktors.misp2.action.admin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
@@ -41,7 +37,6 @@ import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.Validateable;
 
-import edu.emory.mathcs.backport.java.util.Collections;
 import ee.aktors.misp2.action.SecureLoggedAction;
 import ee.aktors.misp2.httpMethodChecker.HTTPMethod;
 import ee.aktors.misp2.httpMethodChecker.HTTPMethods;
@@ -792,7 +787,7 @@ public class PortalAction extends SecureLoggedAction implements Validateable {
 
     /**
      * Set translations of end user license agreement associated with the portal.
-     * @param list of PortalEula entities
+     * @param  portalEulas entities
      */
     public void setPortalEulas(List<PortalEula> portalEulas) {
         this.portalEulas = portalEulas;
