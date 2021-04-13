@@ -212,7 +212,7 @@ public class SOAPUtils {
             String filePath = StringUtils.substring(fileLocation, 0, fileLocation.indexOf("?"));
             LOGGER.debug("read as hexBinary from file: " + filePath);
             Reader r = new FileReader(new File(filePath));
-            String hexContent = toHex(IOUtils.toByteArray(r));
+            String hexContent = toHex(IOUtils.toByteArray(r, StandardCharsets.UTF_8));
             LOGGER.trace(hexContent);
             r.close();
             if (element.getAttribute("attachmentInSoapBody") != null
