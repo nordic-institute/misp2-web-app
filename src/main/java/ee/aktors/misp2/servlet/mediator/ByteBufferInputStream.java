@@ -73,7 +73,7 @@ public class ByteBufferInputStream extends InputStream implements ByteCounter {
     }
 
     @Override
-    public int read(byte[] b) throws IOException {
+    public int read(@NotNull byte[] b) throws IOException {
         int i = in.read(b);
         addToBuffer(b, 0, i);
         //logger.debug(" Read1! " + i + " ");
@@ -82,7 +82,7 @@ public class ByteBufferInputStream extends InputStream implements ByteCounter {
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
+    public int read(@NotNull byte[] b, int off, int len) throws IOException {
         int i = in.read(b, off, len);
         addToBuffer(b, off, i);
         // logger.debug(" Read2! " + i + " ");
@@ -147,7 +147,7 @@ public class ByteBufferInputStream extends InputStream implements ByteCounter {
      */
     public void appendBuffer(StringWriter sw, String label) {
         if (byteBuffer.size() > 0) {
-            sw.append("\n " + label + ": \n");
+            sw.append("\n ").append(label).append(": \n");
             sw.append(bufferToString());
         }
     }
