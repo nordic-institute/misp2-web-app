@@ -148,7 +148,7 @@ public class UnhandledExceptionHandlerFilter extends OncePerRequestFilter {
         @Override
         public void sendError(int statusCode, String statusMessage) throws IOException {
             // do NOT use sendError() otherwise per servlet spec the container will send an html error page
-            this.setStatus(statusCode, statusMessage);
+            this.sendError(statusCode, statusMessage);
             handleException(request, response, statusCode, new RuntimeException(statusMessage));
         }
 
@@ -162,15 +162,5 @@ public class UnhandledExceptionHandlerFilter extends OncePerRequestFilter {
             super.setStatus(statusCode);
         }
 
-        /**
-         * Set status code to given value along with status message.
-         * @param statusCode HTTP status code
-         * @param statusMessage HTTP status message
-         */
-        @Override
-        public void setStatus(int statusCode, String statusMessage) {
-            this.statusCode = statusCode;
-            super.setStatus(statusCode, statusMessage);
-        }
     }
 }
