@@ -25,14 +25,19 @@
 
 package ee.aktors.misp2.util;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
-import java.io.UnsupportedEncodingException;
+import org.apache.commons.codec.binary.Base64;
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.namespace.QName;
+import javax.xml.soap.*;
+import java.io.*;
 import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -44,28 +49,6 @@ import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.namespace.QName;
-import javax.xml.soap.AttachmentPart;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.MimeHeaders;
-import javax.xml.soap.Name;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPConnection;
-import javax.xml.soap.SOAPConnectionFactory;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
-
-import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 /**
  * SOAP utils
  */
@@ -76,8 +59,8 @@ public class SOAPUtils {
     private static SOAPConnection connection;
     private SOAPMessage soapRequest;
     private SOAPMessage soapResponse;
-    private String serviceName = new String("");
-    private String userId = new String("");
+    private String serviceName = "";
+    private String userId = "";
 
     /**
      * Initiates message factory and connection
@@ -149,9 +132,8 @@ public class SOAPUtils {
     /**
      * @return soap response
      * @throws SOAPException if the SOAP Header does not exist or cannot be retrieved
-     * @throws IOException can throw
      */
-    public SOAPMessage processSOAPResponse() throws SOAPException, IOException {
+    public SOAPMessage processSOAPResponse() throws SOAPException {
         Iterator<?> it = soapResponse.getSOAPHeader().examineAllHeaderElements();
         while (it.hasNext()) {
             SOAPElement el = (SOAPElement) it.next();
@@ -170,7 +152,7 @@ public class SOAPUtils {
         return soapResponse;
     }
 
-    private void checkElementForAttachments(SOAPElement element) throws FileNotFoundException, IOException,
+    private void checkElementForAttachments(SOAPElement element) throws IOException,
             SOAPException {
         boolean hasHrefAttribute = false;
         boolean hasHexBinaryAttribute = false;
@@ -211,7 +193,7 @@ public class SOAPUtils {
             mediaType = URLDecoder.decode(mediaType, "UTF-8");
             String filePath = StringUtils.substring(fileLocation, 0, fileLocation.indexOf("?"));
             LOGGER.debug("read as hexBinary from file: " + filePath);
-            Reader r = new FileReader(new File(filePath));
+            Reader r = new FileReader(filePath);
             String hexContent = toHex(IOUtils.toByteArray(r, StandardCharsets.UTF_8));
             LOGGER.trace(hexContent);
             r.close();
@@ -234,12 +216,11 @@ public class SOAPUtils {
     /**
      * @throws SOAPException if there is no content set into this AttachmentPart object or
      * if there was a data transformation error.
-     * @throws IOException can throw
      */
-    public void processSOAPAttachments() throws SOAPException, IOException {
+    public void processSOAPAttachments() throws SOAPException {
         // if message has attachments -> represent them as binary and remove
         Iterator<?> attachments = soapResponse.getAttachments();
-        List<SOAPElement> elementsWithAttachments = new ArrayList<SOAPElement>();
+        List<SOAPElement> elementsWithAttachments = new ArrayList<>();
         while (attachments.hasNext()) {
             AttachmentPart attachment = (AttachmentPart) attachments.next();
             String[] contentDisposition = attachment.getMimeHeader(Const.CONTENT_DISPOSITION);
@@ -255,46 +236,44 @@ public class SOAPUtils {
                     }
                 }
             }
-            if (attachment != null) {
-                String contentId = attachment.getContentId(); // Content-ID pattern: urn:uuid:$UUID>;
-                byte[] rawBytes = attachment.getRawContentBytes();
-                int attachmentSizeInBytes = rawBytes.length;
-                String base64Content = Base64.encodeBase64String(rawBytes);
-                for (SOAPElement xmlElement : elements(soapResponse.getSOAPBody().getElementsByTagName("*"))) {
-                    // if element has already an attachment given, continue
-                    if (elementsWithAttachments.contains(xmlElement))
-                        continue;
-                    boolean hasMTOM = xmlElement.getPrefix() != null
-                            && xmlElement.getPrefix().toUpperCase().equals("XOP");
-                    if (hasMTOM) {
-                        SOAPElement fileElement = xmlElement.getParentElement();
-                        addFileAttributesToElement(fileElement, contentDispositionFileName, attachmentSizeInBytes);
-                        xmlElement.detachNode();
-                        fileElement.addTextNode(base64Content);
-                        LOGGER.debug("Extracted MTOM attachment: " + fileElement.getAttribute("filename"));
+            String contentId = attachment.getContentId(); // Content-ID pattern: urn:uuid:$UUID>;
+            byte[] rawBytes = attachment.getRawContentBytes();
+            int attachmentSizeInBytes = rawBytes.length;
+            String base64Content = Base64.encodeBase64String(rawBytes);
+            for (SOAPElement xmlElement : elements(soapResponse.getSOAPBody().getElementsByTagName("*"))) {
+                // if element has already an attachment given, continue
+                if (elementsWithAttachments.contains(xmlElement))
+                    continue;
+                boolean hasMTOM = xmlElement.getPrefix() != null
+                        && xmlElement.getPrefix().equalsIgnoreCase("XOP");
+                if (hasMTOM) {
+                    SOAPElement fileElement = xmlElement.getParentElement();
+                    addFileAttributesToElement(fileElement, contentDispositionFileName, attachmentSizeInBytes);
+                    xmlElement.detachNode();
+                    fileElement.addTextNode(base64Content);
+                    LOGGER.debug("Extracted MTOM attachment: " + fileElement.getAttribute("filename"));
+                    elementsWithAttachments.add(xmlElement);
+                    break;
+                } else {
+                    String href = xmlElement.getAttribute("href");
+                    if (StringUtils.isNotEmpty(href)
+                            && StringUtils.substringBefore(href, ":").equalsIgnoreCase("CID")) {
+                        href = StringUtils.substringAfter(href, ":");
+                    }
+                    if (StringUtils.isEmpty(contentId) && StringUtils.isEmpty(href)
+                            || StringUtils.isNotEmpty(contentId) && StringUtils.isNotEmpty(href)
+                            && contentId.contains(href)) { // href attribute value pattern: urn:uuid:$UUID;
+                        addFileAttributesToElement(xmlElement, contentDispositionFileName, attachmentSizeInBytes);
+                        xmlElement.addTextNode(base64Content);
+                        LOGGER.debug("Extracted SwA attachment: " + xmlElement.getAttribute("filename"));
                         elementsWithAttachments.add(xmlElement);
+                        if (xmlElement.hasAttribute("href"))
+                            xmlElement.removeAttribute("href");
                         break;
-                    } else {
-                        String href = xmlElement.getAttribute("href");
-                        if (StringUtils.isNotEmpty(href)
-                                && StringUtils.substringBefore(href, ":").toUpperCase().equals("CID")) {
-                            href = StringUtils.substringAfter(href, ":");
-                        }
-                        if (StringUtils.isEmpty(contentId) && StringUtils.isEmpty(href)
-                                || StringUtils.isNotEmpty(contentId) && StringUtils.isNotEmpty(href)
-                                && contentId.contains(href)) { // href attribute value pattern: urn:uuid:$UUID;
-                            addFileAttributesToElement(xmlElement, contentDispositionFileName, attachmentSizeInBytes);
-                            xmlElement.addTextNode(base64Content);
-                            LOGGER.debug("Extracted SwA attachment: " + xmlElement.getAttribute("filename"));
-                            elementsWithAttachments.add(xmlElement);
-                            if (xmlElement.hasAttribute("href"))
-                                xmlElement.removeAttribute("href");
-                            break;
-                        }
                     }
                 }
-
             }
+
         }
         soapResponse.removeAllAttachments();
     }
@@ -305,17 +284,16 @@ public class SOAPUtils {
      * @param fileElement file
      * @param contentDispositionFileName file name from Content-Disposition field
      * @param fileSize number of bytes
-     * @throws SOAPException
      */
     private void addFileAttributesToElement(SOAPElement fileElement,
-            String contentDispositionFileName, Integer fileSize) throws SOAPException {
+            String contentDispositionFileName, Integer fileSize) {
         if (fileSize != null) {
             fileElement.setAttribute("size", "" + fileSize);
         }
 
         Node nextSiblingNode = fileElement.getNextSibling();
         SOAPElement nextSibling = null;
-        if (nextSiblingNode != null && nextSiblingNode instanceof Element) {
+        if (nextSiblingNode instanceof Element) {
             nextSibling = (SOAPElement) nextSiblingNode;
         }
 
@@ -347,7 +325,7 @@ public class SOAPUtils {
     }
 
     private List<SOAPElement> elements(NodeList nodes) {
-        List<SOAPElement> result = new ArrayList<SOAPElement>(nodes.getLength());
+        List<SOAPElement> result = new ArrayList<>(nodes.getLength());
         for (int i = 0; i < nodes.getLength(); i++) {
             Node node = nodes.item(i);
             if (node instanceof SOAPElement) {
@@ -399,7 +377,7 @@ public class SOAPUtils {
         }
     }
 
-    private String toHex(byte[] text) throws UnsupportedEncodingException {
+    private String toHex(byte[] text) {
         return String.format("%x", new BigInteger(1, text));
     }
 
