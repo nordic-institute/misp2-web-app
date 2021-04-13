@@ -34,6 +34,7 @@ import ee.aktors.misp2.model.OrgPerson;
 import ee.aktors.misp2.model.Portal;
 import ee.aktors.misp2.util.FileUtil;
 import ee.aktors.misp2.util.Roles;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Container for organizing user rights from OrgPerson entities to a 3-tier tree structure:
@@ -62,7 +63,7 @@ public class UserPortal implements Comparable<UserPortal> {
             name = null;
         }
         this.portal = p;
-        portalOrgs = new LinkedHashMap<String, PortalOrg>();
+        portalOrgs = new LinkedHashMap<>();
     }
     /**
      * @return user portal
@@ -75,7 +76,7 @@ public class UserPortal implements Comparable<UserPortal> {
      * @return the portalOrgs
      */
     public List<PortalOrg> getPortalOrgs() {
-        ArrayList<PortalOrg> l = new ArrayList<PortalOrg>(portalOrgs.values());
+        ArrayList<PortalOrg> l = new ArrayList<>(portalOrgs.values());
         Collections.sort(l);
         return l;
     }
@@ -111,8 +112,8 @@ public class UserPortal implements Comparable<UserPortal> {
         return name;
     }
     @Override
-    public int compareTo(UserPortal other) {
-        if (this.getName() != null && other != null && other.getName() != null) {
+    public int compareTo(@NotNull UserPortal other) {
+        if (this.getName() != null && other.getName() != null) {
             return FileUtil.compareCaseInsensitiveFirst(this.getName(), other.getName());
         } else {
             return -1;
@@ -127,7 +128,7 @@ public class UserPortal implements Comparable<UserPortal> {
      */
     public static List<UserPortal> getPortals(List<OrgPerson> orgPersons) {
         // Portal short name to portal object map for given user
-        Map<String, UserPortal> userPortals = new LinkedHashMap<String, UserPortal>();
+        Map<String, UserPortal> userPortals = new LinkedHashMap<>();
         for (OrgPerson op : orgPersons) {
             Portal p = op.getPortal();
             if (p != null && p.getShortName() != null) {
@@ -144,7 +145,7 @@ public class UserPortal implements Comparable<UserPortal> {
             }
         }
 
-        ArrayList<UserPortal> l = new ArrayList<UserPortal>(userPortals.values());
+        ArrayList<UserPortal> l = new ArrayList<>(userPortals.values());
         Collections.sort(l);
         return l;
     }
@@ -165,7 +166,7 @@ class PortalOrg implements Comparable<PortalOrg> {
             name = null;
         }
         this.org = o;
-        this.roles = new LinkedHashSet<Integer>();
+        this.roles = new LinkedHashSet<>();
         this.main = false;
     }
     /**
@@ -178,7 +179,7 @@ class PortalOrg implements Comparable<PortalOrg> {
      * @return user roles in an org
      */
     public List<Integer> getRoles() {
-        return new ArrayList<Integer>(roles);
+        return new ArrayList<>(roles);
     }
     
     /**
@@ -207,14 +208,14 @@ class PortalOrg implements Comparable<PortalOrg> {
         return name;
     }
     @Override
-    public int compareTo(PortalOrg other) {
+    public int compareTo(@NotNull PortalOrg other) {
         // Bring main organization to front
         if (this.isMain() && !other.isMain()) {
             return -1;
         } else if (!this.isMain() && other.isMain()) {
             return 1;
          // Otherwise compare alphabetically
-        } else if (this.getName() != null && other != null && other.getName() != null) {
+        } else if (this.getName() != null && other.getName() != null) {
             return FileUtil.compareCaseInsensitiveFirst(this.getName(), other.getName());
         } else {
             return -1;
