@@ -10,6 +10,7 @@ import javax.servlet.http.HttpServletResponseWrapper;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 /**
@@ -28,13 +29,18 @@ public class UnhandledExceptionHandlerFilter extends OncePerRequestFilter {
     /**
      * Define error handling behavior: delegate request down in filter chain. In case of
      * exception, catch it and delegate to handleException().
-     * @param request HTTP request
+     *
+     * @param request  HTTP request
      * @param response HTTP response (written and flushed on handled error)
-     * @param filterChain filter chain called
+     * @param chain    filter chain called
      */
     @Override
-    public void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws IOException,
-        ServletException {
+    public void doFilterInternal(
+            @NotNull HttpServletRequest request,
+            @NotNull HttpServletResponse response,
+            @NotNull FilterChain chain
+    ) throws IOException
+    {
         StatusCodeCaptureWrapper responseWrapper = new StatusCodeCaptureWrapper(request, response);
         Throwable exception = null;
 
@@ -90,7 +96,7 @@ public class UnhandledExceptionHandlerFilter extends OncePerRequestFilter {
                     statusCode, request.getRequestURI()),
                     throwable);
         
-        if (statusCode != null && statusCode.intValue() == 404) {
+        if (statusCode != null && statusCode == 404) {
             response.sendRedirect(request.getContextPath() + "/error404.action");
             response.setStatus(statusCode);
         } else {
@@ -103,8 +109,8 @@ public class UnhandledExceptionHandlerFilter extends OncePerRequestFilter {
     private class StatusCodeCaptureWrapper extends HttpServletResponseWrapper {
 
         private Integer statusCode;
-        private HttpServletRequest request;
-        private HttpServletResponse response;
+        private final HttpServletRequest request;
+        private final HttpServletResponse response;
 
         /**
          * Constructor
@@ -148,7 +154,8 @@ public class UnhandledExceptionHandlerFilter extends OncePerRequestFilter {
         @Override
         public void sendError(int statusCode, String statusMessage) throws IOException {
             // do NOT use sendError() otherwise per servlet spec the container will send an html error page
-            this.sendError(statusCode, statusMessage);
+            this.statusCode = statusCode;
+            super.setStatus(statusCode);
             handleException(request, response, statusCode, new RuntimeException(statusMessage));
         }
 
