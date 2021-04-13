@@ -34,10 +34,12 @@ import java.nio.charset.CharacterCodingException;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.xml.security.utils.Base64;
+import org.bouncycastle.util.encoders.Base64;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Wrapper around {@link InputStream} to place all read InputStream bytes to a buffer.
@@ -126,7 +128,7 @@ public class ByteBufferInputStream extends InputStream implements ByteCounter {
             CharBuffer charBuffer = decoder.decode(buf);
             return charBuffer.toString();
         } catch(CharacterCodingException e){
-            return "(binary, logged as BASE64)\n" + Base64.encode(byteArray);
+            return "(binary, logged as BASE64)\n" + Arrays.toString(Base64.encode(byteArray));
         }
     }
 
