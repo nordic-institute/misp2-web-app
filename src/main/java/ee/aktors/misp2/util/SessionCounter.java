@@ -34,21 +34,23 @@ import org.apache.logging.log4j.Logger;
 
 import ee.aktors.misp2.model.Person;
 
+import java.util.concurrent.atomic.AtomicLong;
+
 /**
  * Session counter
  */
 public class SessionCounter implements HttpSessionListener {
 
     private static final Logger LOG = LogManager.getLogger(SessionCounter.class);
-    private static Integer totalActiveSessions;
+    private static final AtomicLong totalActiveSessionsAtomic = new AtomicLong();
 
     /**
      *  Empty constructor
      */
     public SessionCounter() { }
 
-    private SessionCounter(int sessions) {
-        totalActiveSessions = new Integer(sessions);
+    private SessionCounter(@SuppressWarnings("SameParameterValue") int sessions) {
+        totalActiveSessionsAtomic.set(sessions);
     }
 
     private static class SingletonHolder {
@@ -58,6 +60,7 @@ public class SessionCounter implements HttpSessionListener {
     /**
      * @return Instance of SessionCounter
      */
+    @SuppressWarnings("SameReturnValue")
     public static SessionCounter getInstance() {
         return SingletonHolder.INSTANCE;
     }
@@ -67,10 +70,9 @@ public class SessionCounter implements HttpSessionListener {
      * @param info information to add to log
      */
     public void increaseCounter(String info) {
-        synchronized (totalActiveSessions) {
-            totalActiveSessions++;
-            LOG.debug(info + " entered; " + totalActiveSessions + " active sessions");
-        }
+            totalActiveSessionsAtomic.incrementAndGet();
+            LOG.debug(info + " entered; " + totalActiveSessionsAtomic.get() + " active sessions");
+
     }
 
     /**
@@ -78,10 +80,9 @@ public class SessionCounter implements HttpSessionListener {
      * @param info information to add to log
      */
     public void decreaseCounter(String info) {
-        synchronized (totalActiveSessions) {
-            totalActiveSessions--;
-            LOG.debug(info + " left; " + totalActiveSessions + " active sessions");
-        }
+        totalActiveSessionsAtomic.decrementAndGet();
+        LOG.debug(info + " left; " + totalActiveSessionsAtomic.get() + " active sessions");
+
     }
 
     /** (non-Javadoc)
