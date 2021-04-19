@@ -26,7 +26,6 @@
 package ee.aktors.misp2.action;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -38,7 +37,6 @@ import org.apache.logging.log4j.Logger;
 
 import ee.aktors.misp2.httpMethodChecker.HTTPMethod;
 import ee.aktors.misp2.httpMethodChecker.HTTPMethods;
-import ee.aktors.misp2.model.Portal;
 import ee.aktors.misp2.model.Producer;
 import ee.aktors.misp2.model.Query;
 import ee.aktors.misp2.model.QueryName;
@@ -66,13 +64,11 @@ public class TopicAction extends SessionPreparedBaseAction implements IManagemen
     private List<TopicName> searchResults;
     private Topic topic;
     private List<TopicName> topicNames;
-    private List<QueryName> allAllowedQueries = new ArrayList<QueryName>();
-    private List<Map<Producer, List<Query>>> allowedProducersWithQueries = new ArrayList<Map<Producer, List<Query>>>();
-    private List<Integer> groupAllowedQueryIdList = new ArrayList<Integer>();
+    private List<QueryName> allAllowedQueries = new ArrayList<>();
+    private List<Map<Producer, List<Query>>> allowedProducersWithQueries = new ArrayList<>();
+    private List<Integer> groupAllowedQueryIdList = new ArrayList<>();
     private static final Logger LOG = LogManager.getLogger(TopicAction.class);
     private static final String FILTER = "filter";
-
-    private List<Query> allQueryList = new ArrayList<Query>();
 
     /**
      * @param tService tService to inject
@@ -87,7 +83,7 @@ public class TopicAction extends SessionPreparedBaseAction implements IManagemen
     public void prepare() throws Exception {
         super.prepare();
         if (!FILTER.equals(getContext().getActionInvocation().getProxy().getMethod())) {
-            allQueryList = qService.findAllPortalQueries(portal);
+            List<Query> allQueryList = qService.findAllPortalQueries(portal);
             if (topicId != null) {
                 topic = tService.findObject(Topic.class, topicId);
                 LOG.debug("Found topic " + topic);
@@ -112,13 +108,13 @@ public class TopicAction extends SessionPreparedBaseAction implements IManagemen
                 }
             }
 
-            Collections.sort(getAllAllowedQueries(), QueryName.COMPARE_BY_PRODUCER_SHORT_NAME);
+            getAllAllowedQueries().sort(QueryName.COMPARE_BY_PRODUCER_SHORT_NAME);
 
-            List<Producer> allowedProducers = new ArrayList<Producer>();
-            Set<Producer> prevProducers = new HashSet<Producer>();
+            List<Producer> allowedProducers = new ArrayList<>();
+            Set<Producer> prevProducers = new HashSet<>();
 
             for (QueryName qn : getAllAllowedQueries()) {
-                if (!XRoadUtil.isProducerDuplicatedInSet(qn.getQuery().getProducer(), prevProducers)) {
+                if (XRoadUtil.isProducerUniqueInSet(qn.getQuery().getProducer(), prevProducers)) {
                     prevProducers.add(qn.getQuery().getProducer());
                     if (qn.getQuery().getProducer() != null) {
                         allowedProducers.add(qn.getQuery().getProducer());
@@ -126,19 +122,19 @@ public class TopicAction extends SessionPreparedBaseAction implements IManagemen
                 }
             }
 
-            Collections.sort(getAllAllowedQueries(), QueryName.COMPARE_BY_QUERY_DESCRIPTION);
+            getAllAllowedQueries().sort(QueryName.COMPARE_BY_QUERY_DESCRIPTION);
 
-            List<Producer> allowedProducersCopy = new ArrayList<Producer>(allowedProducers);
-            Collections.sort(allowedProducersCopy, Producer.COMPARE_BY_PRODUCER_DESCRIPTION);
+            List<Producer> allowedProducersCopy = new ArrayList<>(allowedProducers);
+            allowedProducersCopy.sort(Producer.COMPARE_BY_PRODUCER_DESCRIPTION);
             for (Producer ap : allowedProducersCopy) {
-                List<Query> allowedProducersQueries = new ArrayList<Query>();
+                List<Query> allowedProducersQueries = new ArrayList<>();
                 for (QueryName aqn : getAllAllowedQueries()) {
                     if (aqn.getQuery().getProducer().getId().equals(ap.getId())) {
                         allowedProducersQueries.add(aqn.getQuery());
                     }
                 }
 
-                Map<Producer, List<Query>> map = new HashMap<Producer, List<Query>>();
+                Map<Producer, List<Query>> map = new HashMap<>();
                 map.put(ap, allowedProducersQueries);
                 getAllowedProducersWithQueries().add(map);
             }
@@ -176,7 +172,7 @@ public class TopicAction extends SessionPreparedBaseAction implements IManagemen
     @Override
     @HTTPMethods(methods = { HTTPMethod.GET })
     public String showItem() {
-        if (topic != null && !isAllowed(topic)) {
+        if (topic != null && isDenied(topic)) {
             addActionError(getText("text.error.item_not_allowed"));
             return ERROR;
         }
@@ -187,7 +183,7 @@ public class TopicAction extends SessionPreparedBaseAction implements IManagemen
     @HTTPMethods(methods = { HTTPMethod.POST })
     public String submitItem() {
         if (topic != null) {
-            if (topic.getId() != null && !isAllowed(topic)) {
+            if (topic.getId() != null && isDenied(topic)) {
                 addActionError(getText("text.error.item_not_allowed"));
                 return ERROR;
             } else if (tService.findTopic(portal, topic.getName(), topic.getId()) != null) {
@@ -195,7 +191,7 @@ public class TopicAction extends SessionPreparedBaseAction implements IManagemen
                 addActionError(getText("text.error.service_duplicate"));
                 return SUCCESS;
             }
-            List<QueryTopic> qts = new ArrayList<QueryTopic>();
+            List<QueryTopic> qts = new ArrayList<>();
             List<QueryTopic> allTopicQueries = tService.findAllQueryTopic(topic.getId());
             for (Integer qId : groupAllowedQueryIdList) {
                 QueryTopic qt = tService.findQueryTopic(topic.getId(), qId);
@@ -240,11 +236,11 @@ public class TopicAction extends SessionPreparedBaseAction implements IManagemen
     @HTTPMethods(methods = { HTTPMethod.POST })
     public String deleteItem() {
         if (topicId != null) {
-            Topic t = null;
+            Topic t;
             t = tService.findObject(Topic.class, topicId);
             if (t != null) {
 
-                if (!isAllowed(t)) {
+                if (isDenied(t)) {
                     addActionError(getText("text.error.item_not_allowed"));
                     return ERROR;
                 }
@@ -266,12 +262,12 @@ public class TopicAction extends SessionPreparedBaseAction implements IManagemen
      * @param topicIn topic to check
      * @return is topic is allowed in session
      */
-    private boolean isAllowed(Topic topicIn) {
-        return ((Portal) session.get(Const.SESSION_PORTAL)).equals(topicIn.getPortal());
+    private boolean isDenied(Topic topicIn) {
+        return !session.get(Const.SESSION_PORTAL).equals(topicIn.getPortal());
     }
 
     private void initTopicNames() {
-        topicNames = new ArrayList<TopicName>();
+        topicNames = new ArrayList<>();
         for (String language : languages) {
             TopicName topicName = null;
             if (topicId != null) {

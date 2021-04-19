@@ -29,11 +29,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.TreeMap;
+import java.util.*;
 
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
@@ -74,9 +70,8 @@ public class WSDLParser {
     private Document doc;
     private File file;
     private XPath xpath;
-    private XPathFactory xpFactory;
     private String xroadNamespace;
-    private XROAD_VERSION xroadVersion;
+    private final XROAD_VERSION xroadVersion;
 
     /**
      * Initializes WSDLParser and sets given values
@@ -149,7 +144,7 @@ public class WSDLParser {
                         + " failed", e);
             }
         }
-        xpFactory = XPathFactory.newInstance();
+        XPathFactory xpFactory = XPathFactory.newInstance();
         xpath = xpFactory.newXPath();
         PersonalNamespaceContext namespaceContext = new PersonalNamespaceContext();
         xpath.setNamespaceContext(namespaceContext);
@@ -170,12 +165,7 @@ public class WSDLParser {
         }
         namespaceContext.setXRoadNamespace(xroadNamespace);
 
-        try {
-            XRoadUtil.checkFault(doc, wsdlUrl != null ? wsdlUrl.toString() : "unknown URL", xpath);
-        } catch (DataExchangeException e) {
-            throw e;
-            // throw new QueryException(QueryException.Type.WSDL_HAS_SOAP_FAULT, "WSDL validation failed", e);
-        }
+        XRoadUtil.checkFault(doc, wsdlUrl != null ? wsdlUrl.toString() : "unknown URL", xpath);
     }
 
     /**
@@ -214,6 +204,7 @@ public class WSDLParser {
     /**
      * @return false
      */
+    @SuppressWarnings("SameReturnValue")
     public Boolean validateWsdl() {
         return false;
     }
@@ -222,7 +213,7 @@ public class WSDLParser {
      * @return list of operations
      */
     public List<String> getOperations() {
-        List<String> operations = new ArrayList<String>();
+        List<String> operations = new ArrayList<>();
         try {
             XPathExpression expr = xpath.compile("//wsdl:binding/wsdl:operation[@name]");
             NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
@@ -284,7 +275,7 @@ public class WSDLParser {
      * @return list of producer names
      */
     public List<ProducerName> getProducerDescriptions(Producer producer, String lang) {
-        List<ProducerName> producerNames = new ArrayList<ProducerName>();
+        List<ProducerName> producerNames = new ArrayList<>();
         try {
             XPathExpression findXrdAddress = xpath.compile("/wsdl:definitions/wsdl:service//"
                     + Const.XROAD_NS_PREFIX_OLD + ":address");
@@ -304,7 +295,7 @@ public class WSDLParser {
                 for (int i = 0; i < nodes.getLength(); i++) {
                     Element descs = (Element) nodes.item(i); // get the first one that includes title
                     NodeList desc = descs.getChildNodes();
-                    String descript = desc.item(0).getNodeValue().toString(); // get value of title
+                    String descript = desc.item(0).getNodeValue(); // get value of title
                     String wsdlLang = descs.getAttribute("xml:lang");
                     if (wsdlLang == null)
                         wsdlLang = lang;
@@ -327,7 +318,7 @@ public class WSDLParser {
      * @return map of queries
      */
     public TreeMap<String, List<QueryName>> getQueryDescriptions(String lang, String operationName) {
-        TreeMap<String, List<QueryName>> queryWithDescriptions = new TreeMap<String, List<QueryName>>();
+        TreeMap<String, List<QueryName>> queryWithDescriptions = new TreeMap<>();
         try {
             XPathExpression exprNames = xpath.compile("/wsdl:definitions/wsdl:portType/wsdl:operation[@name]");
             NodeList nodes = (NodeList) exprNames.evaluate(doc, XPathConstants.NODESET);
@@ -337,22 +328,16 @@ public class WSDLParser {
                 // if we have service Name defined, then only find description for that service, needed for X-Road v6
                 if (serviceName == null || operationName != null && !operationName.equals(serviceName))
                     continue;
-                List<QueryName> queryNames = new ArrayList<QueryName>();
-                // FIXME: v4, should be working without commented out lines, but that has not been tested
-                // XPathExpression exprTitles =
-                // xpath.compile("/wsdl:definitions/wsdl:portType/wsdl:operation[@name='"+serviceName+"']//"
-                //+Const.XROAD_NS_PREFIX_OLD+":title");
+                List<QueryName> queryNames = new ArrayList<>();
                 String xpathString = "/wsdl:definitions/wsdl:portType/wsdl:operation[@name='" + serviceName + "']//"
                         + Const.XROAD_NS_PREFIX + ":title";
                 NodeList nodesTitles = (NodeList) xpath.compile(xpathString).evaluate(doc, XPathConstants.NODESET);
-                // if(nodesTitles.getLength()==0)
-                // nodesTitles = (NodeList) exprTitles.evaluate(doc, XPathConstants.NODESET);
                 if (nodesTitles.getLength() > 0) {
                     for (int j = 0; j < nodesTitles.getLength(); j++) {
                         NodeList desc = nodesTitles.item(j).getChildNodes();
                         String descript = desc.item(0) != null ? desc.item(0).getNodeValue() : ""; // get value of title
                         LOGGER.debug("Found node " + j + " descript " + descript);
-                        String wsdlLang = (String) ((Element) nodesTitles.item(j)).getAttribute("xml:lang");
+                        String wsdlLang = ((Element) nodesTitles.item(j)).getAttribute("xml:lang");
                         if (wsdlLang == null || wsdlLang.equals(""))
                             wsdlLang = lang;
                         String note = getServiceNote(serviceName, wsdlLang);
@@ -388,7 +373,7 @@ public class WSDLParser {
                         "//wsdl:operation[@name='" + operation + "']//" + Const.XROAD_NS_PREFIX + ":version").evaluate(
                         doc, XPathConstants.NODESET);
             for (int i = 0; i < nodes.getLength(); i++) {
-                version = ((Element) nodes.item(i)).getChildNodes().item(0).getNodeValue().toString();
+                version = nodes.item(i).getChildNodes().item(0).getNodeValue();
             }
         } catch (XPathExpressionException e) {
             LOGGER.error(e.getMessage(), e);
@@ -400,9 +385,8 @@ public class WSDLParser {
      * @param operation operation
      * @param lang language
      * @return note of service
-     * @throws XPathExpressionException can throw
      */
-    public String getServiceNote(String operation, String lang) throws XPathExpressionException {
+    public String getServiceNote(String operation, String lang) {
         String note = "";
         try {
             XPathExpression exprNotes = xpath.compile("//wsdl:operation[@name='" + operation + "']//"
@@ -414,7 +398,7 @@ public class WSDLParser {
                 nodesNotes = (NodeList) exprNotesOld.evaluate(doc, XPathConstants.NODESET);
             if (nodesNotes != null && nodesNotes.getLength() > 0
                     && nodesNotes.item(0).getChildNodes().item(0) != null) {
-                note = nodesNotes.item(0).getChildNodes().item(0).getNodeValue().toString(); // get value of note
+                note = nodesNotes.item(0).getChildNodes().item(0).getNodeValue(); // get value of note
                 return note;
             }
         } catch (XPathExpressionException e) {
@@ -451,7 +435,8 @@ public class WSDLParser {
         return temp;
     }
 
-    private class PersonalNamespaceContext implements NamespaceContext {
+    @SuppressWarnings({"rawtypes", "HttpUrlsUsage"})
+    private static class PersonalNamespaceContext implements NamespaceContext {
 
         private String xroadNamespace;
 
@@ -491,7 +476,8 @@ public class WSDLParser {
 
         // This method isn't necessary for XPath processing either.
         @Override
-        public Iterator<?> getPrefixes(String uri) {
+        @SuppressWarnings("rawtypes")
+        public Iterator getPrefixes(String uri) {
             throw new UnsupportedOperationException();
         }
     }

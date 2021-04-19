@@ -84,11 +84,11 @@ public class GroupAction extends SecureLoggedAction {
     private Boolean filter;
     private List<PersonGroup> groups;
     private List<Person> persons;
-    private List<String> groupPersonIdList = new ArrayList<String>();
+    private List<String> groupPersonIdList = new ArrayList<>();
     private List<Query> allowedQueries;
-    private List<Map<Producer, List<Query>>> allowedProducersWithQueries = new ArrayList<Map<Producer, List<Query>>>();
-    private List<String> groupAllowedQueryIdList = new ArrayList<String>();
-    private List<String> allowedQueryIdList = new ArrayList<String>();
+    private List<Map<Producer, List<Query>>> allowedProducersWithQueries = new ArrayList<>();
+    private List<String> groupAllowedQueryIdList = new ArrayList<>();
+    private List<String> allowedQueryIdList = new ArrayList<>();
     private NotificationMail notificationMail = new NotificationMail();
     private String lang;
     private static final Logger LOG = LogManager.getLogger(GroupAction.class);
@@ -265,7 +265,7 @@ public class GroupAction extends SecureLoggedAction {
             // ids of query rights of group + id_hidden if the query must be hidden from users
             for (Object[] q : groupService.findDistinctGroupAllowedQueries(group)) {
                 groupAllowedQueryIdList.add(((Query) q[0]).getId().toString());
-                if (q[1] != null && (Boolean) q[1] == true) {
+                if (q[1] != null && (Boolean) q[1]) {
                     groupAllowedQueryIdList.add(((Query) q[0]).getId() + "_hidden");
                 }
             }
@@ -320,7 +320,7 @@ public class GroupAction extends SecureLoggedAction {
             addActionError(getText("text.error.item_not_allowed"));
             return Action.ERROR;
         }
-        List<Org> orgs = new ArrayList<Org>(); // universal (unit is consumer) portal
+        List<Org> orgs = new ArrayList<>(); // universal (unit is consumer) portal
         if (portal.getMispType() == Const.MISP_TYPE_UNIVERSAL) {
             if (org.getId().equals(portal.getOrgId().getId())) { // portal manager
                 try {
@@ -339,24 +339,24 @@ public class GroupAction extends SecureLoggedAction {
         }
         // create map: orgId -> groupAllowedQueryIdList (for adding selected query rights
         // to every sub org in universal, unit is consumer type of portal)
-        Map<Integer, List<String>> orgGroupAllowedQueryIdMap = new HashMap<Integer, List<String>>();
+        Map<Integer, List<String>> orgGroupAllowedQueryIdMap = new HashMap<>();
         for (Org o : orgs) {
-            orgGroupAllowedQueryIdMap.put(o.getId(), new ArrayList<String>(groupAllowedQueryIdList));
+            orgGroupAllowedQueryIdMap.put(o.getId(), new ArrayList<>(groupAllowedQueryIdList));
             if (o.getSupOrgId() != null && !orgGroupAllowedQueryIdMap.containsKey(o.getSupOrgId().getId())) {
-                orgGroupAllowedQueryIdMap.put(o.getSupOrgId().getId(), new ArrayList<String>(groupAllowedQueryIdList));
+                orgGroupAllowedQueryIdMap.put(o.getSupOrgId().getId(), new ArrayList<>(groupAllowedQueryIdList));
             }
         }
         List<GroupItem> gilOld = group.getGroupItemList();
-        List<GroupItem> gil = new ArrayList<GroupItem>();
+        List<GroupItem> gil = new ArrayList<>();
         // can't use existing list, otherwise will get java.util.ConcurrentModificationException and Hibernate bug
         // http://opensource.atlassian.com/projects/hibernate/browse/HHH-511 when setting list back on group
         // remove reference to groupItems from group, otherwise can't remove groupItems from database
         group.setGroupItemList(null);
 
-        List<String> removedQueryNames = new ArrayList<String>();
-        List<String> addedQueryNames = new ArrayList<String>();
-        String queryId = null;
-        List<String> ids = null;
+        List<String> removedQueryNames = new ArrayList<>();
+        List<String> addedQueryNames = new ArrayList<>();
+        String queryId;
+        List<String> ids;
         for (GroupItem gi : gilOld) {
             queryId = String.valueOf(gi.getOrgQuery().getQueryId().getId());
             ids = orgGroupAllowedQueryIdMap.get(gi.getOrgQuery().getOrgId().getId());
@@ -369,18 +369,15 @@ public class GroupAction extends SecureLoggedAction {
                     removedQueryNames.add(gi.getOrgQuery().getQueryId().getName());
                 }
             } else { // if it was checked to be hidden - hide it
-                if (ids != null && ids.remove(queryId + "_hidden")) {
-                    gi.setInvisible(true);
-                } else {
-                    gi.setInvisible(false);
-                } // update rights which remained given
+                // update rights which remained given
+                gi.setInvisible(ids != null && ids.remove(queryId + "_hidden"));
                 gil.add(gi);
                 // log.debug("adding old: " + gi.getGroup().getId() + " orgQuery: " + gi.getOrgQuery().getId());
             }
         }
 
-        GroupItem gi = null;
-        OrgQuery oq = null;
+        GroupItem gi;
+        OrgQuery oq;
 
         for (Org o : orgs) {
             ids = orgGroupAllowedQueryIdMap.get(o.getId());
@@ -417,7 +414,7 @@ public class GroupAction extends SecureLoggedAction {
         // remove duplicated items from gil it is possible id in the previous loop gets repeated
         // so the same orgQuery(oq) gets added multiple times and DB unique constraint fails
         // getting around this issue by simply removing duplicated entries from gil
-        Set<Integer> existingOrgQueryIds = new HashSet<Integer>();
+        Set<Integer> existingOrgQueryIds = new HashSet<>();
         for (Iterator<GroupItem> it = gil.iterator(); it.hasNext();) {
             GroupItem groupItem = it.next();
             if (groupItem == null || groupItem.getOrgQuery() == null || groupItem.getOrgQuery().getId() == null)
@@ -478,7 +475,7 @@ public class GroupAction extends SecureLoggedAction {
 
         // ids of active org persons in group
         for (GroupPerson gp : group.getGroupPersonList()) {
-            if (Integer.valueOf(gp.getOrg().getId()).equals(org.getId())) {
+            if (gp.getOrg().getId().equals(org.getId())) {
                 groupPersonIdList.add(gp.getPerson().getId().toString());
             }
         }
@@ -501,24 +498,24 @@ public class GroupAction extends SecureLoggedAction {
             return Action.ERROR;
         }
         // persons under active org only
-        List<GroupPerson> gplOld = new ArrayList<GroupPerson>();
+        List<GroupPerson> gplOld = new ArrayList<>();
         for (GroupPerson gp : group.getGroupPersonList()) {
-            if (Integer.valueOf(gp.getOrg().getId()).equals(org.getId())) {
+            if (gp.getOrg().getId().equals(org.getId())) {
                 gplOld.add(gp);
             }
         }
 
-        List<GroupPerson> gpl = new LinkedList<GroupPerson>();
+        List<GroupPerson> gpl = new LinkedList<>();
         // can't use existing list, otherwise will get java.util.ConcurrentModificationException and
         // Hibernate bug http://opensource.atlassian.com/projects/hibernate/browse/HHH-511
         // when setting list back on group remove reference to groupPersons from group,
         // otherwise can't remove groupPersons from database
         group.setGroupPersonList(null);
-        String personId = null;
-        List<String> addedUsers = new ArrayList<String>();
-        List<String> removedUsers = new ArrayList<String>();
+        String personId;
+        List<String> addedUsers = new ArrayList<>();
+        List<String> removedUsers = new ArrayList<>();
 
-        ArrayList<GroupValidPair> gvpList = new ArrayList<GroupValidPair>(1); // NotifcationMail accepts GroupValidPair
+        ArrayList<GroupValidPair> gvpList = new ArrayList<>(1); // NotifcationMail accepts GroupValidPair
                                                                               // lists
         gvpList.add(new GroupValidPair(group.getName()));
 
@@ -547,8 +544,8 @@ public class GroupAction extends SecureLoggedAction {
                 groupPersonIdList.remove(personId);
             }
         }
-        GroupPerson gp = null;
-        Person p = null;
+        GroupPerson gp;
+        Person p;
         for (String id : groupPersonIdList) {
             gp = new GroupPerson();
             p = userService.findObject(Person.class, Integer.parseInt(id));
@@ -632,30 +629,30 @@ public class GroupAction extends SecureLoggedAction {
      * @param allowedQueriesIn list of allowed queries
      */
     public void setAllowedProducersWithQueries(List<Query> allowedQueriesIn) {
-        Collections.sort(allowedQueriesIn, Query.COMPARE_BY_PRODUCER_SHORT_NAME);
-        List<Producer> allowedProducers = new ArrayList<Producer>();
-        Set<Producer> prevProducers = new HashSet<Producer>();
+        allowedQueriesIn.sort(Query.COMPARE_BY_PRODUCER_SHORT_NAME);
+        List<Producer> allowedProducers = new ArrayList<>();
+        Set<Producer> prevProducers = new HashSet<>();
 
         for (Query aq : allowedQueriesIn) {
-            if (!XRoadUtil.isProducerDuplicatedInSet(aq.getProducer(), prevProducers)) {
+            if (XRoadUtil.isProducerUniqueInSet(aq.getProducer(), prevProducers)) {
                 prevProducers.add(aq.getProducer());
                 if (aq.getProducer() != null) {
                     allowedProducers.add(aq.getProducer());
                 }
             }
         }
-        Collections.sort(allowedQueriesIn, Query.COMPARE_BY_QUERY_DESCRIPTION);
+        allowedQueriesIn.sort(Query.COMPARE_BY_QUERY_DESCRIPTION);
 
-        List<Producer> allowedProducersCopy = new ArrayList<Producer>(allowedProducers);
-        Collections.sort(allowedProducersCopy, Producer.COMPARE_BY_PRODUCER_DESCRIPTION);
+        List<Producer> allowedProducersCopy = new ArrayList<>(allowedProducers);
+        allowedProducersCopy.sort(Producer.COMPARE_BY_PRODUCER_DESCRIPTION);
         for (Producer p : allowedProducersCopy) {
-            List<Query> allowedProducersQueries = new ArrayList<Query>();
+            List<Query> allowedProducersQueries = new ArrayList<>();
             for (Query qa : allowedQueriesIn) {
                 if (qa.getProducer().getId().equals(p.getId())) {
                     allowedProducersQueries.add(qa);
                 }
             }
-            Map<Producer, List<Query>> map = new HashMap<Producer, List<Query>>();
+            Map<Producer, List<Query>> map = new HashMap<>();
             map.put(p, allowedProducersQueries);
             getAllowedProducersWithQueries().add(map);
         }

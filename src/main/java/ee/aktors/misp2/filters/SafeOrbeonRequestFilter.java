@@ -110,27 +110,24 @@ public class SafeOrbeonRequestFilter implements Filter {
         public String getHeader(String name) {
             HttpServletRequest request = (HttpServletRequest) getRequest();
 
-            String value = isAllowed(name) ? request.getHeader(name) : null;
-
-            return value;
+            return isAllowed(name) ? request.getHeader(name) : null;
         }
 
         public long getDateHeader(String name) {
             HttpServletRequest request = (HttpServletRequest) getRequest();
             boolean allowed = isAllowed(name);
-            long value = allowed ? request.getDateHeader(name) : -1L;
 
-            return value;
+            return allowed ? request.getDateHeader(name) : -1L;
         }
 
         protected boolean isAllowed(String name) {
-            return name != null && !"if-modified-since".equals(name.toLowerCase())
-                    && !"if-unmodified-since".equals(name.toLowerCase());
+            return name != null && !"if-modified-since".equalsIgnoreCase(name)
+                    && !"if-unmodified-since".equalsIgnoreCase(name);
         }
 
         @SuppressWarnings("rawtypes")
-        public Enumeration getHeaderNames() {
-            List<String> list = new ArrayList<String>();
+        public Enumeration<String> getHeaderNames() {
+            List<String> list = new ArrayList<>();
 
             HttpServletRequest request = (HttpServletRequest) getRequest();
             Enumeration e = request.getHeaderNames();
@@ -141,8 +138,7 @@ public class SafeOrbeonRequestFilter implements Filter {
                 }
             }
 
-            Enumeration en = Collections.enumeration(list);
-            return en;
+            return Collections.enumeration(list);
         }
 
         @SuppressWarnings("rawtypes")

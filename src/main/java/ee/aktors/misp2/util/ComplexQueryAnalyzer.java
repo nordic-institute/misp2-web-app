@@ -93,7 +93,7 @@ import ee.aktors.misp2.util.xroad.soap.XRoad6SOAPMessageBuilder;
  * <p>
  * 3) {@link #parseWithStringProcessing()} - parses service names from XForms
  * with String processing. By far, the fastest (tens of times faster than the
- * others). Processing does <b>NOT</b> handle namespaces correcly for many
+ * others). Processing does <b>NOT</b> handle namespaces correctly for many
  * possible use-cases, that's why it is not recommended.
  * </p>
  * <p>
@@ -116,11 +116,10 @@ import ee.aktors.misp2.util.xroad.soap.XRoad6SOAPMessageBuilder;
  */
 public class ComplexQueryAnalyzer {
 
-    private static Logger logger = LogManager.getLogger(ComplexQueryAnalyzer.class);
-    private XMLReader parser;
-    private String xforms;
-    private List<String> subQueryNames;
-    private XROAD_VERSION xroadVersion;
+    private static final Logger logger = LogManager.getLogger(ComplexQueryAnalyzer.class);
+    private final String xforms;
+    private final List<String> subQueryNames;
+    private final XROAD_VERSION xroadVersion;
 
     /**
      * Initialize parser, XROAD_VERSION.V6
@@ -131,7 +130,7 @@ public class ComplexQueryAnalyzer {
     public ComplexQueryAnalyzer(String xforms, XROAD_VERSION xroadVersion) {
         this.xforms = xforms;
         this.xroadVersion = xroadVersion;
-        this.subQueryNames = new ArrayList<String>();
+        this.subQueryNames = new ArrayList<>();
     }
 
     /**
@@ -144,7 +143,7 @@ public class ComplexQueryAnalyzer {
         try {
             // this configuration key enables to select different parsing
             // method, values can be SAX, DOM and STR
-            // probably not neededed, useful for development purposes
+            // probably not needed, useful for development purposes
             String key = "complex_service.subquery_extraction_method";
             String value = "";
 
@@ -177,8 +176,7 @@ public class ComplexQueryAnalyzer {
     public String toString() {
         if (subQueryNames.size() == 0)
             return null;
-        Set<String> uniqueSubQueryNames = new LinkedHashSet<String>();
-        uniqueSubQueryNames.addAll(subQueryNames);
+        Set<String> uniqueSubQueryNames = new LinkedHashSet<>(subQueryNames);
         return StringUtils.join(uniqueSubQueryNames, Const.SUB_QUERY_NAME_SEPARATOR);
     }
 
@@ -228,14 +226,14 @@ public class ComplexQueryAnalyzer {
     /**
      * Parse services out of {@link #xforms} with SAX streamline parser
      * 
-     * @throws IOException
-     * @throws SAXException
+     * @throws IOException  throws in case
+     * @throws SAXException throws in case
      */
     protected void parseWithSax() throws IOException, SAXException {
         subQueryNames.clear();
         // specify the SAXParser
         Date d0 = new Date();
-        parser = XMLReaderFactory.createXMLReader("com.sun.org.apache.xerces.internal.parsers.SAXParser");
+        XMLReader parser = XMLReaderFactory.createXMLReader("com.sun.org.apache.xerces.internal.parsers.SAXParser");
         ContentHandler complexServiceHandler = new ComplexServiceHandler(xroadVersion == XROAD_VERSION.V6,
                 subQueryNames);
         parser.setContentHandler(complexServiceHandler);
@@ -269,7 +267,7 @@ public class ComplexQueryAnalyzer {
     protected void parseWithStringProcessing() {
         subQueryNames.clear();
         Date d0 = new Date();
-        List<String[]> namespaces = new ArrayList<String[]>(); // list stringide
+        List<String[]> namespaces = new ArrayList<>(); // list stringide
                                                                 // arraydest.
                                                                 // Iga stringide
                                                                 // array koosneb
@@ -285,6 +283,7 @@ public class ComplexQueryAnalyzer {
                     XRoad4SOAPMessageBuilder.SERVICE_TAG_NAME);
             fillNamespacePrefixexWithStringProcessing(namespaces, Const.XROAD_VERSION.V5.getDefaultNamespace(),
                     XRoad5SOAPMessageBuilder.SERVICE_TAG_NAME);
+            //noinspection HttpUrlsUsage
             fillNamespacePrefixexWithStringProcessing(namespaces, "http://x-rd.net/xsd/xroad.xsd",
                     XRoad5SOAPMessageBuilder.SERVICE_TAG_NAME); // some
                                                                 // temporary
@@ -319,8 +318,7 @@ public class ComplexQueryAnalyzer {
                 // text, like 'iden:memberClass>COM', but it will never end with
                 // a tag
                 XRoadV6ServiceContainer serviceContainer = new XRoadV6ServiceContainer();
-                for (int j = 0; j < serviceIdentifiersWithEmptyFields.length; j++) {
-                    String serviceIdentifier = serviceIdentifiersWithEmptyFields[j];
+                for (String serviceIdentifier : serviceIdentifiersWithEmptyFields) {
                     // if identifier is empty, continue
                     if (serviceIdentifier == null || serviceIdentifier.trim().isEmpty())
                         continue;
@@ -364,7 +362,7 @@ public class ComplexQueryAnalyzer {
      * @author sander.kallo
      *
      */
-    private class XRoadV6ServiceContainer {
+    private static class XRoadV6ServiceContainer {
         private String xRoadInstance;
         private String memberClass;
         private String memberCode;
@@ -373,9 +371,10 @@ public class ComplexQueryAnalyzer {
         private String serviceVersion;
 
         public void set(String tagName, String value) {
-            if (tagName == null)
-                return;
-            else if (tagName.equals(XRoad6SOAPMessageBuilder.XROAD_INSTANCE_TAG_NAME)) {
+            //noinspection StatementWithEmptyBody
+            if (tagName == null) {
+                // nothing to set
+            } else if (tagName.equals(XRoad6SOAPMessageBuilder.XROAD_INSTANCE_TAG_NAME)) {
                 xRoadInstance = value;
             } else if (tagName.equals(XRoad6SOAPMessageBuilder.MEMBER_CLASS_TAG_NAME)) {
                 memberClass = value;
@@ -407,7 +406,7 @@ public class ComplexQueryAnalyzer {
      * @author sander.kallo
      *
      */
-    private class ComplexServiceHandler extends DefaultHandler {
+    private static class ComplexServiceHandler extends DefaultHandler {
         private static final String SOAP_ENVELOPE_NS = "http://schemas.xmlsoap.org/soap/envelope/";
         private boolean inSoapEnvelope = false;
         private boolean inSoapHeader = false;
@@ -415,8 +414,8 @@ public class ComplexQueryAnalyzer {
         private boolean inV5Service = false;
         private boolean inV6ServiceElement = false;
         private StringWriter stringWriter;
-        private boolean xroadV6;
-        private List<String> subQueryNames;
+        private final boolean xroadV6;
+        private final List<String> subQueryNames;
         private XRoadV6ServiceContainer xroadV6ServiceContainer;
 
         ComplexServiceHandler(boolean xroadV6, List<String> subQueryNames) {
@@ -424,6 +423,7 @@ public class ComplexQueryAnalyzer {
             this.subQueryNames = subQueryNames;
         }
 
+        @SuppressWarnings("RedundantThrows")
         public void startElement(String namespaceUri, String localName, String qualifiedName, Attributes attrs)
                 throws SAXException {
             if (!inSoapEnvelope && isSoapMessage(namespaceUri, localName)) {
@@ -442,7 +442,7 @@ public class ComplexQueryAnalyzer {
             }
         }
 
-        public void endElement(String namespaceUri, String localName, String qualifiedName) throws SAXException {
+        public void endElement(String namespaceUri, String localName, String qualifiedName) {
             if (inSoapEnvelope && isSoapMessage(namespaceUri, localName)) {
                 inSoapEnvelope = false;
             } else if (inSoapHeader && isSoapHeader(namespaceUri, localName)) {
@@ -486,7 +486,7 @@ public class ComplexQueryAnalyzer {
             );
         }
 
-        public void characters(char[] ch, int start, int length) throws SAXException {
+        public void characters(char[] ch, int start, int length) {
             if (!xroadV6 && inV5Service || xroadV6 && inV6Service && inV6ServiceElement) {
                 for (int i = start; i < start + length; i++) {
                     stringWriter.append(ch[i]);
@@ -502,12 +502,12 @@ public class ComplexQueryAnalyzer {
      * @param namespaces
      *            List to be filled with namespace prefixes and 'service' tag
      *            names
-     * @param namespaceUri
-     * @param serviceTagName
+     * @param namespaceUri uri
+     * @param serviceTagName tag
      */
     private void fillNamespacePrefixexWithStringProcessing(List<String[]> namespaces, String namespaceUri,
             String serviceTagName) {
-        String ns = null;
+        String ns;
         int index1, index2;
 
         index1 = xforms.indexOf("=\"" + namespaceUri + "\""); // ntx
@@ -523,16 +523,19 @@ public class ComplexQueryAnalyzer {
     }
 
     static class XFormsNamespaceContext implements NamespaceContext {
+        @SuppressWarnings("HttpUrlsUsage")
         @Override
         public String getNamespaceURI(String prefix) {
-            if (prefix.equals("SOAP-ENV")) {
-                return "http://schemas.xmlsoap.org/soap/envelope/";
-            } else if (prefix.equals("xhtml")) {
-                return "http://www.w3.org/1999/xhtml";
-            } else if (prefix.equals("xforms")) {
-                return "http://www.w3.org/2002/xforms";
-            } else
-                return null;
+            switch (prefix) {
+                case "SOAP-ENV":
+                    return "http://schemas.xmlsoap.org/soap/envelope/";
+                case "xhtml":
+                    return "http://www.w3.org/1999/xhtml";
+                case "xforms":
+                    return "http://www.w3.org/2002/xforms";
+                default:
+                    return null;
+            }
         }
 
         @Override
@@ -541,7 +544,7 @@ public class ComplexQueryAnalyzer {
         }
 
         @Override
-        public Iterator<?> getPrefixes(String uri) {
+        public Iterator<String> getPrefixes(String uri) {
             throw new UnsupportedOperationException();
         }
     }
