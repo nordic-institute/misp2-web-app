@@ -25,29 +25,13 @@
 
 package ee.aktors.misp2.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Pattern;
-
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
+import ee.aktors.misp2.util.Const.XROAD_VERSION;
+import ee.aktors.misp2.util.xroad.XRoadUtil;
+import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
+import ee.aktors.misp2.util.xroad.soap.CommonXRoadSOAPMessageBuilder;
+import ee.aktors.misp2.util.xroad.soap.XRoad4SOAPMessageBuilder;
+import ee.aktors.misp2.util.xroad.soap.XRoad5SOAPMessageBuilder;
+import ee.aktors.misp2.util.xroad.soap.XRoad6SOAPMessageBuilder;
 import org.apache.commons.configuration.Configuration;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -56,20 +40,22 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
-import org.xml.sax.ContentHandler;
-import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import org.xml.sax.XMLReader;
 import org.xml.sax.helpers.DefaultHandler;
-import org.xml.sax.helpers.XMLReaderFactory;
 
-import ee.aktors.misp2.util.Const.XROAD_VERSION;
-import ee.aktors.misp2.util.xroad.XRoadUtil;
-import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
-import ee.aktors.misp2.util.xroad.soap.CommonXRoadSOAPMessageBuilder;
-import ee.aktors.misp2.util.xroad.soap.XRoad4SOAPMessageBuilder;
-import ee.aktors.misp2.util.xroad.soap.XRoad5SOAPMessageBuilder;
-import ee.aktors.misp2.util.xroad.soap.XRoad6SOAPMessageBuilder;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.xpath.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
 
 /**
  * <p>
@@ -104,15 +90,14 @@ import ee.aktors.misp2.util.xroad.soap.XRoad6SOAPMessageBuilder;
  * <p>
  * Usage:
  * </p>
- * 
+ *
  * <pre>
  * ComplexQueryAnalyzer ComplexQueryAnalyzer = new ComplexQueryAnalyzer(xforms, XROAD_VERSION.V6);
  * ComplexQueryAnalyzer.parse(config);
  * String subQueries = ComplexQueryAnalyzer.toString()
  * </pre>
- * 
- * @author sander.kallo
  *
+ * @author sander.kallo
  */
 public class ComplexQueryAnalyzer {
 
@@ -123,8 +108,8 @@ public class ComplexQueryAnalyzer {
 
     /**
      * Initialize parser, XROAD_VERSION.V6
-     * 
-     * @param xforms XForms entity
+     *
+     * @param xforms       XForms entity
      * @param xroadVersion X-Road version
      */
     public ComplexQueryAnalyzer(String xforms, XROAD_VERSION xroadVersion) {
@@ -135,9 +120,8 @@ public class ComplexQueryAnalyzer {
 
     /**
      * Set parser type from config object
-     * 
-     * @param config
-     *            configuration object
+     *
+     * @param config configuration object
      */
     public void parse(Configuration config) {
         try {
@@ -180,24 +164,6 @@ public class ComplexQueryAnalyzer {
         return StringUtils.join(uniqueSubQueryNames, Const.SUB_QUERY_NAME_SEPARATOR);
     }
 
-    /**
-     * @param subQueryNames sub-query names as string
-     * @return list of sub-query names
-     */
-    public static List<String> subQueryNamesToList(String subQueryNames) {
-        if (subQueryNames == null)
-            return null;
-        logger.trace("Converting the following subqueries to list: " + subQueryNames);
-        return Arrays.asList(subQueryNames.split(Pattern.quote(Const.SUB_QUERY_NAME_SEPARATOR)));
-    }
-
-    /**
-     * @return sub-query names as list
-     */
-    public List<String> getSubQueryNames() {
-        return subQueryNames;
-    }
-
     protected void parseWithDom()
             throws XMLUtilException, XPathExpressionException, DataExchangeException, SOAPException {
         subQueryNames.clear();
@@ -225,7 +191,7 @@ public class ComplexQueryAnalyzer {
 
     /**
      * Parse services out of {@link #xforms} with SAX streamline parser
-     * 
+     *
      * @throws IOException  throws in case
      * @throws SAXException throws in case
      */
@@ -233,16 +199,25 @@ public class ComplexQueryAnalyzer {
         subQueryNames.clear();
         // specify the SAXParser
         Date d0 = new Date();
-        XMLReader parser = XMLReaderFactory.createXMLReader("com.sun.org.apache.xerces.internal.parsers.SAXParser");
-        ContentHandler complexServiceHandler = new ComplexServiceHandler(xroadVersion == XROAD_VERSION.V6,
-                subQueryNames);
-        parser.setContentHandler(complexServiceHandler);
-        InputStream in = new ByteArrayInputStream(xforms.getBytes(StandardCharsets.UTF_8));
-        InputSource source = new InputSource(in);
-        parser.parse(source);
-        in.close();
+        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance(
+                "com.sun.org.apache.xerces.internal.parsers.SAXParser",
+                ClassLoader.getSystemClassLoader()
+        );
+
+        try (
+                InputStream in = new ByteArrayInputStream(xforms.getBytes(StandardCharsets.UTF_8))) {
+            SAXParser parser = saxParserFactory.newSAXParser();
+            DefaultHandler complexServiceHandler = new ComplexServiceHandler(
+                    xroadVersion == XROAD_VERSION.V6,
+                    subQueryNames
+            );
+            parser.parse(in, complexServiceHandler);
+        } catch (ParserConfigurationException e) {
+            throw new SAXException("SAXParser for ComplexQuery cannot be created for the requested configuration.", e);
+        }
         logger.debug("Complex service subquery extraction done. Parser parsing with SAX time "
                 + (new Date().getTime() - d0.getTime()) + " ms");
+
     }
 
     /**
@@ -268,16 +243,16 @@ public class ComplexQueryAnalyzer {
         subQueryNames.clear();
         Date d0 = new Date();
         List<String[]> namespaces = new ArrayList<>(); // list stringide
-                                                                // arraydest.
-                                                                // Iga stringide
-                                                                // array koosneb
-                                                                // kahest
-                                                                // liikmest,
-                                                                // millest
-                                                                // esimene on
-                                                                // namespace tag
-                                                                // ja teine on
-                                                                // elemendi nimi
+        // arraydest.
+        // Iga stringide
+        // array koosneb
+        // kahest
+        // liikmest,
+        // millest
+        // esimene on
+        // namespace tag
+        // ja teine on
+        // elemendi nimi
         if (xroadVersion != XROAD_VERSION.V6) {
             fillNamespacePrefixexWithStringProcessing(namespaces, Const.XROAD_VERSION.V4.getDefaultNamespace(),
                     XRoad4SOAPMessageBuilder.SERVICE_TAG_NAME);
@@ -344,7 +319,7 @@ public class ComplexQueryAnalyzer {
     private String[] getTextBetweenTags(String text, String tag) {
         String[] array = StringUtils.substringsBetween(text, "<" + tag, "</" + tag + ">");
         if (array == null)
-            return new String[] {};
+            return new String[]{};
         for (int j = 0; j < array.length; j++) {
             String serviceName = array[j];
             if (serviceName.contains(">")) {
@@ -358,9 +333,8 @@ public class ComplexQueryAnalyzer {
     /**
      * Used to populate X-Road v6 service identifiers and print them to a
      * summary.
-     * 
-     * @author sander.kallo
      *
+     * @author sander.kallo
      */
     private static class XRoadV6ServiceContainer {
         private String xRoadInstance;
@@ -402,9 +376,8 @@ public class ComplexQueryAnalyzer {
 
     /**
      * SAX handler for {@link #parseWithSax()} method
-     * 
-     * @author sander.kallo
      *
+     * @author sander.kallo
      */
     private static class ComplexServiceHandler extends DefaultHandler {
         private static final String SOAP_ENVELOPE_NS = "http://schemas.xmlsoap.org/soap/envelope/";
@@ -498,15 +471,14 @@ public class ComplexQueryAnalyzer {
     /**
      * Fill namespaces List with namespace prefix and service name to be search
      * from xforms.
-     * 
-     * @param namespaces
-     *            List to be filled with namespace prefixes and 'service' tag
-     *            names
-     * @param namespaceUri uri
+     *
+     * @param namespaces     List to be filled with namespace prefixes and 'service' tag
+     *                       names
+     * @param namespaceUri   uri
      * @param serviceTagName tag
      */
     private void fillNamespacePrefixexWithStringProcessing(List<String[]> namespaces, String namespaceUri,
-            String serviceTagName) {
+                                                           String serviceTagName) {
         String ns;
         int index1, index2;
 
@@ -518,7 +490,7 @@ public class ComplexQueryAnalyzer {
         if (index1 != -1) {
             index2 = xforms.lastIndexOf(":", index1);
             ns = xforms.substring(index2 + 1, index1);
-            namespaces.add(new String[] {ns, serviceTagName});
+            namespaces.add(new String[]{ns, serviceTagName});
         }
     }
 
