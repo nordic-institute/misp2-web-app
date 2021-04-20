@@ -40,6 +40,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.Attributes;
+import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
@@ -159,7 +160,7 @@ public class ComplexQueryAnalyzer {
      */
     public String toString() {
         if (subQueryNames.size() == 0)
-            return null;
+            return Const.SUB_QUERY_NAME_SEPARATOR;
         Set<String> uniqueSubQueryNames = new LinkedHashSet<>(subQueryNames);
         return StringUtils.join(uniqueSubQueryNames, Const.SUB_QUERY_NAME_SEPARATOR);
     }
@@ -199,25 +200,23 @@ public class ComplexQueryAnalyzer {
         subQueryNames.clear();
         // specify the SAXParser
         Date d0 = new Date();
-        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance(
-                "com.sun.org.apache.xerces.internal.parsers.SAXParser",
-                ClassLoader.getSystemClassLoader()
-        );
+        SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
 
         try (
-                InputStream in = new ByteArrayInputStream(xforms.getBytes(StandardCharsets.UTF_8))) {
+                InputStream in = new ByteArrayInputStream(xforms.getBytes(StandardCharsets.UTF_8))
+        ) {
+            InputSource source = new InputSource(in);
             SAXParser parser = saxParserFactory.newSAXParser();
             DefaultHandler complexServiceHandler = new ComplexServiceHandler(
                     xroadVersion == XROAD_VERSION.V6,
                     subQueryNames
             );
-            parser.parse(in, complexServiceHandler);
+            parser.parse(source, complexServiceHandler);
         } catch (ParserConfigurationException e) {
             throw new SAXException("SAXParser for ComplexQuery cannot be created for the requested configuration.", e);
         }
         logger.debug("Complex service subquery extraction done. Parser parsing with SAX time "
                 + (new Date().getTime() - d0.getTime()) + " ms");
-
     }
 
     /**
