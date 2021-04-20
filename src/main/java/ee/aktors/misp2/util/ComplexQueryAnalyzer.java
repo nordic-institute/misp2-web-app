@@ -201,7 +201,7 @@ public class ComplexQueryAnalyzer {
         // specify the SAXParser
         Date d0 = new Date();
         SAXParserFactory saxParserFactory = SAXParserFactory.newInstance();
-
+        saxParserFactory.setNamespaceAware(true);
         try (
                 InputStream in = new ByteArrayInputStream(xforms.getBytes(StandardCharsets.UTF_8))
         ) {
