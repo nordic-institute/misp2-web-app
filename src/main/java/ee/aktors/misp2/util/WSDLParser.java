@@ -25,12 +25,13 @@
 
 package ee.aktors.misp2.util;
 
-import java.io.File;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.charset.StandardCharsets;
-import java.util.*;
-
+import ee.aktors.misp2.action.exception.QueryException;
+import ee.aktors.misp2.model.Producer;
+import ee.aktors.misp2.model.ProducerName;
+import ee.aktors.misp2.model.QueryName;
+import ee.aktors.misp2.util.Const.XROAD_VERSION;
+import ee.aktors.misp2.util.xroad.XRoadUtil;
+import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
 import javax.xml.XMLConstants;
 import javax.xml.namespace.NamespaceContext;
 import javax.xml.parsers.DocumentBuilder;
@@ -41,7 +42,6 @@ import javax.xml.xpath.XPathConstants;
 import javax.xml.xpath.XPathExpression;
 import javax.xml.xpath.XPathExpressionException;
 import javax.xml.xpath.XPathFactory;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Attr;
@@ -51,13 +51,15 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import ee.aktors.misp2.action.exception.QueryException;
-import ee.aktors.misp2.model.Producer;
-import ee.aktors.misp2.model.ProducerName;
-import ee.aktors.misp2.model.QueryName;
-import ee.aktors.misp2.util.Const.XROAD_VERSION;
-import ee.aktors.misp2.util.xroad.XRoadUtil;
-import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
+import java.io.File;
+import java.io.IOException;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeMap;
 
 /**
  * WSDL parser

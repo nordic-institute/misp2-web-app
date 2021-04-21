@@ -25,16 +25,21 @@
 
 package ee.aktors.misp2.beans;
 
-import java.util.*;
-
 import com.opensymphony.xwork2.ActionContext;
-
 import ee.aktors.misp2.model.Org;
 import ee.aktors.misp2.model.OrgPerson;
 import ee.aktors.misp2.model.Portal;
 import ee.aktors.misp2.util.FileUtil;
 import ee.aktors.misp2.util.Roles;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Container for organizing user rights from OrgPerson entities to a 3-tier tree structure:

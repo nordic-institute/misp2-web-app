@@ -39,8 +39,21 @@ import ee.aktors.misp2.util.Const;
 import ee.aktors.misp2.util.JsonUtil;
 import ee.sk.mid.MidHashToSign;
 import ee.sk.mid.MidInputUtil;
-import ee.sk.mid.exception.*;
+import ee.sk.mid.exception.MidDeliveryException;
+import ee.sk.mid.exception.MidInternalErrorException;
+import ee.sk.mid.exception.MidInvalidNationalIdentityNumberException;
+import ee.sk.mid.exception.MidInvalidPhoneNumberException;
+import ee.sk.mid.exception.MidInvalidUserConfigurationException;
+import ee.sk.mid.exception.MidMissingOrInvalidParameterException;
+import ee.sk.mid.exception.MidNotMidClientException;
+import ee.sk.mid.exception.MidPhoneNotAvailableException;
+import ee.sk.mid.exception.MidSessionNotFoundException;
+import ee.sk.mid.exception.MidSessionTimeoutException;
+import ee.sk.mid.exception.MidUnauthorizedException;
+import ee.sk.mid.exception.MidUserCancellationException;
 import ee.sk.mid.rest.dao.response.MidSignatureResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -49,8 +62,6 @@ import org.apache.struts2.StrutsStatics;
 import org.digidoc4j.Container;
 import org.digidoc4j.DataToSign;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**

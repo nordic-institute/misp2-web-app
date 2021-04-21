@@ -25,18 +25,9 @@
 
 package ee.aktors.misp2.action.admin;
 
-import java.util.*;
-import java.util.Map.Entry;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.struts2.interceptor.validation.SkipValidation;
-
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.Validateable;
-
 import ee.aktors.misp2.action.SecureLoggedAction;
 import ee.aktors.misp2.httpMethodChecker.HTTPMethod;
 import ee.aktors.misp2.httpMethodChecker.HTTPMethods;
@@ -55,6 +46,17 @@ import ee.aktors.misp2.util.Const;
 import ee.aktors.misp2.util.Const.XROAD_VERSION;
 import ee.aktors.misp2.util.LanguageUtil;
 import ee.aktors.misp2.util.xroad.soap.query.unit.UnitQueryConf;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.struts2.interceptor.validation.SkipValidation;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  *

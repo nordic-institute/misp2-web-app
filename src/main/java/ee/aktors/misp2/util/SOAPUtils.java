@@ -25,6 +25,18 @@
 
 package ee.aktors.misp2.util;
 
+import javax.xml.bind.DatatypeConverter;
+import javax.xml.namespace.QName;
+import javax.xml.soap.AttachmentPart;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.MimeHeaders;
+import javax.xml.soap.Name;
+import javax.xml.soap.SOAPBody;
+import javax.xml.soap.SOAPConnection;
+import javax.xml.soap.SOAPConnectionFactory;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPMessage;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
@@ -34,10 +46,11 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 
-import javax.xml.bind.DatatypeConverter;
-import javax.xml.namespace.QName;
-import javax.xml.soap.*;
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
 import java.math.BigInteger;
 import java.net.URL;
 import java.net.URLDecoder;

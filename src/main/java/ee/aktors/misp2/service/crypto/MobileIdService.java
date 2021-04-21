@@ -27,18 +27,24 @@ package ee.aktors.misp2.service.crypto;
 
 import ee.aktors.misp2.configuration.DigiDoc4jConfiguration;
 import ee.aktors.misp2.util.mobileid.MobileIdSessionData;
-import ee.sk.mid.*;
-import ee.sk.mid.exception.*;
+import ee.sk.mid.MidAuthentication;
+import ee.sk.mid.MidAuthenticationHashToSign;
+import ee.sk.mid.MidAuthenticationIdentity;
+import ee.sk.mid.MidAuthenticationResponseValidator;
+import ee.sk.mid.MidAuthenticationResult;
+import ee.sk.mid.MidClient;
+import ee.sk.mid.MidDisplayTextFormat;
+import ee.sk.mid.MidHashToSign;
+import ee.sk.mid.MidInputUtil;
+import ee.sk.mid.MidLanguage;
 import ee.sk.mid.rest.dao.MidSessionStatus;
 import ee.sk.mid.rest.dao.request.MidAuthenticationRequest;
 import ee.sk.mid.rest.dao.request.MidSignatureRequest;
 import ee.sk.mid.rest.dao.response.MidAuthenticationResponse;
 import ee.sk.mid.rest.dao.response.MidSignatureResponse;
+import javax.security.sasl.AuthenticationException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.digidoc4j.*;
-
-import javax.security.sasl.AuthenticationException;
 
 public class MobileIdService {
 	private static final Logger LOG = LogManager.getLogger(MobileIdService.class);

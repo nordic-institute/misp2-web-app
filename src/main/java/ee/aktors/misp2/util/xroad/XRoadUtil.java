@@ -25,43 +25,6 @@
 
 package ee.aktors.misp2.util.xroad;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
-import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPConstants;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPFault;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPPart;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
-import org.apache.commons.configuration.Configuration;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import ee.aktors.misp2.action.exception.QueryException;
 import ee.aktors.misp2.model.Portal;
 import ee.aktors.misp2.model.Producer;
@@ -78,6 +41,46 @@ import ee.aktors.misp2.util.xroad.soap.XMLNamespaceContainer;
 import ee.aktors.misp2.util.xroad.soap.XRoad4SOAPMessageBuilder;
 import ee.aktors.misp2.util.xroad.soap.XRoad5SOAPMessageBuilder;
 import ee.aktors.misp2.util.xroad.soap.XRoad6SOAPMessageBuilder;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPConstants;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFault;
+import javax.xml.soap.SOAPHeader;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPPart;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import org.apache.commons.configuration.Configuration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Utilities related to X-Road (SOAP messages, WSDLs etc)
