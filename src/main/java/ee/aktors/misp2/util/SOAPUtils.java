@@ -273,9 +273,10 @@ public class SOAPUtils {
                             && StringUtils.substringBefore(href, ":").equalsIgnoreCase("CID")) {
                         href = StringUtils.substringAfter(href, ":");
                     }
-                    if (StringUtils.isEmpty(contentId) && StringUtils.isEmpty(href)
-                            || StringUtils.isNotEmpty(contentId) && StringUtils.isNotEmpty(href)
-                            && contentId.contains(href)) { // href attribute value pattern: urn:uuid:$UUID;
+                    boolean idAndHrefMissing = StringUtils.isEmpty(contentId) && StringUtils.isEmpty(href);
+                    boolean hrefInId = StringUtils.isNotEmpty(contentId) && StringUtils.isNotEmpty(href)
+                            && contentId.contains(href);
+                    if ( idAndHrefMissing || hrefInId ) { // href attribute value pattern: urn:uuid:$UUID;
                         addFileAttributesToElement(xmlElement, contentDispositionFileName, attachmentSizeInBytes);
                         xmlElement.addTextNode(base64Content);
                         LOGGER.debug("Extracted SwA attachment: " + xmlElement.getAttribute("filename"));
