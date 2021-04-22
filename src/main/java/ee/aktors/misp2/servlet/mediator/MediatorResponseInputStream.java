@@ -52,11 +52,12 @@ import ee.aktors.misp2.service.QueryLogService;
 import ee.aktors.misp2.util.SOAPUtils;
 import ee.aktors.misp2.util.xroad.XRoadUtil;
 import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Wrapper around {@link InputStream} #in (client response stream).
  * <p>
- * Used by {@link ee.aktors.misp2.servlet.MediatorServlet} to process user
+ * Used by {@link ee.aktors.misp2.servlet.mediator.MediatorServlet} to process user
  * X-Road SOAP response before sending it back to client.
  * <p>
  * Reads in InputStream, converts it to SOAP message, if SOAP Fault is returned,
@@ -70,13 +71,13 @@ import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
 public class MediatorResponseInputStream extends InputStream {
     private final Logger logger = LogManager.getLogger(MediatorResponseInputStream.class);
 
-    private InputStream in;
+    private final InputStream in;
     private InputStream out;
     private SOAPMessage soapMessage;
-    private QueryLog queryLog;
-    private long startTime;
-    private HttpServletResponse response;
-    private QueryLogService queryLogService;
+    private final QueryLog queryLog;
+    private final long startTime;
+    private final HttpServletResponse response;
+    private final QueryLogService queryLogService;
 
     /**
      * Initialize stream
@@ -109,9 +110,9 @@ public class MediatorResponseInputStream extends InputStream {
             // response content type is used in SOAP message creation
             // to ensure correct handling of MIME multipart messages with
             // attachments
-            MimeHeaders hdrs = new MimeHeaders();
-            hdrs.addHeader("Content-Type", response.getContentType());
-            soapMessage = MessageFactory.newInstance().createMessage(hdrs, in);
+            MimeHeaders headers = new MimeHeaders();
+            headers.addHeader("Content-Type", response.getContentType());
+            soapMessage = MessageFactory.newInstance().createMessage(headers, in);
         } catch (IOException | SOAPException e) {
             throw new DataExchangeException(DataExchangeException.Type.XROAD_MEDIATOR_SOAP_RESPONSE_COULD_NOT_BE_READ,
                     "Failed to parse response input stream to SOAPMessage", e);
@@ -139,18 +140,20 @@ public class MediatorResponseInputStream extends InputStream {
         // return output from security server
         // copy headers to final response
         for (String key : urlConnection.getHeaderFields().keySet()) {
-            if (key == null || key.toLowerCase().equals("transfer-encoding"))
+            if (key == null || key.equalsIgnoreCase("transfer-encoding"))
                 continue;
 
             // copy security server response headers to HTTP response
             for (String val : urlConnection.getHeaderFields().get(key)) {
-                if (val == null)
+                if (val == null) {
                     continue;
-                if (key.toString().toLowerCase().equals("content-type")) {
+                }
+                if (key.equalsIgnoreCase("content-type")) {
                     val = val.replace("type=text/xml", "type=\"text/xml\"");
                     logger.debug("Replacing content type with " + val);
                     httpResponse.setContentType(val);
-                } else if (key.toString().toLowerCase().equals("content-length")) {
+                } else if (key.equalsIgnoreCase("content-length")) {
+                    //noinspection UnnecessaryContinue
                     continue;
                 } else { // copy header unchanged
                     httpResponse.setHeader(key, val);
@@ -170,7 +173,7 @@ public class MediatorResponseInputStream extends InputStream {
                 // replace content-type since all the attachments were removed
                 // in processSOAPAttachments()
                 
-            } catch (SOAPException | IOException e) {
+            } catch (SOAPException e) {
                 throw new DataExchangeException(
                         DataExchangeException.Type.XROAD_MEDIATOR_SOAP_RESPONSE_ATTACHMENT_EXTRACTION_FAILED,
                         "Attachment extraction failed from SOAP response", e);
@@ -183,7 +186,7 @@ public class MediatorResponseInputStream extends InputStream {
         // warn if SOAP message contains attachments
         if (soapMessage.countAttachments() > 0) {
             Iterator<?> attachments = soapMessage.getAttachments();
-            List<String> attachmentInfo = new ArrayList<String>(soapMessage.countAttachments());
+            List<String> attachmentInfo = new ArrayList<>(soapMessage.countAttachments());
             while (attachments.hasNext()) {
                 AttachmentPart attachment = (AttachmentPart) attachments.next();
                 attachmentInfo.add(attachment.getContentType());
@@ -227,7 +230,7 @@ public class MediatorResponseInputStream extends InputStream {
         }
     }
 
-    private void logQuery() throws DataExchangeException {
+    private void logQuery() {
         // logger.debug("Query size: " + counterInputStream.getCount() + "B");
         queryLog.setQuerySize("" + (double) ((ByteCounterInputStream) in).getByteCount()); // measured
                                                                                     // in
@@ -255,29 +258,26 @@ public class MediatorResponseInputStream extends InputStream {
     /**
      * Finalize SOAP message by converting it to String and this in turn to
      * input stream
-     * 
-     * @throws DataExchangeException
+     *
      */
-    private void flushSoapMessage() throws DataExchangeException {
+    private void flushSoapMessage() {
         ByteArrayOutputStream byteArrayOutputStream = XRoadUtil.soapMessageToByteArrayOutputStream(soapMessage);
-        this.out = new ByteArrayInputStream(byteArrayOutputStream.toByteArray());
+        this.out = new ByteArrayInputStream(
+                byteArrayOutputStream != null ? byteArrayOutputStream.toByteArray() : new byte[0]);
     }
 
     @Override
-    public int read(byte[] b) throws IOException {
-        int i = out.read(b);
-        return i;
+    public int read(@NotNull byte[] b) throws IOException {
+        return out.read(b);
     }
 
     @Override
-    public int read(byte[] b, int off, int len) throws IOException {
-        int i = out.read(b, off, len);
-        return i;
+    public int read(@NotNull byte[] b, int off, int len) throws IOException {
+        return out.read(b, off, len);
     }
 
     @Override
     public int read() throws IOException {
-        int i = out.read();
-        return i;
+        return out.read();
     }
 }

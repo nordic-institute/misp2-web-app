@@ -26,20 +26,29 @@
 package ee.aktors.misp2.service;
 
 import ee.aktors.misp2.beans.QueryLogItem;
-import ee.aktors.misp2.model.*;
+import ee.aktors.misp2.model.Org;
+import ee.aktors.misp2.model.Person;
+import ee.aktors.misp2.model.Portal;
+import ee.aktors.misp2.model.QueryErrorLog;
+import ee.aktors.misp2.model.QueryLog;
 import ee.aktors.misp2.util.Const;
 import ee.aktors.misp2.util.XMLUtil;
 import ee.aktors.misp2.util.xroad.XRoadUtil;
+import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
+import javax.xml.soap.Detail;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
-import javax.xml.soap.Detail;
 import java.math.BigInteger;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  *

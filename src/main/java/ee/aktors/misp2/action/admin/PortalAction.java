@@ -25,23 +25,9 @@
 
 package ee.aktors.misp2.action.admin;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.struts2.interceptor.validation.SkipValidation;
-
 import com.opensymphony.xwork2.Action;
 import com.opensymphony.xwork2.ActionContext;
 import com.opensymphony.xwork2.Validateable;
-
-import edu.emory.mathcs.backport.java.util.Collections;
 import ee.aktors.misp2.action.SecureLoggedAction;
 import ee.aktors.misp2.httpMethodChecker.HTTPMethod;
 import ee.aktors.misp2.httpMethodChecker.HTTPMethods;
@@ -60,6 +46,17 @@ import ee.aktors.misp2.util.Const;
 import ee.aktors.misp2.util.Const.XROAD_VERSION;
 import ee.aktors.misp2.util.LanguageUtil;
 import ee.aktors.misp2.util.xroad.soap.query.unit.UnitQueryConf;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.struts2.interceptor.validation.SkipValidation;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  *
@@ -69,24 +66,21 @@ public class PortalAction extends SecureLoggedAction implements Validateable {
 
     private static final long serialVersionUID = 1L;
     private static final Logger LOGGER = LogManager.getLogger(PortalAction.class.getName());
-    private static final Comparator<Portal> PORTAL_ALPHABETICAL_ORDER = new Comparator<Portal>() {
-        @Override
-        public int compare(Portal o1, Portal o2) {
-            String language = ActionContext.getContext().getLocale().getLanguage();
-            String activeName1 = o1.getActiveName(language);
-            String activeName2 = o2.getActiveName(language);
-            if (activeName1 == null) return -1;
-            else if (activeName2 == null) return 1;
-            else return activeName1.compareToIgnoreCase(activeName2);
-        }
+    private static final Comparator<Portal> PORTAL_ALPHABETICAL_ORDER = (o1, o2) -> {
+        String language = ActionContext.getContext().getLocale().getLanguage();
+        String activeName1 = o1.getActiveName(language);
+        String activeName2 = o2.getActiveName(language);
+        if (activeName1 == null) return -1;
+        else if (activeName2 == null) return 1;
+        else return activeName1.compareToIgnoreCase(activeName2);
     };
     
     
     private ArrayList<String> languages = LanguageUtil.getLanguages();
     private PortalService portalService;
-    private OrgService oService;
-    private XroadInstanceService xroadInstanceService;
-    private EulaService eulaService;
+    private final OrgService oService;
+    private final XroadInstanceService xroadInstanceService;
+    private final EulaService eulaService;
     private Integer portalId;
     private Portal portal;
     private List<PortalName> portalNames;
@@ -103,7 +97,7 @@ public class PortalAction extends SecureLoggedAction implements Validateable {
     private boolean logQuery;
     private boolean unitIsConsumer;
     private boolean registerUnits;
-    private UnitQueryConf unitQueryConf;
+    private final UnitQueryConf unitQueryConf;
     private int debug;
 
     /**
@@ -157,7 +151,7 @@ public class PortalAction extends SecureLoggedAction implements Validateable {
                 addFieldError(
                         strUCVT,
                         getText("validation.in_action.not_in_range",
-                                Arrays.asList(new Object[] {minimumValidTime, maximumValidTime })));
+                                Arrays.asList(minimumValidTime, maximumValidTime)));
             }
             if (univCheckMaxValidTime == null) {
                 if (registerUnits)
@@ -168,7 +162,7 @@ public class PortalAction extends SecureLoggedAction implements Validateable {
                 addFieldError(
                         strUCMVT,
                         getText("validation.in_action.not_in_range",
-                                Arrays.asList(new Object[] {minimumValidTime, maximumValidTime })));
+                                Arrays.asList(minimumValidTime, maximumValidTime)));
             }
             if (compareTimes && univCheckValidTime.compareTo(univCheckMaxValidTime) >= 0) {
                 addFieldError(strUCVT, getText("validation.reg_lteq_max"));
@@ -273,7 +267,7 @@ public class PortalAction extends SecureLoggedAction implements Validateable {
     @SkipValidation
     public String listPortals() {
         portals = portalService.findAllPortals();
-        Collections.sort(portals, PORTAL_ALPHABETICAL_ORDER);
+        portals.sort(PORTAL_ALPHABETICAL_ORDER);
         return SUCCESS;
     }
 
@@ -283,14 +277,14 @@ public class PortalAction extends SecureLoggedAction implements Validateable {
     @HTTPMethods(methods = { HTTPMethod.GET, HTTPMethod.POST })
     @SkipValidation
     public String showPortal() {
-        univUseManger = (portal.isUnivUseManger() != null ? portal.isUnivUseManger().booleanValue() : univUseManger);
-        useTopics = (portal.getUseTopics() != null ? portal.getUseTopics().booleanValue() : useTopics);
-        useXrdIssue = (portal.getUseXrdIssue() != null ? portal.getUseXrdIssue().booleanValue() : useXrdIssue);
-        logQuery = (portal.getLogQuery() != null ? portal.getLogQuery().booleanValue() : logQuery);
-        registerUnits = (portal.getRegisterUnits() != null ? portal.getRegisterUnits().booleanValue() : registerUnits);
-        unitIsConsumer = (portal.getUnitIsConsumer() != null ? portal.getUnitIsConsumer().booleanValue()
+        univUseManger = (portal.isUnivUseManger() != null ? portal.isUnivUseManger() : univUseManger);
+        useTopics = (portal.getUseTopics() != null ? portal.getUseTopics() : useTopics);
+        useXrdIssue = (portal.getUseXrdIssue() != null ? portal.getUseXrdIssue() : useXrdIssue);
+        logQuery = (portal.getLogQuery() != null ? portal.getLogQuery() : logQuery);
+        registerUnits = (portal.getRegisterUnits() != null ? portal.getRegisterUnits() : registerUnits);
+        unitIsConsumer = (portal.getUnitIsConsumer() != null ? portal.getUnitIsConsumer()
                 : unitIsConsumer);
-        useEula = (portal.getEulaInUse() != null ? portal.getEulaInUse().booleanValue() : useEula);
+        useEula = (portal.getEulaInUse() != null ? portal.getEulaInUse() : useEula);
         // debug = portal.getDebug();
         session.put(Const.SESSION_PORTAL, portal);
         session.put(Const.SESSION_ACTIVE_ORG, portal.getOrgId());
@@ -353,7 +347,7 @@ public class PortalAction extends SecureLoggedAction implements Validateable {
             portal.setUseXrdIssue(useXrdIssue);
             portal.setLogQuery(logQuery);
             portal.setUnitIsConsumer(unitIsConsumer);
-            portal.setRegisterUnits(unitIsConsumer ? false : registerUnits);
+            portal.setRegisterUnits(!unitIsConsumer && registerUnits);
             portal.setEulaInUse(useEula);
             // portal.setDebug(debug);
 
@@ -388,7 +382,7 @@ public class PortalAction extends SecureLoggedAction implements Validateable {
     }
 
     private void initPortalNames() {
-        portalNames = new ArrayList<PortalName>();
+        portalNames = new ArrayList<>();
         for (String language : languages) {
             PortalName portalName = portalService.findPortalName(portal, language); // Take existing one
             if (portalName == null) { // If existing one is not accessible or does not exist, then create new one
@@ -420,7 +414,7 @@ public class PortalAction extends SecureLoggedAction implements Validateable {
     }
     
     private void initPortalEulas() {
-        portalEulas = new ArrayList<PortalEula>();
+        portalEulas = new ArrayList<>();
         Map<String, PortalEula> portalEulaMap = eulaService.findPortalEulaMap(portal);
         for (String language : languages) {
             PortalEula portalEula = portalEulaMap.get(language); // Take existing one
@@ -455,7 +449,7 @@ public class PortalAction extends SecureLoggedAction implements Validateable {
     
 
     private void initOrgNames() {
-        orgNames = new ArrayList<OrgName>();
+        orgNames = new ArrayList<>();
         for (String language : languages) {
             OrgName orgName = oService.findOrgName(org, language); // Take existing one
             if (orgName == null) { // If existing one is not accessible or does not exist, then create new one
@@ -792,7 +786,7 @@ public class PortalAction extends SecureLoggedAction implements Validateable {
 
     /**
      * Set translations of end user license agreement associated with the portal.
-     * @param list of PortalEula entities
+     * @param  portalEulas entities
      */
     public void setPortalEulas(List<PortalEula> portalEulas) {
         this.portalEulas = portalEulas;

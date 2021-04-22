@@ -30,6 +30,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -80,7 +82,7 @@ public class XSLServlet extends HttpServlet implements ExternallyConfigured {
                         + "| XSL file: " + xslFilePath);
             }
             logger.info("Performing XSL transformation with " + xslFile.getAbsolutePath());
-            InputStreamReader in = new InputStreamReader(new FileInputStream(xslFile), "UTF-8");
+            InputStreamReader in = new InputStreamReader(new FileInputStream(xslFile), StandardCharsets.UTF_8);
             TransformerFactory tFactory = XMLUtil.getTransformerFactory();
             // add node-set extension that etsa xsls use
             ((TransformerFactoryImpl) tFactory).getConfiguration().registerExtensionFunction(new SaxonNodeSet());
@@ -93,12 +95,12 @@ public class XSLServlet extends HttpServlet implements ExternallyConfigured {
             String htmlResult = writer.toString();
             File html = File.createTempFile("tmp", ".doc");
 
-            FileUtils.write(html, htmlResult);
+            FileUtils.write(html, htmlResult, StandardCharsets.UTF_8);
             htmlResult = StringEscapeUtils.escapeXml(htmlResult);
             String xmlResult = "<root><element>" + htmlResult + "</element></root>";
             // send response as xml
             response.setContentType("text/xml");
-            response.getOutputStream().write(xmlResult.getBytes("UTF-8"));
+            response.getOutputStream().write(xmlResult.getBytes(StandardCharsets.UTF_8));
         } catch (Exception e) {
             LogManager.getLogger(getClass()).error(e.getMessage(), e);
             String htmlErrorResult = "<html><head></head><body><h5>Viga faili töötlemisel</h5></body></html>";
@@ -107,7 +109,7 @@ public class XSLServlet extends HttpServlet implements ExternallyConfigured {
             // send response error message as xml
             response.setContentType("text/xml");
             // response.setCharacterEncoding("UTF-8");
-            response.getOutputStream().write(xmlErrorResult.getBytes("UTF-8"));
+            response.getOutputStream().write(xmlErrorResult.getBytes(StandardCharsets.UTF_8));
         }
     }
 }

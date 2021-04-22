@@ -37,12 +37,16 @@ import ee.aktors.misp2.model.ProducerName;
 import ee.aktors.misp2.model.Query;
 import ee.aktors.misp2.model.QueryName;
 import ee.aktors.misp2.util.Const.QUERY_TYPE;
-import ee.aktors.misp2.util.openapi.generator.OpenApiFormBuilder;
 import ee.aktors.misp2.util.LanguageUtil;
+import ee.aktors.misp2.util.openapi.generator.OpenApiFormBuilder;
+
 import java.io.File;
 import java.io.StringWriter;
 import java.net.URI;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Extract data from OpenAPI description YAML file and generate HTML forms from it.

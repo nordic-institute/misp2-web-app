@@ -25,47 +25,6 @@
 
 package ee.aktors.misp2.util.xroad;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.net.URLConnection;
-import java.net.URLStreamHandler;
-import java.nio.charset.StandardCharsets;
-import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import javax.xml.namespace.NamespaceContext;
-import javax.xml.soap.MessageFactory;
-import javax.xml.soap.SOAPConstants;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.SOAPException;
-import javax.xml.soap.SOAPFault;
-import javax.xml.soap.SOAPHeader;
-import javax.xml.soap.SOAPMessage;
-import javax.xml.soap.SOAPPart;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
-
-import org.apache.commons.configuration.Configuration;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 import ee.aktors.misp2.action.exception.QueryException;
 import ee.aktors.misp2.model.Portal;
 import ee.aktors.misp2.model.Producer;
@@ -82,6 +41,46 @@ import ee.aktors.misp2.util.xroad.soap.XMLNamespaceContainer;
 import ee.aktors.misp2.util.xroad.soap.XRoad4SOAPMessageBuilder;
 import ee.aktors.misp2.util.xroad.soap.XRoad5SOAPMessageBuilder;
 import ee.aktors.misp2.util.xroad.soap.XRoad6SOAPMessageBuilder;
+import javax.xml.namespace.NamespaceContext;
+import javax.xml.soap.MessageFactory;
+import javax.xml.soap.SOAPConstants;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPException;
+import javax.xml.soap.SOAPFault;
+import javax.xml.soap.SOAPHeader;
+import javax.xml.soap.SOAPMessage;
+import javax.xml.soap.SOAPPart;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import org.apache.commons.configuration.Configuration;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLConnection;
+import java.net.URLStreamHandler;
+import java.nio.charset.StandardCharsets;
+import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Utilities related to X-Road (SOAP messages, WSDLs etc)
@@ -89,9 +88,10 @@ import ee.aktors.misp2.util.xroad.soap.XRoad6SOAPMessageBuilder;
  * @author sander.kallo
  *
  */
+@SuppressWarnings("RedundantThrows")
 public final class XRoadUtil {
 
-    protected static Logger log = LogManager.getLogger(XRoadUtil.class);
+    protected static final Logger log = LogManager.getLogger(XRoadUtil.class);
 
     /**
      * Hide constructor to work around RIA checkstyle limitations
@@ -113,11 +113,11 @@ public final class XRoadUtil {
         final int sixteen = 0x10;
         
         SecureRandom random = new SecureRandom();
-        byte bytes[] = new byte[length];
+        byte[] bytes = new byte[length];
         random.nextBytes(bytes);
-        StringBuffer nonce = new StringBuffer();
-        for (int i = 0; i < bytes.length; i++) {
-            int b = bytes[i] & ff;
+        StringBuilder nonce = new StringBuilder();
+        for (byte aByte : bytes) {
+            int b = aByte & ff;
             if (b < sixteen)
                 nonce.append('0');
             nonce.append(Integer.toHexString(b));
@@ -134,7 +134,7 @@ public final class XRoadUtil {
      */
     public static String soapMessageToString(SOAPMessage soapMessage) {
         ByteArrayOutputStream out = soapMessageToByteArrayOutputStream(soapMessage);
-        return new String(out.toByteArray(), StandardCharsets.UTF_8);
+        return new String(Objects.requireNonNull(out).toByteArray(), StandardCharsets.UTF_8);
     }
 
     /**
@@ -149,9 +149,7 @@ public final class XRoadUtil {
         try {
             soapMessage.writeTo(out);
             return out;
-        } catch (SOAPException e) {
-            log.error("Failed to generate a String from SOAPMessage", e);
-        } catch (IOException e) {
+        } catch (SOAPException | IOException e) {
             log.error("Failed to generate a String from SOAPMessage", e);
         }
         return null;
@@ -231,20 +229,21 @@ public final class XRoadUtil {
 
         // This method isn't necessary for XPath processing either.
         @Override
-        public Iterator<?> getPrefixes(String uri) {
+        @SuppressWarnings("rawtypes")
+        public Iterator getPrefixes(String uri) {
             throw new UnsupportedOperationException();
         }
     }
     /**
      * Throw exception if SOAP fault is found from document from SOAP message fault xpath.
-     * @param doc XML document that is handeled as SOAP message
+     * @param doc XML document that is handled as SOAP message
      * @param remark short comment for logging
      * @param xpath XPath object with pre-determined namespace prefixes
      * @throws DataExchangeException when SOAP-Fault is found
      * (+ faultCode and faultString are embedded into the exception)
      */
     public static void checkFault(Document doc, String remark, XPath xpath) throws DataExchangeException {
-        NodeList faultNodes = null;
+        NodeList faultNodes;
         try {
             XPathExpression soapFault = xpath.compile("/SOAP-ENV:Envelope/SOAP-ENV:Body/SOAP-ENV:Fault");
             faultNodes = (NodeList) soapFault.evaluate(doc, XPathConstants.NODESET);
@@ -258,7 +257,7 @@ public final class XRoadUtil {
             StringWriter faultBuf = new StringWriter();
             for (int i = 0; i < faultNodes.getLength(); i++) {
                 Node faultNode = faultNodes.item(i);
-                faultBuf.append(faultNode.getTextContent() + " ");
+                faultBuf.append(faultNode.getTextContent()).append(" ");
                 if (faultNode instanceof Element) {
                     Element faultCodeElement =
                         XMLUtil.getElementByLocalTagName((Element) faultNode, "faultcode");
@@ -271,12 +270,12 @@ public final class XRoadUtil {
             }
             throw new DataExchangeException(DataExchangeException.Type.XROAD_SOAP_RESPONSE_FAULT,
                     " " + remark + " response contained SOAP-ENV:Fault | "
-                        + faultBuf.toString(), faultCode, faultString, null);
+                        + faultBuf, faultCode, faultString, null);
         }
     }
     /**
      * Throw exception if SOAP fault is found from document .
-     * @param doc XML document that is handeled as SOAP message
+     * @param doc XML document that is handled as SOAP message
      * @param remark short comment for logging
      * @throws DataExchangeException when SOAP-Fault is found
      * (+ faultCode and faultString are embedded into the exception)
@@ -332,7 +331,7 @@ public final class XRoadUtil {
      * @return {@link List} of {@link Integer}
      */
     public static List<Integer> getIntegerListFromString(String s) {
-        List<Integer> l = new ArrayList<Integer>();
+        List<Integer> l = new ArrayList<>();
         for (String intString : getStringListFromString(s)) {
             if (intString.trim().isEmpty())
                 continue;
@@ -347,11 +346,7 @@ public final class XRoadUtil {
      */
     public static List<String> getStringListFromString(String s) {
         String[] ar = s.split(Pattern.quote(Const.LIST_ELEMENT_DELIMITER));
-        List<String> l = new ArrayList<String>();
-        for (String substr : ar) {
-            l.add(substr);
-        }
-        return l;
+        return new ArrayList<>(Arrays.asList(ar));
     }
 
     /**
@@ -399,11 +394,7 @@ public final class XRoadUtil {
 
     private static String readXml(String url) throws QueryException, DataExchangeException {
         String xml = URLReader.readUrlStr(getMetaServiceEndpointUrlWithTimeouts(url), false);
-        if (xml == null) {
-            throw new DataExchangeException(
-                    DataExchangeException.Type.UNSPECIFIED,
-                    "URLReader returned null instead of WSDL string.", null);
-        }
+        Objects.requireNonNull(xml);
         return xml;
     }
     /**
@@ -429,8 +420,7 @@ public final class XRoadUtil {
      */
     public static Document readValidWsdlAsDocument(String wsdlUrl) throws QueryException, DataExchangeException {
         String wsdl = readXml(wsdlUrl);
-        Document doc = wsdlToDocument(wsdl, wsdlUrl);
-        return doc;
+        return wsdlToDocument(wsdl, wsdlUrl);
     }
 
     /**
@@ -473,7 +463,7 @@ public final class XRoadUtil {
     public static CommonXRoadSOAPMessageBuilder getXRoadSOAPMessageBuilder(int xroadVersion)
             throws DataExchangeException {
         Portal portal = new Portal();
-        portal.setXroadProtocolVer(Const.XROAD_VERSION.getByIndex(xroadVersion).getProtocolVersion());
+        portal.setXroadProtocolVer(Objects.requireNonNull(XROAD_VERSION.getByIndex(xroadVersion)).getProtocolVersion());
         return getXRoadSOAPMessageBuilder(portal);
     }
 
@@ -493,7 +483,7 @@ public final class XRoadUtil {
         // objects are definitely unequal: one is null and another isn't
         if (obj == null && anotherObj != null || obj != null && anotherObj == null) {
             return false;
-        } else if (obj == null && anotherObj == null) {
+        } else if (obj == null) {
             // objects are definitely equal: both are nulls
             return true;
         }
@@ -504,7 +494,7 @@ public final class XRoadUtil {
     private static boolean areStringsEqual(String str, String anotherStr) {
         Boolean stringsEqual = areObjectsEqual(str, anotherStr);
         if (stringsEqual != null)
-            return stringsEqual.booleanValue();
+            return stringsEqual;
         return str.equals(anotherStr);
     }
 
@@ -516,7 +506,7 @@ public final class XRoadUtil {
         Boolean producersEqual = areObjectsEqual(producer, anotherProducer);
         // return if one of the producers is null, no other comparison needed
         if (producersEqual != null)
-            return producersEqual.booleanValue();
+            return producersEqual;
 
         // producer != null && anotherProducer != null
         if (portal.isV6()) {
@@ -535,14 +525,14 @@ public final class XRoadUtil {
      * @param producers list to be checked
      * @return true if producer is contained in a set
      */
-    public static boolean isProducerDuplicatedInSet(Producer producer, Set<Producer> producers) {
+    public static boolean isProducerUniqueInSet(Producer producer, Set<Producer> producers) {
         for (Producer producerItem : producers) {
             if (producerItem.getId().equals(producer.getId()))
-                return true;
+                return false;
             // alternative not using ID: if(areProducersEqual(producer,
             // producerItem)) return true;
         }
-        return false;
+        return true;
     }
 
     /**
@@ -670,7 +660,6 @@ public final class XRoadUtil {
      * @param readTimeout
      *            maximum endpoint data reading timeout in milliseconds
      * @return URL with set timeouts
-     * @throws MalformedURLException
      */
     private static URL getEndpointUrlWithTimeouts(String endpointUrl, final Integer connectTimeout,
             final Integer readTimeout) throws DataExchangeException {
@@ -687,10 +676,10 @@ public final class XRoadUtil {
                         URLConnection connection = target.openConnection();
                         // Connection settings
                         if (connectTimeout != null) {
-                            connection.setConnectTimeout(connectTimeout.intValue());
+                            connection.setConnectTimeout(connectTimeout);
                         }
                         if (readTimeout != null) {
-                            connection.setReadTimeout(readTimeout.intValue());
+                            connection.setReadTimeout(readTimeout);
                         }
                         // Overwrite default Accept header
                         setGenericAcceptHeader(connection);
@@ -710,17 +699,17 @@ public final class XRoadUtil {
         final int kilo = 1000;
         Integer connectTimeout = null; // ms
         if (config.containsKey(connectTimeoutKey)) {
-            Double connectTimeoutInSeconds = config.getDouble(connectTimeoutKey);
-            if (connectTimeoutInSeconds != null && connectTimeoutInSeconds.doubleValue() > 0) {
-                connectTimeout = (int) Math.round(connectTimeoutInSeconds.doubleValue() * kilo);
+            double connectTimeoutInSeconds = config.getDouble(connectTimeoutKey);
+            if (connectTimeoutInSeconds > 0) {
+                connectTimeout = (int) Math.round(connectTimeoutInSeconds * kilo);
             }
         }
 
         Integer readTimeout = null; // ms
         if (config.containsKey(readTimeoutKey)) {
-            Double readTimeoutInSeconds = config.getDouble(readTimeoutKey);
-            if (readTimeoutInSeconds != null && readTimeoutInSeconds.doubleValue() > 0) {
-                readTimeout = (int) Math.round(readTimeoutInSeconds.doubleValue() * kilo);
+            double readTimeoutInSeconds = config.getDouble(readTimeoutKey);
+            if (readTimeoutInSeconds > 0) {
+                readTimeout = (int) Math.round(readTimeoutInSeconds * kilo);
             }
         }
         return getEndpointUrlWithTimeouts(endpointUrl, connectTimeout, readTimeout);

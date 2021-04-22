@@ -66,7 +66,7 @@ import org.w3c.dom.NodeList;
 @Transactional
 public class ProducerService extends BaseService {
 
-	private static Logger logger = LogManager.getLogger(ProducerService.class);
+	private static final Logger logger = LogManager.getLogger(ProducerService.class);
 
 	private String getProducerHqlOrder() {
 		return "p.xroadInstance,"
@@ -81,7 +81,6 @@ public class ProducerService extends BaseService {
 	 * @param portal portal of producer
 	 * @return a list of the results
 	 */
-	@SuppressWarnings("unchecked")
 	public List<Producer> findActiveProducers(Portal portal) {
 		return findActiveProducers(portal, null);
 	}
@@ -119,9 +118,10 @@ public class ProducerService extends BaseService {
 	 * @param protocolType producer protocol type
 	 * @return a list of the results
 	 */
+	@SuppressWarnings("unchecked")
 	public List<Producer> findAllProducers(Portal portal, ProtocolType protocolType) {
 		String qlString = "select p FROM Producer p where p.portal.id=:portalId "
-			+ "and (p.isComplex=false or p.isComplex=null)";
+			+ "and (p.isComplex=false or p.isComplex is null)";
 		if (protocolType != null) {
 			qlString += " and p.protocol = :protocol ";
 		}
@@ -134,8 +134,7 @@ public class ProducerService extends BaseService {
 		if (protocolType != null) {
 			s.setParameter("protocol", protocolType);
 		}
-
-		return s.getResultList();
+		return  s.getResultList();
 	}
 
 	/**
@@ -147,7 +146,7 @@ public class ProducerService extends BaseService {
 		try {
 			StringWriter queryStringWriter = new StringWriter();
 			queryStringWriter.append("select p FROM Producer p where ");
-			HashMap<String, Object> parameters = new LinkedHashMap<String, Object>();
+			HashMap<String, Object> parameters = new LinkedHashMap<>();
 
 			queryStringWriter.append("p.portal.id=:portalId ");
 			parameters.put("portalId", portal.getId());
@@ -179,7 +178,7 @@ public class ProducerService extends BaseService {
 				queryStringWriter.append("and p.subsystemCode is null ");
 			}
 
-			queryStringWriter.append(" order by p.inUse desc, " + getProducerHqlOrder());
+			queryStringWriter.append(" order by p.inUse desc, ").append(getProducerHqlOrder());
 			// logger.debug("Query str: " + queryStringWriter.toString());
 			javax.persistence.Query s = getEntityManager().createQuery(queryStringWriter.toString());
 			for (String key : parameters.keySet()) {
@@ -222,7 +221,7 @@ public class ProducerService extends BaseService {
 			if (state != producer.getInUse()) {
 				producer.setInUse(state);
 				save(producer);
-				if (state == false) {
+				if (!state) {
 					deleteProducerQueries(producer);
 				}
 			}
@@ -303,43 +302,36 @@ public class ProducerService extends BaseService {
 
 						String name = XMLUtil.getElementByLocalTagName(member, "name").getTextContent();
 
-						Producer temp = new Producer();
-						temp.setXroadInstance(xroadInstance);
-						temp.setShortName(memberCode);
-						temp.setMemberClass(memberClass);
-						temp.setSubsystemCode(subsystemCode);
-						String key = temp.getXroadIdentifier();
-						logger.trace("Inserting into producerNames '" + key + "' : '" + name + "'");
-						ProducerName tempProducerName = new ProducerName();
-						tempProducerName.setProducer(temp);
-						tempProducerName.setDescription(name);
-						tempProducerName.setLang(ActionContext.getContext().getLocale().getLanguage());
-						producerNames.add(tempProducerName);
-						temp.setInUse(false);
+						Producer producer = new Producer();
+						producer.setXroadInstance(xroadInstance);
+						producer.setShortName(memberCode);
+						producer.setMemberClass(memberClass);
+						producer.setSubsystemCode(subsystemCode);
+						addProducerToProducerNamesWithDescription(producerNames, name, producer);
+						producer.setInUse(false);
 
 						// if producer with that name is active then set
 						// temporary producer to active
-						for (int z = 0; z < activeProducers.size(); z++) {
-							Producer activeProducer = activeProducers.get(z);
+						for (Producer activeProducer : activeProducers) {
 							boolean equalToLegacyXroadProducer = !activeProducer.getPortal().isV6()
-								&& memberCode.equalsIgnoreCase(activeProducer.getShortName());
+									&& memberCode.equalsIgnoreCase(activeProducer.getShortName());
 							boolean equalToXroadV6Producer = activeProducer.getPortal().isV6()
-								&& xroadInstance.equals(activeProducer.getXroadInstance())
-								&& memberClass.equals(activeProducer.getMemberClass())
-								&& memberCode.equalsIgnoreCase(activeProducer.getShortName())
-								&& (
-								subsystemCode == null && activeProducer.getSubsystemCode() == null
-									|| subsystemCode != null
-									&& subsystemCode.equals(activeProducer.getSubsystemCode()
-								));
+									&& xroadInstance.equals(activeProducer.getXroadInstance())
+									&& memberClass.equals(activeProducer.getMemberClass())
+									&& memberCode.equalsIgnoreCase(activeProducer.getShortName())
+									&& (
+									subsystemCode == null && activeProducer.getSubsystemCode() == null
+											|| subsystemCode != null
+											&& subsystemCode.equals(activeProducer.getSubsystemCode()
+									));
 							if (equalToLegacyXroadProducer || equalToXroadV6Producer) {
-								temp.setInUse(true);
+								producer.setInUse(true);
 								break;
 							}
 						}
-						temp.setPortal(portal);
-						temp.setProtocol(ProtocolType.SOAP);
-						producers.add(temp); // add producer to list
+						producer.setPortal(portal);
+						producer.setProtocol(ProtocolType.SOAP);
+						producers.add(producer); // add producer to list
 					}
 				}
 				List<Producer> afterUpdate = saveProducersFromXml(producers, portal); // update DAO
@@ -355,6 +347,16 @@ public class ProducerService extends BaseService {
 		return Boolean.FALSE;
 	}
 
+	private void addProducerToProducerNamesWithDescription(List<ProducerName> producerNames, String name, Producer temp) {
+		String key = temp.getXroadIdentifier();
+		logger.trace("Inserting into producerNames '" + key + "' : '" + name + "'");
+		ProducerName tempProducerName = new ProducerName();
+		tempProducerName.setProducer(temp);
+		tempProducerName.setDescription(name);
+		tempProducerName.setLang(ActionContext.getContext().getLocale().getLanguage());
+		producerNames.add(tempProducerName);
+	}
+
 	/**
 	 * Updates clients list via REST interface
 	 * @param portal portal which clients to get
@@ -363,8 +365,9 @@ public class ProducerService extends BaseService {
 	 * @return true if clients were update
 	 * @throws DataExchangeException if something went wrong with acquiring client list
 	 */
+	@SuppressWarnings("SameReturnValue")
 	private boolean listClientsForV6Rest(Portal portal, Set<String> activeXroadInstanceCodes,
-		List<String> selectedXroadInstanceCodes) throws DataExchangeException {
+										 List<String> selectedXroadInstanceCodes) throws DataExchangeException {
 		List<Producer> beforeUpdate = findAllProducers(portal, ProtocolType.REST);
 		List<Producer> activeProducers = findActiveProducers(portal, ProtocolType.REST);
 		List<ProducerName> producerNames = new ArrayList<>();
@@ -381,44 +384,36 @@ public class ProducerService extends BaseService {
 			List<ProducerInfo> producerInfoList = listClientsQuery.fetchProducerInfo(instCode);
 
 			for (ProducerInfo producerInfo : producerInfoList) {
-				Producer temp = new Producer();
+				Producer producer = new Producer();
 				Id id = producerInfo.getId();
-				temp.setMemberClass(id.getMemberClass());
-				temp.setShortName(id.getMemberCode());
-				temp.setSubsystemCode(id.getSubsystemCode());
-				temp.setXroadInstance(id.getXroadInstance());
-				temp.setInUse(false);
+				producer.setMemberClass(id.getMemberClass());
+				producer.setShortName(id.getMemberCode());
+				producer.setSubsystemCode(id.getSubsystemCode());
+				producer.setXroadInstance(id.getXroadInstance());
+				producer.setInUse(false);
 
 				String name = producerInfo.getName();
-				String key = temp.getXroadIdentifier();
-				logger.trace("Inserting into producerNames '" + key + "' : '" + name + "'");
-				ProducerName tempProducerName = new ProducerName();
-				tempProducerName.setProducer(temp);
-				tempProducerName.setDescription(name);
-				tempProducerName.setLang(ActionContext.getContext().getLocale().getLanguage());
-				producerNames.add(tempProducerName);
-
-				for (int z = 0; z < activeProducers.size(); z++) {
-					Producer activeProducer = activeProducers.get(z);
+				addProducerToProducerNamesWithDescription(producerNames,name,producer);
+				for (Producer activeProducer : activeProducers) {
 					boolean equalToLegacyXroadProducer = !activeProducer.getPortal().isV6()
-						&& temp.getShortName().equalsIgnoreCase(activeProducer.getShortName());
+							&& producer.getShortName().equalsIgnoreCase(activeProducer.getShortName());
 					boolean equalToXroadV6Producer = activeProducer.getPortal().isV6()
-						&& temp.getXroadInstance().equals(activeProducer.getXroadInstance())
-						&& temp.getMemberClass().equals(activeProducer.getMemberClass())
-						&& temp.getShortName().equalsIgnoreCase(activeProducer.getShortName())
-						&& (
-						temp.getSubsystemCode() == null && activeProducer.getSubsystemCode() == null
-							|| temp.getSubsystemCode() != null
-							&& temp.getSubsystemCode().equals(activeProducer.getSubsystemCode()
-						));
+							&& producer.getXroadInstance().equals(activeProducer.getXroadInstance())
+							&& producer.getMemberClass().equals(activeProducer.getMemberClass())
+							&& producer.getShortName().equalsIgnoreCase(activeProducer.getShortName())
+							&& (
+							producer.getSubsystemCode() == null && activeProducer.getSubsystemCode() == null
+									|| producer.getSubsystemCode() != null
+									&& producer.getSubsystemCode().equals(activeProducer.getSubsystemCode()
+							));
 					if (equalToLegacyXroadProducer || equalToXroadV6Producer) {
-						temp.setInUse(true);
+						producer.setInUse(true);
 						break;
 					}
 				}
-				temp.setPortal(portal);
-				temp.setProtocol(ProtocolType.REST);
-				producers.add(temp); // add producer to list
+				producer.setPortal(portal);
+				producer.setProtocol(ProtocolType.REST);
+				producers.add(producer); // add producer to list
 			}
 			List<Producer> afterUpdate = saveProducersFromXml(producers, portal); // update DAO
 			compare(beforeUpdate, afterUpdate, activeXroadInstanceCodes);
@@ -467,7 +462,7 @@ public class ProducerService extends BaseService {
 			pn.setLang(tempProducerName.getLang());
 
 			// if that producer exists, then setId and update
-			if (producerDescExists(pn, tempProducerName.getLang(), portal)) {
+			if (producerDescExists(pn, portal)) {
 				getEntityManager().merge(pn);
 			} else {
 				getEntityManager().persist(pn);
@@ -481,7 +476,7 @@ public class ProducerService extends BaseService {
 	 * @return list of results, empty if no results
 	 */
 	public List<Producer> saveProducersFromXml(List<Producer> all, Portal portal) {
-		List<Producer> list = new ArrayList<Producer>();
+		List<Producer> list = new ArrayList<>();
 		for (Producer temp : all) {
 			if (XRoadUtil.isProducerExcluded(temp)) {
 				logger.trace("Not persisting producer '" + temp.getXroadIdentifier()
@@ -576,8 +571,8 @@ public class ProducerService extends BaseService {
 	 */
 	private void compare(List<Producer> before, List<Producer> after,
 		Set<String> activeXroadInstanceCodes) {
-		if (after != null && after.isEmpty() == false) {
-			ArrayList<String> outOfSync = new ArrayList<String>();
+		if (after != null && !after.isEmpty()) {
+			ArrayList<String> outOfSync = new ArrayList<>();
 			Map<String, Producer> beforeMap = mapIdentifierToProducer(before);
 			Map<String, Producer> afterMap = mapIdentifierToProducer(after);
 			String afterXroadInstanceCode = getCommonXroadInstanceCode(afterMap);
@@ -606,9 +601,7 @@ public class ProducerService extends BaseService {
 		String commonXroadInstanceCode = null;
 		for (Producer producer : producerMap.values()) {
 			String producerXroadInstanceCode = producer.getXroadInstance();
-			if (producerXroadInstanceCode == null) {
-				continue;
-			} else if (commonXroadInstanceCode == null) { // producerXroadInstanceCode != null
+			if (commonXroadInstanceCode == null) { // producerXroadInstanceCode != null
 				// assign current producer instance to common instance
 				commonXroadInstanceCode = producerXroadInstanceCode;
 			} else if (!commonXroadInstanceCode.equals(producerXroadInstanceCode)) {
@@ -646,11 +639,10 @@ public class ProducerService extends BaseService {
 
 	/**
 	 * @param p producer name
-	 * @param lang language of portal name
 	 * @param portal portal of producer
 	 * @return true if description exists and no errors occurred, false otherwise
 	 */
-	public boolean producerDescExists(ProducerName p, String lang, Portal portal) {
+	public boolean producerDescExists(ProducerName p, Portal portal) {
 		String qlString = "select p FROM ProducerName p, Producer pr where p.lang=:lang and "
 			+ "p.producer.id=:producerId and p.producer.id=pr.id and pr.portal.id=:portalId";
 		try {
@@ -674,7 +666,6 @@ public class ProducerService extends BaseService {
 	 * @param portal portal of producers
 	 * @return list of results, empty list if no results
 	 */
-	@SuppressWarnings("unchecked")
 	public List<Producer> findComplexProducers(Portal portal) {
 		return findComplexProducers(portal, null);
 	}
@@ -711,7 +702,7 @@ public class ProducerService extends BaseService {
 	 * @param producer producer whom names to delete
 	 */
 	public void deleteProducerNames(Producer producer) {
-		String qlString = "DELETE ProducerName pn WHERE pn.producer.id = :producer_id";
+		String qlString = "DELETE FROM ProducerName pn WHERE pn.producer.id = :producer_id";
 		getEntityManager()
 			.createQuery(qlString)
 			.setParameter("producer_id", producer.getId())
@@ -722,7 +713,7 @@ public class ProducerService extends BaseService {
 	 * @param producer producer whom queries to delete
 	 */
 	public void deleteProducerQueries(Producer producer) {
-		String qlString = "DELETE Query q WHERE q.producer=:producer";
+		String qlString = "DELETE FROM Query q WHERE q.producer=:producer";
 		getEntityManager()
 			.createQuery(qlString)
 			.setParameter("producer", producer)
