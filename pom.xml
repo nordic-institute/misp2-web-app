@@ -565,7 +565,7 @@
                                         <http>
                                             <url>http://localhost:${misp2.it-test.misp2_port}/misp2</url>
                                         </http>
-                                        <time>15000</time>
+                                        <time>60000</time>
                                     </wait>
                                     <log>
                                         <enabled>true</enabled>
