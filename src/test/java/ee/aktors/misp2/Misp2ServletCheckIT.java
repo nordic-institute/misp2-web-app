@@ -29,22 +29,11 @@ public class Misp2ServletCheckIT extends BaseUITest {
     }
 
     @Test
-    public void loadCertificationCheck() throws Exception {
-        userLogin();
-        URL url = new URL(baseUrl + "/loadCertification" + "?certificate=fakecert");
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        assertEquals("misp2 /loadCertification endpoint should reply status 200",
-                HttpStatus.OK.value(), connection.getResponseCode()
-        );
-
-    }
-
-    @Test
     public void ssnValidationCheck() throws Exception {
         userLogin();
         URL url = new URL(baseUrl + "/ssnValidation" + "?ssn=fakessn&countryCode=EE");
         HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        assertEquals("misp2 /loadCertification endpoint should reply status 200",
+        assertEquals("misp2 /ssnValidation endpoint should reply status 200",
                 HttpStatus.OK.value(), connection.getResponseCode()
         );
         assertEquals("text/xml;charset=UTF-8", connection.getContentType());

@@ -248,7 +248,6 @@
         <constructor-arg ref="orgService"/>
     </bean>
 
-    <bean id="certificateAction" scope="prototype" class="ee.aktors.misp2.action.CertificateAction"/>
     <bean id="complexAction" scope="prototype" class="ee.aktors.misp2.action.ComplexQueryAction">
         <constructor-arg ref="queryService"/>
         <constructor-arg ref="producerService"/>

@@ -60,15 +60,12 @@ public final class MenuUtil {
     public static final String MENU_AC_HELP_POSTFIX = "_help";
     public static final String MENU_AC_MANAGER_HELP_POSTFIX = "_help_manager";
     public static final String CHECK_TIMEOUT = "checkTimeout";
-    public static final List<String> MENU_AC_LOGIN = Arrays.asList(new String[]{
-            "login",
+    public static final List<String> MENU_AC_LOGIN = Arrays.asList("login",
             "enter",
             "portalChange",
             "formLogin",
             "IDCardLogin",
-            "version"
-            //"certCreate", "certGenerate", "certLoad"
-            });
+            "version");
     public static final List<String> MENU_AC_EULA = Arrays.asList(new String[]{
             "acceptEula",
             "rejectEula"
