@@ -67,13 +67,16 @@ import java.util.TreeMap;
 public class WSDLParser {
     
     private static final Logger LOGGER = LogManager.getLogger(WSDLParser.class.getName());
-    
-    public URL wsdlUrl;
+
+    protected URL wsdlUrl;
     private Document doc;
     private File file;
     private XPath xpath;
     private String xroadNamespace;
     private final XROAD_VERSION xroadVersion;
+    private static final String DEFINITIONS_SERVICE_XTEE_XPATH ="/wsdl:definitions/wsdl:service//".concat(Const.XROAD_NS_PREFIX_OLD);
+
+    private static final String TITLE_XPATH = ":title";
 
     /**
      * Initializes WSDLParser and sets given values
@@ -132,9 +135,11 @@ public class WSDLParser {
             try {
                 DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance(); // factory + builder + doc =>
                                                                                        // parse XML
+                factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+                factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
                 factory.setNamespaceAware(true);
                 DocumentBuilder builder = factory.newDocumentBuilder();
-                LOGGER.debug("Parsing WSDL from URI: " + wsdlUrl);
+                LOGGER.debug("Parsing WSDL from URI:{}", wsdlUrl);
                 if(wsdlUrl != null) {
                     doc = builder.parse(wsdlUrl.openConnection().getInputStream(), StandardCharsets.UTF_8.name());
                 } else if(file != null) {
@@ -155,7 +160,7 @@ public class WSDLParser {
         } else {
             try {
                 xroadNamespace = getXRoadNamespaceFromWsdlV4And5();
-                LOGGER.debug("Extracted X-Road namespace (v4 or v5): " + xroadNamespace);
+                LOGGER.debug("Extracted X-Road namespace (v4 or v5):{}", xroadNamespace);
             } catch (Exception e) {
                 throw new QueryException(QueryException.Type.WSDL_XROAD_NAMESPACE_NOT_FOUND,
                         "Failed to extract X-Road namespace from WSDL", e);
@@ -237,6 +242,7 @@ public class WSDLParser {
      * @return  operation request namespace
      */
     public String getOperationRequestNamespace(String operationName) {
+
         String namespaceUri = null;
         try {
             Long t0 = new Date().getTime();
@@ -279,20 +285,19 @@ public class WSDLParser {
     public List<ProducerName> getProducerDescriptions(Producer producer, String lang) {
         List<ProducerName> producerNames = new ArrayList<>();
         try {
-            XPathExpression findXrdAddress = xpath.compile("/wsdl:definitions/wsdl:service//"
-                    + Const.XROAD_NS_PREFIX_OLD + ":address");
+            XPathExpression findXrdAddress = xpath.compile(DEFINITIONS_SERVICE_XTEE_XPATH + ":address");
             NodeList addressNodes = (NodeList) findXrdAddress.evaluate(doc, XPathConstants.NODESET);
             if (addressNodes == null || addressNodes.getLength() == 0)
                 addressNodes = (NodeList) xpath.compile(
-                        "/wsdl:definitions/wsdl:service//" + Const.XROAD_NS_PREFIX + ":address").evaluate(doc,
+                        DEFINITIONS_SERVICE_XTEE_XPATH + ":address").evaluate(doc,
                         XPathConstants.NODESET);
             if (addressNodes != null && addressNodes.getLength() > 0) {
-                XPathExpression expr = xpath.compile("/wsdl:definitions/wsdl:service//" + Const.XROAD_NS_PREFIX_OLD
-                        + ":title");
+                XPathExpression expr = xpath.compile(DEFINITIONS_SERVICE_XTEE_XPATH
+                        + TITLE_XPATH);
                 NodeList nodes = (NodeList) expr.evaluate(doc, XPathConstants.NODESET);
                 if (nodes.getLength() == 0)
                     nodes = (NodeList) xpath.compile(
-                            "/wsdl:definitions/wsdl:service//" + Const.XROAD_NS_PREFIX + ":title").evaluate(doc,
+                            DEFINITIONS_SERVICE_XTEE_XPATH + TITLE_XPATH).evaluate(doc,
                             XPathConstants.NODESET);
                 for (int i = 0; i < nodes.getLength(); i++) {
                     Element descs = (Element) nodes.item(i); // get the first one that includes title
@@ -332,7 +337,7 @@ public class WSDLParser {
                     continue;
                 List<QueryName> queryNames = new ArrayList<>();
                 String xpathString = "/wsdl:definitions/wsdl:portType/wsdl:operation[@name='" + serviceName + "']//"
-                        + Const.XROAD_NS_PREFIX + ":title";
+                        + Const.XROAD_NS_PREFIX + TITLE_XPATH;
                 NodeList nodesTitles = (NodeList) xpath.compile(xpathString).evaluate(doc, XPathConstants.NODESET);
                 if (nodesTitles.getLength() > 0) {
                     for (int j = 0; j < nodesTitles.getLength(); j++) {
