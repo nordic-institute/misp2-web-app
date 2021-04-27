@@ -194,19 +194,6 @@
     <servlet>
         <description>
         </description>
-        <display-name>loadCertification</display-name>
-        <servlet-name>loadCertification</servlet-name>
-        <servlet-class>
-    	ee.aktors.misp2.servlet.LoadCertificationServlet
-        </servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>loadCertification</servlet-name>
-        <url-pattern>/loadCertification</url-pattern>
-    </servlet-mapping>
-    <servlet>
-        <description>
-        </description>
         <display-name>ssnValidation</display-name>
         <servlet-name>ssnValidation</servlet-name>
         <servlet-class>

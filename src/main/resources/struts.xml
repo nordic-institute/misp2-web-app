@@ -524,24 +524,6 @@
             <result name="success">/pages/loggedOut.jsp</result>
         </action>
 
-        <!--############## Certificate  ##############-->
-        <action name="certCreate" method="execute" class="certificateAction">
-            <interceptor-ref name="entranceStack"/>
-            <result name="success">
-                <param name="location">/pages/certificateCreate.jsp</param>
-            </result>
-        </action>
-        <action name="certGenerate" method="generate" class="certificateAction">
-            <interceptor-ref name="entranceStack"/>
-            <result name="success">/pages/certificateCreate.jsp</result>
-            <result name="error">/pages/certificateCreate.jsp</result>
-            <result name="input">/pages/certificateCreate.jsp</result>
-        </action>
-        <action name="certLoad" method="execute" class="certificateAction">
-            <interceptor-ref name="entranceStack"/>
-            <result name="success">/loadCertification</result>
-        </action>
-        
         <!-- Accept or reject EULA (end user license agreement) JSON-based server-side methods. -->
         <action name="rejectEula" method="rejectEula" class="eulaAction"/>
         <action name="acceptEula" method="acceptEula" class="eulaAction"/>
