@@ -25,19 +25,19 @@
 
 package ee.aktors.misp2.util;
 
-import java.io.IOException;
-import java.io.StringReader;
-
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xml.sax.ErrorHandler;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
+
+import java.io.IOException;
+import java.io.StringReader;
 
 /**
  *
@@ -58,8 +58,10 @@ public final class CheckXML {
      */
     public static boolean checkSyntax(String xml) {
         String str = xml.trim();
-        LOGGER.trace("Checking XML: " + str);
+        LOGGER.trace("Checking XML: {}", str);
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         dbf.setNamespaceAware(true);
 
         try {
@@ -67,13 +69,7 @@ public final class CheckXML {
             builder.setErrorHandler(new MyErrorHandler());
             InputSource is = new InputSource(new StringReader(str));
             builder.parse(is);
-        } catch (SAXException e) {
-            LOGGER.error(e.getMessage(), e);
-            return false;
-        } catch (ParserConfigurationException e) {
-            LOGGER.error(e.getMessage(), e);
-            return false;
-        } catch (IOException e) {
+        } catch (SAXException | ParserConfigurationException | IOException e) {
             LOGGER.error(e.getMessage(), e);
             return false;
         }
