@@ -25,6 +25,20 @@
 
 package ee.aktors.misp2.util;
 
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -36,25 +50,13 @@ import java.util.List;
 import java.util.Set;
 import java.util.TreeMap;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NamedNodeMap;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-
 /**
  */
 public class XMLDiffMerge {
 
     /**
      */
-    public static enum Difference {
+    public enum Difference {
         ADDED, DELETED, EQUAL;
         /**
          * @return lower case enum name
@@ -64,11 +66,10 @@ public class XMLDiffMerge {
         }
 
         /**
-         * @return attribute name
+         * @apiNote  attribute name
          */
-        public static String getAttributeName() {
-            return "diff";
-        }
+        public static final String ATTRIBUTE_NAME = "diff";
+
     }
 
     private Document baseDoc;
@@ -80,6 +81,8 @@ public class XMLDiffMerge {
     private XMLDiffMerge() {
         docBuildFactory = DocumentBuilderFactory.newInstance();
         docBuildFactory.setIgnoringElementContentWhitespace(true);
+        docBuildFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        docBuildFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         docBuildFactory.setNamespaceAware(true);
         this.diffDoc = null;
     }
@@ -87,10 +90,13 @@ public class XMLDiffMerge {
     /**
      * @param baseInputStream document input stream
      * @param modifiedInputStream modified document input stream
-     * @throws Exception if parsing fails
+     * @throws ParserConfigurationException, IOException, SAXException if parsing fails
      */
-    public XMLDiffMerge(InputStream baseInputStream, InputStream modifiedInputStream) throws Exception {
+    public XMLDiffMerge(InputStream baseInputStream, InputStream modifiedInputStream)
+            throws ParserConfigurationException, IOException, SAXException {
         this();
+        docBuildFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        docBuildFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
         DocumentBuilder docBuilder = docBuildFactory.newDocumentBuilder();
         this.baseDoc = docBuilder.parse(baseInputStream);
         this.modifiedDoc = docBuilder.parse(modifiedInputStream);
@@ -99,9 +105,9 @@ public class XMLDiffMerge {
     /**
      * @param baseDocument base document to set
      * @param modifiedDocument modified document to set
-     * @throws ParserConfigurationException can throw
+     *
      */
-    public XMLDiffMerge(Document baseDocument, Document modifiedDocument) throws ParserConfigurationException {
+    public XMLDiffMerge(Document baseDocument, Document modifiedDocument) {
         this();
         this.baseDoc = baseDocument;
         this.modifiedDoc = modifiedDocument;
@@ -159,9 +165,9 @@ public class XMLDiffMerge {
 
     /**
      * @return document difference
-     * @throws Exception if doucment cloning fails
+     * @throws ParserConfigurationException if document cloning fails
      */
-    public Document getDifferenceDocument() throws Exception {
+    public Document getDifferenceDocument() throws ParserConfigurationException {
         long t = new Date().getTime();
         // insert mark all diff attributes
         cloneToDiffDoc(this.baseDoc);
@@ -171,42 +177,41 @@ public class XMLDiffMerge {
         // attributes +
         // all the text content and attributes of that element so it can be uniquely identified
         logger.trace("...Parsing base elements...\n");
-        HashMap<String, ElementContainer> baseElements = new LinkedHashMap<String, ElementContainer>();
+        HashMap<String, ElementContainer> baseElements = new LinkedHashMap<>();
         // use cloned diff doc so elements do not have to be exported
         parseComparisonElements(this.diffDoc, baseElements);
 
         // collect all comparable modified document nodes to hashmap
         logger.trace("...Parsing modified elements...\n");
-        HashMap<String, ElementContainer> modifiedElements = new LinkedHashMap<String, ElementContainer>();
+        HashMap<String, ElementContainer> modifiedElements = new LinkedHashMap<>();
         parseComparisonElements(this.modifiedDoc, modifiedElements);
 
         long t1 = new Date().getTime();
         // find all the entries existing only in base document
-        HashSet<String> baseKeySet = new LinkedHashSet<String>();
-        baseKeySet.addAll(baseElements.keySet());
-        logger.trace("1. baseKeySet: " + baseKeySet.size());
+        HashSet<String> baseKeySet = new LinkedHashSet<>(baseElements.keySet());
+        logger.trace("1. baseKeySet:{}", baseKeySet.size());
         baseKeySet.removeAll(modifiedElements.keySet());
-        logger.trace("2. baseKeySet: " + baseKeySet.size());
+        logger.trace("2. baseKeySet: {}", baseKeySet.size());
 
         // all nodes not existing in modified document must be deleted
         for (String key : baseKeySet) {
             ElementContainer elementContainer = baseElements.get(key);
             Element element = elementContainer.getElement();
-            logger.trace("Deleted: " + key);
-            element.setAttribute(Difference.getAttributeName(), Difference.DELETED.toLowerCase());
+            logger.trace("Deleted:{}", key);
+            element.setAttribute(Difference.ATTRIBUTE_NAME, Difference.DELETED.toLowerCase());
         }
 
         // find all the entries existing only in modified document
-        HashSet<String> modifiedKeySet = new LinkedHashSet<String>();
+        HashSet<String> modifiedKeySet = new LinkedHashSet<>();
         modifiedKeySet.addAll(modifiedElements.keySet());
-        logger.trace("1. modifiedKeySet: " + modifiedKeySet.size());
+        logger.trace("1. modifiedKeySet: {}", modifiedKeySet.size());
         modifiedKeySet.removeAll(baseElements.keySet());
-        logger.trace("2. modifiedKeySet: " + modifiedKeySet.size());
+        logger.trace("2. modifiedKeySet: {}", modifiedKeySet.size());
 
         // modified nodes need to be added to diffDoc
         mergeFromCoparisonElements(this.diffDoc, modifiedElements, modifiedKeySet);
 
-        logger.trace("t: " + (t1 - t));
+        logger.trace("t: {}", (t1 - t));
         return diffDoc;
 
     }
@@ -356,7 +361,7 @@ public class XMLDiffMerge {
                 Element newBaseNode = (Element) base.importNode(adjustedModifiedElement, true);
                 logger.trace("Added: " + key);
                 firstUsableBaseContainer.getElement().appendChild(newBaseNode);
-                newBaseNode.setAttribute(Difference.getAttributeName(), Difference.ADDED.toLowerCase());
+                newBaseNode.setAttribute(Difference.ATTRIBUTE_NAME, Difference.ADDED.toLowerCase());
 
                 if (insertedParent) { // mark all children as already inserted if parent was inserted, otherwise we get
                                       // duplicate elements when children are inserted again
@@ -485,11 +490,10 @@ public class XMLDiffMerge {
             }
             List<Element> baseElements = getChildren(base);
 
-            if (baseElements.size() > 0) {
-                TreeMap<String, Element> sortedElements = new TreeMap<String, Element>();
+            if (!baseElements.isEmpty()) {
+                TreeMap<String, Element> sortedElements = new TreeMap<>();
                 // sort
-                for (int i = 0; i < baseElements.size(); i++) {
-                    Element baseElement = baseElements.get(i);
+                for (Element baseElement : baseElements) {
                     String baseHash = normalizeElement(baseElement, level, maxLevel, includeAttributes, includeContent,
                             entrySubTagNamesForComparison);
                     sortedElements.put(baseHash, baseElement);
@@ -505,7 +509,7 @@ public class XMLDiffMerge {
     }
 
     private static List<Element> getChildren(Element el) {
-        List<Element> elements = new ArrayList<Element>();
+        List<Element> elements = new ArrayList<>();
         NodeList nodes = el.getChildNodes();
         if (nodes != null) {
             for (int i = 0; i < nodes.getLength(); i++) {
