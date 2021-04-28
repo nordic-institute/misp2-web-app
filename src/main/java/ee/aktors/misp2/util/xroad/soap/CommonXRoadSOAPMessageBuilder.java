@@ -111,12 +111,10 @@ public abstract class CommonXRoadSOAPMessageBuilder {
     protected abstract Node getQueryId() throws DataExchangeException;
     
     /**
-     * Get query ID tag name
-     * @return query ID tag name
+     * query ID tag name
      */
-    public String getQueryIdTagName() {
-        return "id"; // common for all X-Road versions so far
-    }
+    public static final String QUERY_ID_TAG = "id";
+
     
     // Setters for X-Road query header elements, uses element tag names
     /**
