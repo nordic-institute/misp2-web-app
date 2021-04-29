@@ -25,9 +25,10 @@
 
 package ee.aktors.misp2.util.xroad.soap;
 
-import java.io.IOException;
-import java.io.StringReader;
-
+import ee.aktors.misp2.util.XMLUtil;
+import ee.aktors.misp2.util.xroad.XRoadUtil;
+import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -40,7 +41,6 @@ import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPHeader;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
@@ -50,9 +50,8 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import ee.aktors.misp2.util.XMLUtil;
-import ee.aktors.misp2.util.xroad.XRoadUtil;
-import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
+import java.io.IOException;
+import java.io.StringReader;
 
 /**
  * Common functionality for all implemented X-Road SOAP request messages.
@@ -76,7 +75,7 @@ public abstract class CommonXRoadSOAPMessageBuilder {
      * @param xroadNamespace X-Road namespace URI
      * @throws DataExchangeException on initialization failure
      */
-    public CommonXRoadSOAPMessageBuilder(XMLNamespaceContainer xroadNamespace) throws DataExchangeException {
+    protected CommonXRoadSOAPMessageBuilder(XMLNamespaceContainer xroadNamespace) throws DataExchangeException {
         try {
             soapMessage = MessageFactory.newInstance(SOAPConstants.SOAP_1_1_PROTOCOL).createMessage();
             soapPart = soapMessage.getSOAPPart();
@@ -94,7 +93,7 @@ public abstract class CommonXRoadSOAPMessageBuilder {
      * @param soapMessage X-Road SOAP message
      * @throws DataExchangeException on initialization failure
      */
-    public CommonXRoadSOAPMessageBuilder(SOAPMessage soapMessage) throws DataExchangeException {
+    protected CommonXRoadSOAPMessageBuilder(SOAPMessage soapMessage) throws DataExchangeException {
         try {
             this.soapMessage = soapMessage;
             soapPart = soapMessage.getSOAPPart();
@@ -112,12 +111,10 @@ public abstract class CommonXRoadSOAPMessageBuilder {
     protected abstract Node getQueryId() throws DataExchangeException;
     
     /**
-     * Get query ID tag name
-     * @return query ID tag name
+     * query ID tag name
      */
-    public String getQueryIdTagName() {
-        return "id"; // common for all X-Road versions so far
-    }
+    public static final String QUERY_ID_TAG = "id";
+
     
     // Setters for X-Road query header elements, uses element tag names
     /**
@@ -147,7 +144,11 @@ public abstract class CommonXRoadSOAPMessageBuilder {
             : "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + content;
         
         SOAPBody soapBody = getBody();
-        DocumentBuilder documentBuilder =  DocumentBuilderFactory.newInstance().newDocumentBuilder();
+        DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+        dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        DocumentBuilder documentBuilder =  dbf.newDocumentBuilder();
+
         Document document = documentBuilder.parse(new InputSource(new StringReader(processedContent)));
         
         soapBody.addDocument(document);
@@ -164,8 +165,7 @@ public abstract class CommonXRoadSOAPMessageBuilder {
     
     /**
      * @return SOAP-ENV:Head of the request currently being built message
-     * @throws DataExchangeException
-     * @throws SOAPException
+     * @throws DataExchangeException for errors in retrieving  SOAP header from the SOAP message
      */
     protected SOAPHeader getHeader() throws DataExchangeException {
         try {
@@ -213,7 +213,7 @@ public abstract class CommonXRoadSOAPMessageBuilder {
         try {
             Element element = XMLUtil.getElementByLocalTagName(parentElement, tagName);
             if (value == null && element == null) return null;
-            else if (value == null && element != null) {
+            else if (value == null) {
                 element.getParentNode().removeChild(element);
             } else if (element == null) {
                 element = parentElement.addChildElement(tagName, ns.getPrefix(), ns.getUri());

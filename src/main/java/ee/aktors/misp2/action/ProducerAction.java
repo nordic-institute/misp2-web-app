@@ -45,6 +45,13 @@ import ee.aktors.misp2.service.XroadInstanceService;
 import ee.aktors.misp2.util.Const;
 import ee.aktors.misp2.util.LanguageUtil;
 import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
+import javax.servlet.http.HttpServletRequest;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.struts2.StrutsStatics;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.InputStream;
@@ -55,12 +62,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import javax.servlet.http.HttpServletRequest;
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.struts2.StrutsStatics;
 
 /**
  */
@@ -72,8 +73,8 @@ public class ProducerAction extends SessionPreparedBaseAction implements StrutsS
     private QueryExportImportService queryExportImportService;
     private List<Producer> activeProducers;
     private List<Producer> allProducers;
-    private LinkedHashMap<Producer, List<Xforms>> activeProducersXforms;
-    private LinkedHashMap<Producer, List<Xforms>> complexProducersXforms;
+    private Map<Producer, List<Xforms>> activeProducersXforms;
+    private Map<Producer, List<Xforms>> complexProducersXforms;
     private Producer producer;
     private List<ProducerName> producerNames;
     private String name;
@@ -478,25 +479,25 @@ public class ProducerAction extends SessionPreparedBaseAction implements StrutsS
     /**
      * @return the activeProducersXforms
      */
-    public LinkedHashMap<Producer, List<Xforms>> getActiveProducersXforms() {
+    public Map<Producer, List<Xforms>> getActiveProducersXforms() {
         return activeProducersXforms;
     }
     /**
      * @param activeProducersXformsNew the activeProducersXforms to set
      */
-    public void setActiveProducersXforms(LinkedHashMap<Producer, List<Xforms>> activeProducersXformsNew) {
+    public void setActiveProducersXforms(Map<Producer, List<Xforms>> activeProducersXformsNew) {
         this.activeProducersXforms = activeProducersXformsNew;
     }
     /**
      * @return the complexProducersXforms
      */
-    public LinkedHashMap<Producer, List<Xforms>> getComplexProducersXforms() {
+    public Map<Producer, List<Xforms>> getComplexProducersXforms() {
         return complexProducersXforms;
     }
     /**
      * @param complexProducersXformsNew the complexProducersXforms to set
      */
-    public void setComplexProducersXforms(LinkedHashMap<Producer, List<Xforms>> complexProducersXformsNew) {
+    public void setComplexProducersXforms(Map<Producer, List<Xforms>> complexProducersXformsNew) {
         this.complexProducersXforms = complexProducersXformsNew;
     }
     /**

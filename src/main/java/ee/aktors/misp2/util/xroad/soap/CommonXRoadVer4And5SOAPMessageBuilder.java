@@ -25,14 +25,12 @@
 
 package ee.aktors.misp2.util.xroad.soap;
 
+import ee.aktors.misp2.util.XMLUtil;
+import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
 import javax.xml.soap.SOAPMessage;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Node;
-
-import ee.aktors.misp2.util.XMLUtil;
-import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
 
 
 /**
@@ -46,12 +44,11 @@ import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
  *
  */
 public abstract class CommonXRoadVer4And5SOAPMessageBuilder extends CommonXRoadSOAPMessageBuilder {
-    protected Logger log = LogManager.getLogger(CommonXRoadVer4And5SOAPMessageBuilder.class);
+    protected Logger logger = LogManager.getLogger(CommonXRoadVer4And5SOAPMessageBuilder.class);
     
     /**
      * Main constructor which should directly be called only by the implementing class constructor.
-     * @param soapProtocol SOAP version as {@link javax.xml.soap.SOAPConstants} version string.
-     * @param xmlNamespaceContainer XML namespace of X-Road header elements
+     * @param xroadNamespace XML namespace of X-Road header elements
      * @throws DataExchangeException when initialization fails
      */
     protected CommonXRoadVer4And5SOAPMessageBuilder(XMLNamespaceContainer xroadNamespace) throws DataExchangeException {
@@ -60,8 +57,7 @@ public abstract class CommonXRoadVer4And5SOAPMessageBuilder extends CommonXRoadS
 
     /**
      * Main constructor which should directly be called only by the implementing class constructor.
-     * @param soapProtocol SOAP version as {@link javax.xml.soap.SOAPConstants} version string.
-     * @param xmlNamespaceContainer XML namespace of X-Road header elements
+     * @param soapMessage f
      * @throws DataExchangeException when initialization fails
      */
     protected CommonXRoadVer4And5SOAPMessageBuilder(SOAPMessage soapMessage) throws DataExchangeException {
@@ -93,7 +89,7 @@ public abstract class CommonXRoadVer4And5SOAPMessageBuilder extends CommonXRoadS
     }
     @Override
     protected Node getQueryId() throws DataExchangeException {
-        return getHeaderField(getQueryIdTagName());
+        return getHeaderField(QUERY_ID_TAG);
     }
     
     /** Getters for header tag contents */
@@ -184,7 +180,7 @@ public abstract class CommonXRoadVer4And5SOAPMessageBuilder extends CommonXRoadS
     }
     @Override
     public void setQueryId(String s) throws DataExchangeException {
-        setHeaderField(getQueryIdTagName(), s);
+        setHeaderField(QUERY_ID_TAG, s);
     }
     
     // standalone v4 and v5 component setters

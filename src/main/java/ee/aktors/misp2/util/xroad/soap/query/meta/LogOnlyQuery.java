@@ -25,19 +25,6 @@
 
 package ee.aktors.misp2.util.xroad.soap.query.meta;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import javax.xml.namespace.QName;
-import javax.xml.soap.SOAPBody;
-import javax.xml.soap.SOAPElement;
-import javax.xml.soap.SOAPException;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.w3c.dom.Element;
-
 import ee.aktors.misp2.beans.GroupValidPair;
 import ee.aktors.misp2.beans.T3SecWrapper;
 import ee.aktors.misp2.model.T3Sec;
@@ -47,6 +34,19 @@ import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
 import ee.aktors.misp2.util.xroad.soap.CommonXRoadVer4And5SOAPMessageBuilder;
 import ee.aktors.misp2.util.xroad.soap.XRoad4SOAPMessageBuilder;
 import ee.aktors.misp2.util.xroad.soap.XRoad6SOAPMessageBuilder;
+import javax.xml.namespace.QName;
+import javax.xml.soap.SOAPBody;
+import javax.xml.soap.SOAPElement;
+import javax.xml.soap.SOAPException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.w3c.dom.Element;
+
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+
+import static ee.aktors.misp2.util.xroad.soap.CommonXRoadSOAPMessageBuilder.QUERY_ID_TAG;
 
 /**
  * Sends any XML or text content to security server in order to hold auditlog in
@@ -78,32 +78,30 @@ public class LogOnlyQuery extends AbstractMisp2MetaQuery {
      */
     public LogOnlyQuery(T3SecWrapper input) throws DataExchangeException {
         super();
+        final String LOG_ONLY_SERVICE_CODE = "logOnly";
         this.input = input;
-        this.toBeSaved = new ArrayList<T3Sec>();
+        this.toBeSaved = new ArrayList<>();
         validateInput();
 
         if (isV6()) {
-            // final Configuration config = ConfigurationProvider.getConfig();
-            // String logOnlyConf = config.getString("xroad.v6.logOnly");
-            // service instance is same as client instance
             serviceXroadInstance = portal.getClientXroadInstance();
             serviceMemberClass = portal.getMisp2XroadServiceMemberClass();
             serviceMemberCode = portal.getMisp2XroadServiceMemberCode();
             serviceSubsystemCode = portal.getMisp2XroadServiceSubsystemCode();
-            serviceCode = "logOnly";
+            serviceCode = LOG_ONLY_SERVICE_CODE;
             serviceVersion = "v1";
         } else if (isV5()) {
             serviceXroadInstance = null;
             serviceMemberClass = null;
             serviceMemberCode = getMetaServiceMemberCode();
             serviceSubsystemCode = null;
-            serviceCode = "logOnly";
+            serviceCode = LOG_ONLY_SERVICE_CODE;
             serviceVersion = null;
         } else if (isV4()) {
             serviceMemberClass = null;
             serviceMemberCode = getMetaServiceMemberCode();
             serviceSubsystemCode = null;
-            serviceCode = "logOnly";
+            serviceCode = LOG_ONLY_SERVICE_CODE;
             serviceVersion = null;
         }
     }
@@ -199,7 +197,7 @@ public class LogOnlyQuery extends AbstractMisp2MetaQuery {
 
             QName name = new QName(LogQuery.NAME_ACTION_NAME);
             request.addChildElement(name).addTextNode(input.getActionName());
-            T3Sec t3 = null;
+            T3Sec t3;
             switch (input.getT3sec().getActionId()) {
             case LogQuery.USER_ADD_TO_GROUP:
             case LogQuery.USER_DELETE_FROM_GROUP:
@@ -336,7 +334,7 @@ public class LogOnlyQuery extends AbstractMisp2MetaQuery {
         // add query_id
         Element id;
         try {
-            id = XMLUtil.getElementByLocalTagName(soapResponse.getSOAPHeader(), soapRequestBuilder.getQueryIdTagName());
+            id = XMLUtil.getElementByLocalTagName(soapResponse.getSOAPHeader(), QUERY_ID_TAG);
             if (id != null) {
                 String queryId = id.getTextContent();
                 if (queryId != null && !queryId.isEmpty()) {

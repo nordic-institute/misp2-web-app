@@ -25,15 +25,6 @@
 
 package ee.aktors.misp2.util;
 
-import java.io.ByteArrayInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Iterator;
-
 import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -49,7 +40,7 @@ import javax.xml.transform.stream.StreamSource;
 import javax.xml.validation.Schema;
 import javax.xml.validation.SchemaFactory;
 import javax.xml.validation.Validator;
-
+import net.sf.saxon.TransformerFactoryImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Attr;
@@ -67,7 +58,15 @@ import org.xml.sax.ErrorHandler;
 import org.xml.sax.SAXException;
 import org.xml.sax.SAXParseException;
 
-import net.sf.saxon.TransformerFactoryImpl;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.Writer;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  */
@@ -93,8 +92,7 @@ public final class XMLUtil {
                     null);
             docFactory.setNamespaceAware(true);
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
-            Document doc = docBuilder.newDocument();
-            return doc;
+            return docBuilder.newDocument();
         } catch (ParserConfigurationException e) {
             throw new XMLUtilException(e);
         }
@@ -118,14 +116,8 @@ public final class XMLUtil {
             Writer stringWriter = new StringWriter();
             lsOutput.setCharacterStream(stringWriter);
             lsSerializer.write(doc, lsOutput);
-            String result = stringWriter.toString();
-
-            return result;
-        } catch (ClassNotFoundException e) {
-            throw new XMLUtilException(e);
-        } catch (InstantiationException e) {
-            throw new XMLUtilException(e);
-        } catch (IllegalAccessException e) {
+            return stringWriter.toString();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
             throw new XMLUtilException(e);
         }
     }
@@ -138,12 +130,8 @@ public final class XMLUtil {
      * @throws XMLUtilException if class not fount, illegal access or initiation fails
      */
     public static Document convertXMLToDocument(String xml) throws XMLUtilException {
-        try {
-            InputStream inputStream = new ByteArrayInputStream(xml.getBytes("UTF-8"));
-            return convertInputStreamToDocument(inputStream);
-        } catch (UnsupportedEncodingException e) {
-            throw new XMLUtilException(e);
-        }
+        InputStream inputStream = new ByteArrayInputStream(xml.getBytes(StandardCharsets.UTF_8));
+        return convertInputStreamToDocument(inputStream);
     }
 
     /**
@@ -157,16 +145,14 @@ public final class XMLUtil {
         try {
             DocumentBuilderFactory docFactory =
                     DocumentBuilderFactory.newInstance(DOCUMENT_BUILDER_FACTORY_CLASS_NAME, null);
+            docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            docFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             docFactory.setNamespaceAware(true);
             DocumentBuilder docBuilder = docFactory.newDocumentBuilder();
             Document doc = docBuilder.parse(inputStream);
             doc.getDocumentElement().normalize();
             return doc;
-        } catch (ParserConfigurationException e) {
-            throw new XMLUtilException(e);
-        } catch (SAXException e) {
-            throw new XMLUtilException(e);
-        } catch (IOException e) {
+        } catch (ParserConfigurationException | SAXException | IOException e) {
             throw new XMLUtilException(e);
         }
     }
@@ -182,6 +168,8 @@ public final class XMLUtil {
     public static void validateDocument(Document doc, InputStream schemaStream) throws SAXException, IOException {
         DOMSource source = new DOMSource(doc);
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
         Schema schema = schemaFactory.newSchema(new StreamSource(schemaStream));
         Validator validator = schema.newValidator();
         validator.validate(source);
@@ -202,6 +190,8 @@ public final class XMLUtil {
     public static void validateDocumentIgnoringMissingAttributes(Document doc, InputStream schemaStream)
             throws SAXException, IOException {
         SchemaFactory schemaFactory = SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI);
+        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+        schemaFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
         Schema schema = schemaFactory.newSchema(new StreamSource(schemaStream));
         Validator validator = schema.newValidator();
         validator.setErrorHandler(new ErrorHandler() {
@@ -236,8 +226,8 @@ public final class XMLUtil {
      * @param name - name of children elements.
      * @return children element(s)
      */
-    public static ArrayList<Element> getChildren(Element parent, String name) {
-        ArrayList<Element> children = new ArrayList<Element>();
+    public static List<Element> getChildren(Element parent, String name) {
+        ArrayList<Element> children = new ArrayList<>();
 
         for (Node child = parent.getFirstChild(); child != null; child = child.getNextSibling()) {
             if (child instanceof Element && name.equals(child.getNodeName()))
@@ -282,7 +272,7 @@ public final class XMLUtil {
     public static String getTagValue(Element tag) {
         for (Node child = tag.getFirstChild(); child != null; child = child.getNextSibling()) {
             if (child instanceof Text)
-                return ((Text) child).getNodeValue();
+                return child.getNodeValue();
         }
         return "";
     }
@@ -298,9 +288,9 @@ public final class XMLUtil {
         Element parent = (Element) element.getParentNode();
         Node prevSibling = element.getPreviousSibling();
         Node nextSibling = element.getNextSibling();
-        if (prevSibling != null && prevSibling instanceof Text && prevSibling.getNodeValue().trim().equals(""))
+        if (prevSibling instanceof Text && prevSibling.getNodeValue().trim().equals(""))
             parent.removeChild(prevSibling);
-        if (nextSibling != null && nextSibling instanceof Text && nextSibling.getNodeValue().trim().equals(""))
+        if (nextSibling instanceof Text && nextSibling.getNodeValue().trim().equals(""))
             parent.removeChild(nextSibling);
         parent.removeChild(element);
         return element;

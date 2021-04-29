@@ -25,15 +25,11 @@
 
 package ee.aktors.misp2.util;
 
-import java.io.IOException;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-
+import ee.aktors.misp2.beans.ListClassifierItem;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
@@ -43,7 +39,10 @@ import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
-import ee.aktors.misp2.beans.ListClassifierItem;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -88,9 +87,11 @@ public class XmlSimpleClassifierParser {
         if (xml == null) {
             throw new IllegalArgumentException("Xml is null");
         }
-        List<ListClassifierItem> classifierItems = new ArrayList<ListClassifierItem>();
+        List<ListClassifierItem> classifierItems = new ArrayList<>();
         try {
             DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+            dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            dbf.setAttribute(XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
             DocumentBuilder db = dbf.newDocumentBuilder();
             Document doc = db.parse(new InputSource(new StringReader(xml)));
 
@@ -116,11 +117,7 @@ public class XmlSimpleClassifierParser {
                     classifierItems.add(new ListClassifierItem(fpstr, spstr));
                 }
             }
-        } catch (SAXException ex) {
-            LOGGER.error(ex.getMessage(), ex);
-        } catch (IOException ex) {
-            LOGGER.error(ex.getMessage(), ex);
-        } catch (ParserConfigurationException ex) {
+        } catch (SAXException | IOException | ParserConfigurationException ex) {
             LOGGER.error(ex.getMessage(), ex);
         }
         return classifierItems;

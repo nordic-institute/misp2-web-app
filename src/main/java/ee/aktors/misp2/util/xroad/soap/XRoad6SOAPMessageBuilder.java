@@ -25,18 +25,16 @@
 
 package ee.aktors.misp2.util.xroad.soap;
 
+import ee.aktors.misp2.util.XMLUtil;
+import ee.aktors.misp2.util.xroad.XRoadUtil;
+import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
 import javax.xml.namespace.QName;
 import javax.xml.soap.SOAPElement;
 import javax.xml.soap.SOAPEnvelope;
 import javax.xml.soap.SOAPException;
 import javax.xml.soap.SOAPMessage;
 import javax.xml.soap.SOAPPart;
-
 import org.w3c.dom.Node;
-
-import ee.aktors.misp2.util.XMLUtil;
-import ee.aktors.misp2.util.xroad.XRoadUtil;
-import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
 
 /**
  * X-Road version 6 soap message builder
@@ -94,7 +92,7 @@ public class XRoad6SOAPMessageBuilder extends CommonXRoadSOAPMessageBuilder {
 
     @Override
     protected Node getQueryId() throws DataExchangeException {
-        return getHeaderField(getQueryIdTagName());
+        return getHeaderField(QUERY_ID_TAG);
     }
 
     @Override
@@ -105,7 +103,7 @@ public class XRoad6SOAPMessageBuilder extends CommonXRoadSOAPMessageBuilder {
 
     @Override
     public void setQueryId(String queryId) throws DataExchangeException {
-        setHeaderField(getQueryIdTagName(), queryId);
+        setHeaderField(QUERY_ID_TAG, queryId);
 
     }
 

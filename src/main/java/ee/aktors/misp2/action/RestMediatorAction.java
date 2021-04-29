@@ -24,6 +24,37 @@
  */
 package ee.aktors.misp2.action;
 
+import com.fasterxml.jackson.core.JsonGenerationException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.opensymphony.xwork2.ActionContext;
+import ee.aktors.misp2.httpMethodChecker.HTTPMethod;
+import ee.aktors.misp2.httpMethodChecker.HTTPMethods;
+import ee.aktors.misp2.model.Query;
+import ee.aktors.misp2.model.QueryLog;
+import ee.aktors.misp2.model.QueryName;
+import ee.aktors.misp2.service.QueryLogService;
+import ee.aktors.misp2.service.QueryLogService.LogQueryInput;
+import ee.aktors.misp2.service.QueryService;
+import ee.aktors.misp2.service.XroadInstanceService;
+import ee.aktors.misp2.servlet.mediator.ByteBufferInputStream;
+import ee.aktors.misp2.servlet.mediator.ByteCounter;
+import ee.aktors.misp2.servlet.mediator.ByteCounterInputStream;
+import ee.aktors.misp2.util.Const;
+import ee.aktors.misp2.util.JsonUtil;
+import ee.aktors.misp2.util.xroad.XRoadUtil;
+import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
+import ee.aktors.misp2.util.xroad.soap.identifier.XRoad6ClientIdentifierData;
+import ee.aktors.misp2.util.xroad.soap.identifier.XRoad6ServiceIdentifierData;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.struts2.StrutsStatics;
+import org.springframework.http.HttpStatus;
+
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,40 +69,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.pdfbox.io.IOUtils;
-import org.apache.struts2.StrutsStatics;
-import org.springframework.http.HttpStatus;
-
-import com.fasterxml.jackson.core.JsonGenerationException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.ObjectWriter;
-import com.opensymphony.xwork2.ActionContext;
-
-import ee.aktors.misp2.httpMethodChecker.HTTPMethod;
-import ee.aktors.misp2.httpMethodChecker.HTTPMethods;
-import ee.aktors.misp2.model.Query;
-import ee.aktors.misp2.model.QueryLog;
-import ee.aktors.misp2.model.QueryName;
-import ee.aktors.misp2.service.QueryLogService;
-import ee.aktors.misp2.service.QueryService;
-import ee.aktors.misp2.service.XroadInstanceService;
-import ee.aktors.misp2.servlet.mediator.ByteBufferInputStream;
-import ee.aktors.misp2.servlet.mediator.ByteCounter;
-import ee.aktors.misp2.servlet.mediator.ByteCounterInputStream;
-import ee.aktors.misp2.service.QueryLogService.LogQueryInput;
-import ee.aktors.misp2.util.Const;
-import ee.aktors.misp2.util.JsonUtil;
-import ee.aktors.misp2.util.xroad.XRoadUtil;
-import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
-import ee.aktors.misp2.util.xroad.soap.identifier.XRoad6ClientIdentifierData;
-import ee.aktors.misp2.util.xroad.soap.identifier.XRoad6ServiceIdentifierData;
 
 /**
  * Action for mediating REST query to security server.

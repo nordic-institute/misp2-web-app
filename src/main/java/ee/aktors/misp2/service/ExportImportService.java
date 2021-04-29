@@ -25,29 +25,6 @@
 
 package ee.aktors.misp2.service;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang.ObjectUtils;
-import org.apache.commons.lang.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.struts2.ServletActionContext;
-import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.xml.sax.SAXException;
-
 import ee.aktors.misp2.action.exception.BusinessException;
 import ee.aktors.misp2.action.exception.MispException;
 import ee.aktors.misp2.exportImport.QueryImportData;
@@ -76,6 +53,28 @@ import ee.aktors.misp2.util.Roles;
 import ee.aktors.misp2.util.XMLUtil;
 import ee.aktors.misp2.util.XMLUtilException;
 import ee.aktors.misp2.util.ZipUtil;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang.ObjectUtils;
+import org.apache.commons.lang.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
+import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map.Entry;
 
 /**
  * @author karol.kartau
@@ -789,7 +788,7 @@ public class ExportImportService extends BaseService {
 
     private void saveServiceXroadInstances(Element serviceXroadInstancesElement, Portal portal) {
         if (serviceXroadInstancesElement != null) {
-            ArrayList<Element> xroadInstanceElements =
+            List<Element> xroadInstanceElements =
                     XMLUtil.getChildren(serviceXroadInstancesElement, "xroadInstance");
             for (Element xroadInstanceElement : xroadInstanceElements) {
                 String code = XMLUtil.getTagValue(xroadInstanceElement, "code");

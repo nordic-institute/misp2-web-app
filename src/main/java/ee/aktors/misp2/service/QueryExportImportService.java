@@ -25,38 +25,15 @@
 
 package ee.aktors.misp2.service;
 
-import ee.aktors.misp2.model.Producer.ProtocolType;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map.Entry;
-
-import org.apache.commons.io.FileUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.struts2.ServletActionContext;
-import org.springframework.transaction.annotation.Transactional;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.xml.sax.SAXException;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.opensymphony.xwork2.ActionContext;
-
 import ee.aktors.misp2.action.exception.MispException;
 import ee.aktors.misp2.exportImport.QueryImportData;
 import ee.aktors.misp2.model.Org;
 import ee.aktors.misp2.model.OrgQuery;
 import ee.aktors.misp2.model.Portal;
 import ee.aktors.misp2.model.Producer;
+import ee.aktors.misp2.model.Producer.ProtocolType;
 import ee.aktors.misp2.model.ProducerName;
 import ee.aktors.misp2.model.Query;
 import ee.aktors.misp2.model.QueryName;
@@ -68,6 +45,28 @@ import ee.aktors.misp2.util.XMLUtil;
 import ee.aktors.misp2.util.XMLUtilException;
 import ee.aktors.misp2.util.ZipUtil;
 import ee.aktors.misp2.util.xroad.exception.DataExchangeException;
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.struts2.ServletActionContext;
+import org.springframework.transaction.annotation.Transactional;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.xml.sax.SAXException;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 /**
  * @author karol.kartau
@@ -85,8 +84,8 @@ public class QueryExportImportService extends BaseService {
      * @param producers producer entity list; Xforms entities are looked up for each one
      * @return Producer entities with associated Xforms entities
      */
-    public LinkedHashMap<Producer, List<Xforms>> getProducersWithXforms(List<Producer> producers) {
-        LinkedHashMap<Producer, List<Xforms>> producersWithXforms = new LinkedHashMap<Producer, List<Xforms>>();
+    public Map<Producer, List<Xforms>> getProducersWithXforms(List<Producer> producers) {
+        LinkedHashMap<Producer, List<Xforms>> producersWithXforms = new LinkedHashMap<>();
         for (Producer producer : producers) {
             List<Xforms> xForms = queryService.findXFormsByProducer(producer);
             producersWithXforms.put(producer, xForms);
@@ -133,7 +132,7 @@ public class QueryExportImportService extends BaseService {
      * @throws SAXException on parse failure
      * @throws MispException on internal error (this exception in unexpected)
      */
-    public File getExportFile(LinkedHashMap<Producer, List<Xforms>> producersWithXforms)
+    public File getExportFile(Map<Producer, List<Xforms>> producersWithXforms)
             throws XMLUtilException, IOException, SAXException, MispException {
         File tempDir = FileUtil.getTempDir();
 
@@ -247,7 +246,7 @@ public class QueryExportImportService extends BaseService {
         // Its negative in order to make difference between elements which are saved to database and which are not.
 
         Element producersElement = doc.getDocumentElement();
-        ArrayList<Element> producerElements = XMLUtil.getChildren(producersElement, "producer");
+        List<Element> producerElements = XMLUtil.getChildren(producersElement, "producer");
         for (Element producerElement : producerElements) {
             Producer producer = new Producer();
             String xroadInstance = XMLUtil.getTagValue(producerElement, "xroadInstance");
@@ -294,7 +293,7 @@ public class QueryExportImportService extends BaseService {
             Producer baseProducer = producerService.findProducer(producer, portal); // Give id to producer
             producer.setId(baseProducer != null ? baseProducer.getId() : idCounter--);
 
-            ArrayList<Element> producerNameElements = XMLUtil.getChildren(XMLUtil.getChild(producerElement, "names"),
+            List<Element> producerNameElements = XMLUtil.getChildren(XMLUtil.getChild(producerElement, "names"),
                     "name");
             List<ProducerName> producerNameList = new ArrayList<ProducerName>();
             producer.setProducerNameList(producerNameList);
@@ -306,7 +305,7 @@ public class QueryExportImportService extends BaseService {
                 producerNameList.add(producerName);
             }
 
-            ArrayList<Element> queryElements = XMLUtil.getChildren(XMLUtil.getChild(producerElement, "queries"),
+            List<Element> queryElements = XMLUtil.getChildren(XMLUtil.getChild(producerElement, "queries"),
                     "query");
             List<Xforms> xFormsList = new ArrayList<Xforms>();
             if (isComplex) {
@@ -342,7 +341,7 @@ public class QueryExportImportService extends BaseService {
                     xForm.setId(idCounter--);
                 }
 
-                ArrayList<Element> queryNameElements = XMLUtil.getChildren(XMLUtil.getChild(queryElement, "names"),
+                List<Element> queryNameElements = XMLUtil.getChildren(XMLUtil.getChild(queryElement, "names"),
                         "name");
                 List<QueryName> queryNameList = new ArrayList<QueryName>();
                 query.setQueryNameList(queryNameList);

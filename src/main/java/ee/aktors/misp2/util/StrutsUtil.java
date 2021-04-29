@@ -25,17 +25,17 @@
 
 package ee.aktors.misp2.util;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-
+import com.opensymphony.xwork2.ActionInvocation;
+import com.opensymphony.xwork2.config.entities.ActionConfig;
 import org.apache.commons.io.IOUtils;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
-import com.opensymphony.xwork2.ActionInvocation;
-import com.opensymphony.xwork2.config.entities.ActionConfig;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * Struts util
@@ -61,8 +61,7 @@ public final class StrutsUtil {
         String methodName = actionConfig.getMethodName();
         // If methodName is undefined, then use default method name
         methodName = (methodName != null ? methodName : "execute");
-        Method actionMethod = actionClass.getMethod(methodName);
-        return actionMethod;
+        return actionClass.getMethod(methodName);
     }
 
     /**
@@ -74,19 +73,18 @@ public final class StrutsUtil {
     public static String getConstant(String name) {
         try {
             InputStream inputStream = StrutsUtil.class.getClassLoader().getResourceAsStream("struts-constants.xml");
-            String constantsXML = IOUtils.toString(inputStream, "UTF-8");
+            assert inputStream != null;
+            String constantsXML = IOUtils.toString(inputStream, StandardCharsets.UTF_8);
             Document constantsDoc = XMLUtil.convertXMLToDocument(constantsXML);
             Element strutsElement = constantsDoc.getDocumentElement();
-            ArrayList<Element> constantElements = XMLUtil.getChildren(strutsElement, "constant");
+            List<Element> constantElements = XMLUtil.getChildren(strutsElement, "constant");
             for (Element constantElement : constantElements) {
                 if (constantElement.getAttribute("name").equals(name)) {
                     return constantElement.getAttribute("value");
                 }
             }
             return null; // Constant with specified name was not found
-        } catch (XMLUtilException e) {
-            throw new RuntimeException(e);
-        } catch (IOException e) {
+        } catch (XMLUtilException | IOException e) {
             throw new RuntimeException(e);
         }
     }
