@@ -69,11 +69,6 @@
         <h3><s:text name="label.signin.certificate"/></h3>
         <s:a scheme="https" action="certLogin" data-confirmable-post-link="" cssClass="button regular_btn"><s:text name="label.certificate"/></s:a>
         <br/>
-
-        <span>
-            <s:text name="text.signin.certificate.create"/>
-            <s:a id="newcert" action="certCreate" encode="true"><s:text name="text.here"/></s:a>
-        </span>
     </div>
 </s:if>
 
