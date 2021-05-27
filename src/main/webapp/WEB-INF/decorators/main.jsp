@@ -236,8 +236,8 @@
         </div>
         <div id="footer">
             <div class="container">
-                <s:a href=""><img width="80" height="35" alt="" src="<s:url value='/resources/%{subPortal}/images/erf.gif'  encode='false'/>" id="erf"/></s:a><br />
-                <a rel="noopener" href="https://x-road.global/misp2-licence-info" target="_blank">License info</a>
+                <s:a href=""><img width="80" height="35" alt="" src="<s:url value='/resources/%{subPortal}/images/erf.gif'  encode='false'/>" id="erf"/></s:a>
+                <a rel="noopener" href="https://x-road.global/misp2-licence-info" target="_blank">Licence info</a>
 
             </div>
         </div>
