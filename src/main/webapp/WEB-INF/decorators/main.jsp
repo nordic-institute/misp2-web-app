@@ -35,14 +35,14 @@
         <title>
         	<s:text name="app.title"/>
         </title>
-        
-		<script type="text/javascript">			
+
+		<script type="text/javascript">
 			var absoluteURL = new function(){
 				this.getURL = function(url){
 					return '<s:url value="/"/>'+url;
 				}
 			};
-			
+
 			var serverData = new function(){
 				this.getCSRFHeaderName = function() {
 					return 'X-CSRF-Token';
@@ -51,7 +51,7 @@
 				this.getCSRFToken = function(){
 					return '<s:property value="%{#session.SESSION_CSRF_TOKEN}"/>';
 				};
-			};			
+			};
 		</script>
 
         <!---->
@@ -94,7 +94,7 @@
     <!-- form field error handling -->
     <s:include value="/pages/formError.jsp"/>
     <s:set var="userAuthenticated" value="(#session.SESSION_USER_HANDLE != null || #session.SESSION_CERT != null)"/>
-    
+
     <body>
     	<jsp:include page='eula.jsp' />
          <script type="text/javascript">
@@ -118,8 +118,8 @@
 	            	$(function() {
 	                	$("#lang_<s:property value="locale.language"/>").addClass("active");
 	            	});
-	            </script>                
-				         
+	            </script>
+
                 <ul id="language">
 					<s:iterator var="language" value="@ee.aktors.misp2.util.LanguageUtil@getLanguages()" >
 		                <li>
@@ -130,8 +130,8 @@
 			                	<s:property value="getText('label.lang_switch.'+#language)"/>
 			                </a>
 		                </li>
-					</s:iterator>                  
-                    
+					</s:iterator>
+
                     <s:if test="#session.SESSION_USER_HANDLE != null">
                     	<s:if test="#session.SESSION_USER_ROLE==null || #session.SESSION_USER_ROLE==1 || #session.SESSION_USER_ROLE==64">
                     		<s:set var="helpAction" value="%{locale.language+'_help'}"/>
@@ -174,7 +174,7 @@
                 <s:iterator value="" var="xroadInstance">
                    	<option value="<s:property value="#xroadInstance"/>" <s:if test='portal.clientXroadInstance.equals(#xroadInstance)'> selected="selected"</s:if>><s:property value="#xroadInstance"/></option>
                 </s:iterator>
-                
+
                 <img id="logo" src="<s:url value='/resources/%{subPortal}/images/%{locale.language.equals("et") ? "logo.png" : "e-services.png"}' encode='false'/>" alt="" />
 
 
@@ -184,7 +184,7 @@
         </div>
         <div id="body">
             <div class="container">
-                
+
                 <s:set var="showSide" value="%{#userAuthenticated && showSideBox && context.name!='xforms-query'}"/>
 
                 <s:if test="!#showSide">
@@ -196,8 +196,8 @@
                 </s:if>
 
 				<div id="content">
-					<s:if test='#session.PREVIOUS_ACTION == "enter" && 
-						(#session.SESSION_USER_ROLE == @ee.aktors.misp2.util.Roles@DUMBUSER || 
+					<s:if test='#session.PREVIOUS_ACTION == "enter" &&
+						(#session.SESSION_USER_ROLE == @ee.aktors.misp2.util.Roles@DUMBUSER ||
 						#session.SESSION_USER_ROLE == @ee.aktors.misp2.util.Roles@UNREGISTERED)'>
 						<div class="contentbox ok">
 						   	<h3><s:text name="welcome.message.title"/></h3>
@@ -236,7 +236,9 @@
         </div>
         <div id="footer">
             <div class="container">
-                <s:a href=""><img width="80" height="35" alt="" src="<s:url value='/resources/%{subPortal}/images/erf.gif'  encode='false'/>" id="erf"/></s:a>
+                <s:a href=""><img width="80" height="35" alt="" src="<s:url value='/resources/%{subPortal}/images/erf.gif'  encode='false'/>" id="erf"/></s:a><br />
+                <a rel="noopener" href="https://x-road.global/misp2-licence-info" target="_blank">License info</a>
+
             </div>
         </div>
 
@@ -248,12 +250,12 @@
 	        	<div><button type="button" class="button regular_btn"><s:text name="text.extendSession"/></button></div>
 	        </div>
         </div>
-        
+
 		<%-- Initially hidden div for displaying loading overlay. Absolute positioned --%>
 		<div id="loadingOverlay" class="overlay">
 			<span class="xforms-loading-loading"><s:text name="help.loading.indicator"/></span>
 		</div>
-        
+
         <div class="translations hidden">
         	<input id="validation.service.none.selected" value="<s:text name="validation.service.none.selected"/>" type="hidden"/>
         </div>
