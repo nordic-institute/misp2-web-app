@@ -151,7 +151,7 @@ apt-get update
 
 ### 4.2 MISP2 database package
 
-The MISP2 database package `xtee-misp2-postgresql` is installed using the
+The MISP2 database package `xtee-misp2-postgresql` is installed with default settings using the
 command:
 
 ```bash
@@ -159,40 +159,14 @@ apt-get install xtee-misp2-postgresql
 ```
 
 Below is a list of questions and answers displayed after this command is run.
+The default role i.e. username is `misp2` and only the password is queried. 
 
-Enter a name for the database to be created, the default is `misp2db`:
-
-```bash
-Please provide a database name: [misp2db]
-```
-
-Enter a username for the database to be created, the default is `misp2`:
-
-```bash
-Please provide a username for accessing the database: [misp2]
-```
-
-Once this information has been provided, the installation script will try to
-connect to the database. If this is not successful, the user will be asked to
-create a new database. If they answer `no`, the script will proceed to the next
-step. If you do wish to create a new database with the default name, you can
-proceed with the default answer (enter), otherwise, answer `n`, in which case
-the script will display an error once it has finished.
-
-```bash
-Are you sure you want to create a new database 'misp2db' (y/n)? [y]
-```
-
-If you answered `yes` to the previous question, enter a password for the new
-database user (2 times):
-
-```bash
-Adding new user misp2 
-
+```text
+Creating database 'misp2db'
 Enter password for new role: 
-
 Enter it again:
 ```
+The same password is needed again during MISP2 application installation.
 
 ### 4.3 MISP2 application
 
