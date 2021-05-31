@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+	<Appenders>
+		<Console name="STDOUT" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss} [%c{2},%p] %M; %m%n" />
+		</Console>
+	</Appenders>
+	
+	<Loggers>
+		<Root level="info">
+			<AppenderRef ref="STDOUT" />
+		</Root>
+		<Logger name="com.opensymphony.xwork2.config" level="info" />
+		<Logger name="ee.aktors.misp2" level="trace" />
+		<Logger name="ee.sk.mid.rest" level="trace" />
+	</Loggers>
+</Configuration>

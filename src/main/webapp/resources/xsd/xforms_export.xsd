@@ -1,0 +1,68 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.aktors.ee/support/xroad/xsd/xForms_export.xsd" xmlns="http://www.aktors.ee/support/xroad/xsd/xForms_export.xsd" 
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<xs:element name="producers">
+		<xs:complexType>
+			<xs:sequence>			
+				<xs:element name="producer" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:all>
+							<xs:element name="xroadInstance" type="xs:string" minOccurs="0"/>
+							<xs:element name="memberClass" type="xs:string" minOccurs="0"/>
+							<xs:element name="shortName" type="xs:string"/>
+							<xs:element name="subsystemCode" type="xs:string" minOccurs="0"/>
+							<xs:element name="isComplex" type="xs:boolean"/>
+							<xs:element name="protocol" type="xs:string" minOccurs="0" maxOccurs="1"/>
+							<xs:element name="names">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="name" minOccurs="0" maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="description" type="xs:string"/>
+												</xs:sequence>
+												<xs:attribute name="lang" type="xs:string" use="required"/>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+							<xs:element name="queries">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="query" minOccurs="0" maxOccurs="unbounded">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="shortName" type="xs:string"/>
+													<xs:element name="URL" type="xs:string"/>
+													<xs:element name="openapiServiceCode" type="xs:string" minOccurs="0" maxOccurs="1"/>
+													<xs:element name="names">
+														<xs:complexType>
+															<xs:sequence>
+																<xs:element name="name" minOccurs="0" maxOccurs="unbounded">
+																	<xs:complexType>
+																		<xs:sequence>
+																			<xs:element name="description" type="xs:string"/>
+																			<xs:element name="note" type="xs:string"/>
+																		</xs:sequence>
+																		<xs:attribute name="lang" type="xs:string" use="required"/>
+																	</xs:complexType>
+																</xs:element>
+															</xs:sequence>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>
+						</xs:all>
+					</xs:complexType>
+				</xs:element>	
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+
+</xs:schema>

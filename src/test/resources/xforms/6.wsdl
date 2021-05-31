@@ -1,0 +1,976 @@
+<?xml version="1.0" encoding="UTF-8"?><wsdl:definitions xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/" xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/" xmlns:tns="http://skais2.som.ee/producer/skais2" xmlns:xrd="http://x-road.eu/xsd/xroad.xsd" xmlns:xsd="http://www.w3.org/2001/XMLSchema" targetNamespace="http://skais2.som.ee/producer/skais2">
+    <wsdl:types>
+        <schema xmlns="http://www.w3.org/2001/XMLSchema" elementFormDefault="qualified" targetNamespace="http://skais2.som.ee/producer/skais2">
+            <import namespace="http://x-road.eu/xsd/xroad.xsd" schemaLocation="http://x-road.eu/xsd/xroad.xsd"/>
+            <import namespace="http://x-road.eu/xsd/xroad.xsd" schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/listMethods.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/courier/courierDelivery.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/courier/courierDeliveryReply.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/courier/courierDeliveryAnnulation.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/tvh/tootukassa_teenused.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/tk/tkToovoimPuueHyvitised.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/tk/tkToovoimPuueHyvitisedMassTeenus.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/tk/tkToovoimPuueHyvitisedMassTeenusVastus.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/eaf/eafMakseteatised.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/eaf/eafMakseraport.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/star/star1.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/star/starPuue.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/star/starPuue2.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/star/starLapsTeenus.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/taituri/taituriVmaksed.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/kra/isikutePuuded.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/tlv/tlvIsikuPuudeInfo.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/kpr/maksuvabatuluArvestus.xsd"/>
+            <xsd:include schemaLocation="https://eteenindus.sotsiaalkindlustusamet.ee/xsd/schemas/skais/technicalAid.xsd"/>
+        </schema>
+    </wsdl:types>
+    <!-- SKAIS2 wsdl:message -->
+    <wsdl:message name="requestHeader">
+        <wsdl:part element="xrd:client" name="client"/>
+        <wsdl:part element="xrd:service" name="service"/>
+        <wsdl:part element="xrd:id" name="id"/>
+        <wsdl:part element="xrd:userId" name="userId"/>
+        <wsdl:part element="xrd:requestHash" name="requestHash"/>
+        <wsdl:part element="xrd:issue" name="issue"/>
+        <wsdl:part element="xrd:protocolVersion" name="protocolVersion"/>
+    </wsdl:message>
+
+    <wsdl:message name="listMethods">
+        <wsdl:part element="xrd:listMethods" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="listMethodsResponse">
+        <wsdl:part element="xrd:listMethodsResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="checkJustification">
+        <wsdl:part element="tns:checkJustification" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="checkJustificationResponse">
+        <wsdl:part element="tns:checkJustificationResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="calculateIsoLimitParameters">
+        <wsdl:part element="tns:calculateIsoLimitParameters" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="calculateIsoLimitParametersResponse">
+        <wsdl:part element="tns:calculateIsoLimitParametersResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="calculateContribution">
+        <wsdl:part element="tns:calculateContribution" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="calculateContributionResponse">
+        <wsdl:part element="tns:calculateContributionResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="createTransaction">
+        <wsdl:part element="tns:createTransaction" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="createTransactionResponse">
+        <wsdl:part element="tns:createTransactionResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="cancelTransactionRow">
+        <wsdl:part element="tns:cancelTransactionRow" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="cancelTransactionRowResponse">
+        <wsdl:part element="tns:cancelTransactionRowResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="endRental">
+        <wsdl:part element="tns:endRental" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="endRentalResponse">
+        <wsdl:part element="tns:endRentalResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="providerValidity">
+        <wsdl:part element="tns:providerValidity" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="providerValidityResponse">
+        <wsdl:part element="tns:providerValidityResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="courierDelivery">
+        <wsdl:part element="tns:courierDelivery" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="courierDeliveryResponse">
+        <wsdl:part element="tns:courierDeliveryResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="courierDeliveryReply">
+        <wsdl:part element="tns:courierDeliveryReply" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="courierDeliveryReplyResponse">
+        <wsdl:part element="tns:courierDeliveryReplyResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="courierDeliveryAnnulation">
+        <wsdl:part element="tns:courierDeliveryAnnulation" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="courierDeliveryAnnulationResponse">
+        <wsdl:part element="tns:courierDeliveryAnnulationResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="TVHTaotlusYksUks">
+        <wsdl:part element="tns:TVHTaotlusYksUks" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="TVHTaotlusYksUksResponse">
+        <wsdl:part element="tns:TVHTaotlusYksUksResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="TKToovoimPuueHyvitised">
+        <wsdl:part element="tns:TKToovoimPuueHyvitised" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="TKToovoimPuueHyvitisedResponse">
+        <wsdl:part element="tns:TKToovoimPuueHyvitisedResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="TKToovoimPuueHyvitisedMassTeenus">
+        <wsdl:part element="tns:TKToovoimPuueHyvitisedMassTeenus" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="TKToovoimPuueHyvitisedMassTeenusResponse">
+        <wsdl:part element="tns:TKToovoimPuueHyvitisedMassTeenusResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="TKToovoimPuueHyvitisedMassTeenusVastus">
+        <wsdl:part element="tns:TKToovoimPuueHyvitisedMassTeenusVastus" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="TKToovoimPuueHyvitisedMassTeenusVastusResponse">
+        <wsdl:part element="tns:TKToovoimPuueHyvitisedMassTeenusVastusResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="EAFmakseteatised">
+        <wsdl:part element="tns:EAFmakseteatised" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="EAFmakseteatisedResponse">
+        <wsdl:part element="tns:EAFmakseteatisedResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="EAFmakseraport">
+        <wsdl:part element="tns:EAFmakseraport" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="EAFmakseraportResponse">
+        <wsdl:part element="tns:EAFmakseraportResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="star1Tulud">
+        <wsdl:part element="tns:star1Tulud" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="star1TuludResponse">
+        <wsdl:part element="tns:star1TuludResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="starLapsTeenus">
+        <wsdl:part element="tns:starLapsTeenus" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="starLapsTeenusResponse">
+        <wsdl:part element="tns:starLapsTeenusResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="taituri_vmaksed">
+        <wsdl:part element="tns:taituri_vmaksed" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="taituri_vmaksedResponse">
+        <wsdl:part element="tns:taituri_vmaksedResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="starPuue">
+        <wsdl:part element="tns:starPuue" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="starPuueResponse">
+        <wsdl:part element="tns:starPuueResponse" name="body"/>
+    </wsdl:message>
+
+
+    <wsdl:message name="starPuue2">
+        <wsdl:part element="tns:starPuue2" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="starPuue2Response">
+        <wsdl:part element="tns:starPuue2Response" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="isikutePuuded">
+        <wsdl:part element="tns:isikutePuuded" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="isikutePuudedResponse">
+        <wsdl:part element="tns:isikutePuudedResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="tlvIsikuPuudeInfo">
+        <wsdl:part element="tns:tlvIsikuPuudeInfo" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="tlvIsikuPuudeInfoResponse">
+        <wsdl:part element="tns:tlvIsikuPuudeInfoResponse" name="body"/>
+    </wsdl:message>
+
+    <wsdl:message name="maksuvabatuluArvestus">
+        <wsdl:part element="tns:maksuvabatuluArvestus" name="body"/>
+    </wsdl:message>
+    <wsdl:message name="maksuvabatuluArvestusResponse">
+        <wsdl:part element="tns:maksuvabatuluArvestusResponse" name="body"/>
+    </wsdl:message>
+
+    <!-- SKAIS2 portType -->
+    <wsdl:portType name="skais2PortType">
+        <wsdl:operation name="checkJustification">
+            <wsdl:documentation>
+                <xrd:title>Abivahendite õigustatuse kontroll</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:checkJustification"/>
+            <wsdl:output message="tns:checkJustificationResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="calculateIsoLimitParameters">
+            <wsdl:documentation>
+                <xrd:title>Abivahendite ISO limiitide päring</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:calculateIsoLimitParameters"/>
+            <wsdl:output message="tns:calculateIsoLimitParametersResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="calculateContribution">
+            <wsdl:documentation>
+                <xrd:title>Abivahendite osamaksete arvutamine</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:calculateContribution"/>
+            <wsdl:output message="tns:calculateContributionResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="createTransaction">
+            <wsdl:documentation>
+                <xrd:title>Abivahendite tehingu loomine</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:createTransaction"/>
+            <wsdl:output message="tns:createTransactionResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="cancelTransactionRow">
+            <wsdl:documentation>
+                <xrd:title>Abivahendite tehingu tühistamine</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:cancelTransactionRow"/>
+            <wsdl:output message="tns:cancelTransactionRowResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="endRental">
+            <wsdl:documentation>
+                <xrd:title>Abivahendite üüritehingu lõpetamine</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:endRental"/>
+            <wsdl:output message="tns:endRentalResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="providerValidity">
+            <wsdl:documentation>
+                <xrd:title>providerValidity</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:providerValidity"/>
+            <wsdl:output message="tns:providerValidityResponse"/>
+        </wsdl:operation>
+
+        <wsdl:operation name="listMethods">
+            <wsdl:input message="tns:listMethods" name="listMethods"/>
+            <wsdl:output message="tns:listMethodsResponse" name="listMethodsResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="courierDelivery">
+            <wsdl:documentation>
+                <xrd:title>Väljamaksete edastus</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:courierDelivery"/>
+            <wsdl:output message="tns:courierDeliveryResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="courierDeliveryReply">
+            <wsdl:documentation>
+                <xrd:title>Väljamaksete info tagastus</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:courierDeliveryReply"/>
+            <wsdl:output message="tns:courierDeliveryReplyResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="courierDeliveryAnnulation">
+            <wsdl:documentation>
+                <xrd:title>Väljamakse peatamine</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:courierDeliveryAnnulation"/>
+            <wsdl:output message="tns:courierDeliveryAnnulationResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="TVHTaotlusYksUks">
+            <wsdl:documentation>
+                <xrd:title>Töövõimehindamise taotlus - üks uks</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:TVHTaotlusYksUks"/>
+            <wsdl:output message="tns:TVHTaotlusYksUksResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="TKToovoimPuueHyvitised">
+            <wsdl:documentation>
+                <xrd:title>Töötukassa töövõimetuste, hüvitiste ja pensionite üksikpäring</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:TKToovoimPuueHyvitised"/>
+            <wsdl:output message="tns:TKToovoimPuueHyvitisedResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="TKToovoimPuueHyvitisedMassTeenus">
+            <wsdl:documentation>
+                <xrd:title>Töötukassa töövõimetuste, hüvitiste ja pensionite masspäring - tellimus</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:TKToovoimPuueHyvitisedMassTeenus"/>
+            <wsdl:output message="tns:TKToovoimPuueHyvitisedMassTeenusResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="TKToovoimPuueHyvitisedMassTeenusVastus">
+            <wsdl:documentation>
+                <xrd:title>Töötukassa töövõimetuste, hüvitiste ja pensionite masspäring - tellimuse vastus</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:TKToovoimPuueHyvitisedMassTeenusVastus"/>
+            <wsdl:output message="tns:TKToovoimPuueHyvitisedMassTeenusVastusResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="EAFmakseteatised">
+            <wsdl:documentation>
+                <xrd:title>EAF: Elatiabifond makseteatised</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:EAFmakseteatised"/>
+            <wsdl:output message="tns:EAFmakseteatisedResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="EAFmakseraport">
+            <wsdl:documentation>
+                <xrd:title>EAF: Elatiabifond makseraport</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:EAFmakseraport"/>
+            <wsdl:output message="tns:EAFmakseraportResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="star1Tulud">
+            <wsdl:documentation>
+                <xrd:title>Star1 tulud</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:star1Tulud"/>
+            <wsdl:output message="tns:star1TuludResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="starLapsTeenus">
+            <wsdl:documentation>
+                <xrd:title>StarLapsTeenus</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:starLapsTeenus"/>
+            <wsdl:output message="tns:starLapsTeenusResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="taituri_vmaksed">
+            <wsdl:documentation>
+                <xrd:title>Kohtutäituri infoteenus</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:taituri_vmaksed"/>
+            <wsdl:output message="tns:taituri_vmaksedResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="starPuue">
+            <wsdl:documentation>
+                <xrd:title>STAR puude ja püsiva töövõimetuse päring</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:starPuue"/>
+            <wsdl:output message="tns:starPuueResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="starPuue2">
+            <wsdl:documentation>
+                <xrd:title>Teenuse kaudu on võimalik kindla kuupäeva seisuga pärida, kas isikul on olemas kehtiv ekspertiisi otsus, millega tal on määratud puue.</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:starPuue2"/>
+            <wsdl:output message="tns:starPuue2Response"/>
+        </wsdl:operation>
+        <wsdl:operation name="isikutePuuded">
+            <wsdl:documentation>
+                <xrd:title>KRA puude päring</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:isikutePuuded"/>
+            <wsdl:output message="tns:isikutePuudedResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="tlvIsikuPuudeInfo">
+            <wsdl:documentation>
+                <xrd:title>Tallinna LV puude päring</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:tlvIsikuPuudeInfo"/>
+            <wsdl:output message="tns:tlvIsikuPuudeInfoResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="maksuvabatuluArvestus">
+            <wsdl:documentation>
+                <xrd:title>Maksuvaba tulu jäägi pärimine</xrd:title>
+            </wsdl:documentation>
+            <wsdl:input message="tns:maksuvabatuluArvestus"/>
+            <wsdl:output message="tns:maksuvabatuluArvestusResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+    <!-- SKAIS2 binding -->
+    <wsdl:binding name="skais2Binding" type="tns:skais2PortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+
+        <wsdl:operation name="checkJustification">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="calculateIsoLimitParameters">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="calculateContribution">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="createTransaction">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="cancelTransactionRow">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="endRental">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="providerValidity">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="providerValidityResponse">
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+
+        <wsdl:operation name="listMethods">
+            <soap:operation soapAction=""/>
+            <wsdl:input>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+                <soap:body parts="body" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+                <soap:body parts="body" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="courierDelivery">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="courierDeliveryReply">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="courierDeliveryAnnulation">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="TVHTaotlusYksUks">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="TKToovoimPuueHyvitised">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="TKToovoimPuueHyvitisedMassTeenus">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="TKToovoimPuueHyvitisedMassTeenusVastus">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="EAFmakseteatised">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="EAFmakseraport">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="star1Tulud">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="starLapsTeenus">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="taituri_vmaksed">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="starPuue">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="starPuue2">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="isikutePuuded">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="tlvIsikuPuudeInfo">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="maksuvabatuluArvestus">
+            <soap:operation soapAction="http://TURVASERVER.XTEE/cgi-bin/consumer_proxy" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output>
+                <soap:body use="literal"/>
+                <soap:header message="tns:requestHeader" part="client" use="literal"/>
+                <soap:header message="tns:requestHeader" part="service" use="literal"/>
+                <soap:header message="tns:requestHeader" part="id" use="literal"/>
+                <soap:header message="tns:requestHeader" part="userId" use="literal"/>
+                <soap:header message="tns:requestHeader" part="requestHash" use="literal"/>
+                <soap:header message="tns:requestHeader" part="issue" use="literal"/>
+                <soap:header message="tns:requestHeader" part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="skais2Service">
+        <wsdl:port binding="tns:skais2Binding" name="skais2">
+            <soap:address location="http://example.org/xroad-endpoint"/>
+            <xrd:title>Sotsiaalkaitse infosüsteem</xrd:title>
+            <xrd:address producer="skais2"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>

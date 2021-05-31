@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN" "http://struts.apache.org/dtds/struts-2.5.dtd">
+
+<struts>
+    
+    <constant name="struts.enable.DynamicMethodInvocation" value="true"/>
+    <constant name="struts.mapper.action.prefix.enabled" value="true"/>
+    
+    <constant name="struts.subPortal" value="EE" />
+
+    <!-- No need to change anything after this -->
+    <!-- ..................................... -->
+    <constant name="struts.objectFactory" value="spring"/>
+    <constant name="struts.i18n.encoding" value="UTF-8"/>
+    <constant name="struts.devMode" value="false"/>
+    <constant name="struts.action.extension" value="action"/>
+    <constant name="struts.ognl.allowStaticMethodAccess" value="true"/>
+    <constant name="struts.multipart.maxSize" value="15728640"/><!-- 15 MB in bytes -->
+    
+    <!-- Need to exclude Orbeon requests, otherwise Struts2 starts to parse multipart messages before
+        sending them to Orbeon and Orbeon fails to read data from them. And redundant message parsing causes
+        extra load and is slow.
+    -->
+    <constant name="struts.action.excludePattern" value="/orbeon/.*,/xforms-jsp/.*"/>
+    
+</struts>

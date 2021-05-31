@@ -1,0 +1,189 @@
+<?xml version="1.0"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://www.aktors.ee/support/xroad/xsd/export.xsd" xmlns="http://www.aktors.ee/support/xroad/xsd/export.xsd" 
+	elementFormDefault="qualified" attributeFormDefault="unqualified">
+
+	<xs:element name="root">
+		<xs:complexType>
+			<xs:sequence>
+			
+				<xs:element name="universal" type="xs:boolean"/>
+				<xs:element name="xroadProtocolVer" type="xs:string" minOccurs="0"/>
+				<xs:element name="xroadInstance" type="xs:string" minOccurs="0"/>
+
+				<xs:element name="headOrg">
+					<xs:complexType>
+						<xs:sequence>
+							<xs:element name="orgPersons" type="orgPersons"/>
+							<xs:element name="groups" type="groups"/>
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>				
+				
+				<xs:element name="subOrgs">
+					<xs:complexType>
+						<xs:sequence>			
+							<xs:element name="subOrg" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="memberClass" type="xs:string" minOccurs="0"/>
+										<xs:element name="code" type="xs:string"/>
+										<xs:element name="names" type="names"/>
+										<xs:element name="orgPersons" type="orgPersons"/>
+										<xs:element name="groups" type="groups"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>	
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				
+				<xs:element name="topics">
+					<xs:complexType>
+						<xs:sequence>			
+							<xs:element name="topic" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="name" type="xs:string"/>
+										<xs:element name="priority" type="xs:integer" minOccurs="0"/>
+										<xs:element name="names" type="names"/>
+										<xs:element name="topicQueries">
+											<xs:complexType>
+												<xs:sequence>
+													<xs:element name="topicQuery" minOccurs="0" maxOccurs="unbounded">
+														<xs:complexType>
+															<xs:all>
+																<xs:element name="name" type="xs:string"/>
+																<xs:element name="producerXroadInstance" type="xs:string" minOccurs="0" maxOccurs="1"/>
+																<xs:element name="producerMemberClass" type="xs:string" minOccurs="0" maxOccurs="1"/>
+																<xs:element name="producerShortName" type="xs:string"/>
+																<xs:element name="producerSubsystemCode" type="xs:string" minOccurs="0" maxOccurs="1"/>
+																<xs:element name="producerProtocol" type="xs:string" minOccurs="0" maxOccurs="1"/>
+															</xs:all>
+														</xs:complexType>
+													</xs:element>
+												</xs:sequence>
+											</xs:complexType>
+										</xs:element>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>	
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				
+				<xs:element name="persons">
+					<xs:complexType>
+						<xs:sequence>			
+							<xs:element name="person" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="ssn" type="xs:string"/>
+										<xs:element name="givenname" type="xs:string"/>
+										<xs:element name="surname" type="xs:string"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>	
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+				
+				<xs:element name="serviceXroadInstances" minOccurs="0" maxOccurs="unbounded">
+					<xs:complexType>
+						<xs:sequence>			
+							<xs:element name="xroadInstance" minOccurs="0" maxOccurs="unbounded">
+								<xs:complexType>
+									<xs:sequence>
+										<xs:element name="code" type="xs:string"/>
+										<xs:element name="inUse" type="xs:string"/>
+										<xs:element name="selected" type="xs:string"/>
+									</xs:sequence>
+								</xs:complexType>
+							</xs:element>	
+						</xs:sequence>
+					</xs:complexType>
+				</xs:element>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	
+	<xs:complexType name="names">
+		<xs:sequence>
+			<xs:element name="name" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="description" type="xs:string"/>
+					</xs:sequence>
+					<xs:attribute name="lang" type="xs:string" use="required"/>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="orgPersons">
+		<xs:sequence>
+			<xs:element name="orgPerson" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="ssn" type="xs:string"/>
+						<xs:element name="role" type="xs:integer"/>
+						<xs:element name="profession" type="xs:string"/>
+						<xs:element name="mail" type="xs:string"/>
+						<xs:element name="notifyChanges" type="xs:boolean"/>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+	
+	<xs:complexType name="groups">
+		<xs:sequence>
+			<xs:element name="group" minOccurs="0" maxOccurs="unbounded">
+				<xs:complexType>
+					<xs:sequence>
+						<xs:element name="name" type="xs:string"/>
+						<xs:element name="groupPersons">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="groupPerson" minOccurs="0" maxOccurs="unbounded">
+										<xs:complexType>
+											<xs:sequence>
+												<xs:element name="ssn" type="xs:string"/>
+												<!-- If groupPerson is related to group's org, then subOrgCode will not be set. 
+												If group's org is superOrg and groupPerson is related to subOrg, then subOrgCode will be set to subOrg's code -->
+												<xs:element name="subOrgCode" type="xs:string" minOccurs="0"/>
+												<xs:element name="validuntil" type="xs:date" minOccurs="0"/>
+											</xs:sequence>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+						<xs:element name="groupQueries">
+							<xs:complexType>
+								<xs:sequence>
+									<xs:element name="groupQuery" minOccurs="0" maxOccurs="unbounded">
+										<xs:complexType>
+											<xs:all>
+												<xs:element name="name" type="xs:string"/>
+												<xs:element name="producerXroadInstance" type="xs:string" minOccurs="0" maxOccurs="1"/>
+												<xs:element name="producerMemberClass" type="xs:string" minOccurs="0" maxOccurs="1"/>
+												<xs:element name="producerShortName" type="xs:string"/>
+												<xs:element name="producerSubsystemCode" type="xs:string" minOccurs="0" maxOccurs="1"/>
+												<xs:element name="producerProtocol" type="xs:string" minOccurs="0" maxOccurs="1"/>
+												<!-- If groupQuery is related to group's org, then subOrgCode will not be set. 
+												If group's org is superOrg and groupQuery is related to subOrg, then subOrgCode will be set to subOrg's code -->
+												<xs:element name="subOrgCode" type="xs:string" minOccurs="0"/>
+												<xs:element name="invisible" type="xs:boolean"/>
+											</xs:all>
+										</xs:complexType>
+									</xs:element>
+								</xs:sequence>
+							</xs:complexType>
+						</xs:element>
+					</xs:sequence>
+				</xs:complexType>
+			</xs:element>
+		</xs:sequence>
+	</xs:complexType>
+
+</xs:schema>
