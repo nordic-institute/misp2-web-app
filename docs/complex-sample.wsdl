@@ -1,0 +1,328 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wsdl:definitions targetNamespace="https://complex-sample.x-road.global"
+                  xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+                  xmlns:cs="https://complex-sample.x-road.global"
+                  xmlns:xrd="http://x-road.eu/xsd/xroad.xsd"
+                  xmlns:xs="http://www.w3.org/2001/XMLSchema"
+                  xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+    <wsdl:types>
+        <xs:schema targetNamespace="https://complex-sample.x-road.global"
+                   xmlns:xs="http://www.w3.org/2001/XMLSchema">
+            <xs:import namespace="http://x-road.eu/xsd/xroad.xsd"
+                       schemaLocation="http://x-road.eu/xsd/xroad.xsd"/>
+            <xs:element name="listPeople">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="page" type="xs:decimal">
+                            <xs:annotation>
+                                <xs:appinfo>
+                                    <xrd:title xml:lang="en">Requested page</xrd:title>
+                                </xs:appinfo>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="listPeopleResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="people">
+                            <xs:complexType>
+                                <xs:sequence>
+                                    <xs:element name="person" type="cs:personShort" minOccurs="0"
+                                                maxOccurs="unbounded"/>
+                                </xs:sequence>
+                            </xs:complexType>
+                        </xs:element>
+                        <xs:element name="fault" type="cs:fault" minOccurs="0"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="personDetails">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="ssn" type="xs:string">
+                            <xs:annotation>
+                                <xs:appinfo>
+                                    <xrd:title xml:lang="en">Social Security Number</xrd:title>
+                                </xs:appinfo>
+                            </xs:annotation>
+                        </xs:element>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:element name="personDetailsResponse">
+                <xs:complexType>
+                    <xs:sequence>
+                        <xs:element name="person" type="cs:person" minOccurs="0"/>
+                        <xs:element name="fault" type="cs:fault" minOccurs="0"/>
+                    </xs:sequence>
+                </xs:complexType>
+            </xs:element>
+            <xs:complexType name="personShort">
+                <xs:sequence>
+                    <xs:element name="ssn" type="xs:string">
+                        <xs:annotation>
+                            <xs:appinfo>
+                                <xrd:title xml:lang="en">Social Security Number</xrd:title>
+                            </xs:appinfo>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="firstName" type="xs:string">
+                        <xs:annotation>
+                            <xs:appinfo>
+                                <xrd:title xml:lang="en">First name</xrd:title>
+                            </xs:appinfo>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="lastName" type="xs:string">
+                        <xs:annotation>
+                            <xs:appinfo>
+                                <xrd:title xml:lang="en">Last name</xrd:title>
+                            </xs:appinfo>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:complexType name="person">
+                <xs:complexContent>
+                    <xs:extension base="cs:personShort">
+                        <xs:sequence>
+                            <xs:element name="dateOfBirth" type="xs:date">
+                                <xs:annotation>
+                                    <xs:appinfo>
+                                        <xrd:title xml:lang="en">Date of birth</xrd:title>
+                                    </xs:appinfo>
+                                </xs:annotation>
+                            </xs:element>
+                            <xs:element name="contactAddress" type="xs:string" minOccurs="0">
+                                <xs:annotation>
+                                    <xs:appinfo>
+                                        <xrd:title xml:lang="en">Contact address</xrd:title>
+                                    </xs:appinfo>
+                                </xs:annotation>
+                            </xs:element>
+                            <xs:element name="contacts">
+                                <xs:complexType>
+                                    <xs:sequence>
+                                        <xs:element name="contact" minOccurs="0" maxOccurs="unbounded"
+                                                    type="cs:contact">
+                                            <xs:annotation>
+                                                <xs:appinfo>
+                                                    <xrd:title xml:lang="en">Contact</xrd:title>
+                                                </xs:appinfo>
+                                            </xs:annotation>
+                                        </xs:element>
+                                    </xs:sequence>
+                                </xs:complexType>
+                            </xs:element>
+                        </xs:sequence>
+                    </xs:extension>
+                </xs:complexContent>
+            </xs:complexType>
+            <xs:complexType name="contact">
+                <xs:sequence>
+                    <xs:element name="type" type="cs:contactType">
+                        <xs:annotation>
+                            <xs:appinfo>
+                                <xrd:title xml:lang="en">Contact type</xrd:title>
+                            </xs:appinfo>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="name" type="xs:string">
+                        <xs:annotation>
+                            <xs:appinfo>
+                                <xrd:title xml:lang="en">Contact name</xrd:title>
+                            </xs:appinfo>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="value" type="xs:string">
+                        <xs:annotation>
+                            <xs:appinfo>
+                                <xrd:title xml:lang="en">Contact value</xrd:title>
+                            </xs:appinfo>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+            </xs:complexType>
+            <xs:simpleType name="contactType" final="restriction">
+                <xs:annotation>
+                    <xs:appinfo>
+                        <xrd:title xml:lang="en">Contact type</xrd:title>
+                    </xs:appinfo>
+                </xs:annotation>
+                <xs:restriction base="xs:string">
+                    <xs:enumeration value="phone">
+                        <xs:annotation>
+                            <xs:appinfo>
+                                <xrd:title xml:lang="en">PHONE</xrd:title>
+                            </xs:appinfo>
+                        </xs:annotation>
+                    </xs:enumeration>
+                    <xs:enumeration value="mobile">
+                        <xs:annotation>
+                            <xs:appinfo>
+                                <xrd:title xml:lang="en">MOBILE</xrd:title>
+                            </xs:appinfo>
+                        </xs:annotation>
+                    </xs:enumeration>
+                    <xs:enumeration value="email">
+                        <xs:annotation>
+                            <xs:appinfo>
+                                <xrd:title xml:lang="en">E-MAIL</xrd:title>
+                            </xs:appinfo>
+                        </xs:annotation>
+                    </xs:enumeration>
+                </xs:restriction>
+            </xs:simpleType>
+            <xs:complexType name="fault">
+                <xs:sequence>
+                    <xs:element name="faultCode" type="xs:string">
+                        <xs:annotation>
+                            <xs:appinfo>
+                                <xrd:title xml:lang="en">Fault Code</xrd:title>
+                            </xs:appinfo>
+                        </xs:annotation>
+                    </xs:element>
+                    <xs:element name="faultString" type="xs:string">
+                        <xs:annotation>
+                            <xs:appinfo>
+                                <xrd:title xml:lang="en">Fault explanation</xrd:title>
+                            </xs:appinfo>
+                        </xs:annotation>
+                    </xs:element>
+                </xs:sequence>
+            </xs:complexType>
+        </xs:schema>
+    </wsdl:types>
+
+    <wsdl:message name="listPeople">
+        <wsdl:part name="listPeople" element="cs:listPeople"/>
+    </wsdl:message>
+    <wsdl:message name="listPeopleResponse">
+        <wsdl:part name="listPeopleResponse"
+                   element="cs:listPeopleResponse"/>
+    </wsdl:message>
+
+    <wsdl:message name="personDetails">
+        <wsdl:part name="personDetails" element="cs:personDetails"/>
+    </wsdl:message>
+    <wsdl:message name="personDetailsResponse">
+        <wsdl:part name="personDetailsResponse"
+                   element="cs:personDetailsResponse"/>
+    </wsdl:message>
+
+    <wsdl:message name="requestHeader">
+        <wsdl:part name="client" element="xrd:client"/>
+        <wsdl:part name="service" element="xrd:service"/>
+        <wsdl:part name="id" element="xrd:id"/>
+        <wsdl:part name="userId" element="xrd:userId"/>
+        <wsdl:part name="issue" element="xrd:issue"/>
+        <wsdl:part name="protocolVersion" element="xrd:protocolVersion"/>
+    </wsdl:message>
+
+    <wsdl:portType name="populationServicePort">
+        <wsdl:operation name="listPeople">
+            <wsdl:documentation>
+                <xrd:title xml:lang="en">List people service</xrd:title>
+                <xrd:notes>This service returns a list of people in the registry in pages of 100 people, according to
+                    the input page. The caller is expected to provide the page number as an input, starting from 1.
+                </xrd:notes>
+            </wsdl:documentation>
+            <wsdl:input name="listPeople" message="cs:listPeople"/>
+            <wsdl:output name="listPeopleResponse"
+                         message="cs:listPeopleResponse"/>
+        </wsdl:operation>
+        <wsdl:operation name="personDetails">
+            <wsdl:documentation>
+                <xrd:title xml:lang="en">Person details service</xrd:title>
+                <xrd:notes>This service returns the details of the person with the provided SSN. If no matching person
+                    is found, an empty result is returned.
+                </xrd:notes>
+            </wsdl:documentation>
+            <wsdl:input name="personDetails" message="cs:personDetails"/>
+            <wsdl:output name="personDetailsResponse"
+                         message="cs:personDetailsResponse"/>
+        </wsdl:operation>
+    </wsdl:portType>
+
+    <wsdl:binding name="populationServicePortSoap11"
+                  type="cs:populationServicePort">
+        <soap:binding style="document"
+                      transport="http://schemas.xmlsoap.org/soap/http"/>
+        <wsdl:operation name="listPeople">
+            <soap:operation soapAction="" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input name="listPeople">
+                <soap:body use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="client" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="service" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="id" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="userId" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="issue" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="listPeopleResponse">
+                <soap:body use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="client" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="service" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="id" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="userId" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="issue" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+        <wsdl:operation name="personDetails">
+            <soap:operation soapAction="" style="document"/>
+            <xrd:version>v1</xrd:version>
+            <wsdl:input name="personDetails">
+                <soap:body use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="client" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="service" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="id" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="userId" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="issue" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="protocolVersion" use="literal"/>
+            </wsdl:input>
+            <wsdl:output name="personDetailsResponse">
+                <soap:body use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="client" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="service" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="id" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="userId" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="issue" use="literal"/>
+                <soap:header message="cs:requestHeader"
+                             part="protocolVersion" use="literal"/>
+            </wsdl:output>
+        </wsdl:operation>
+    </wsdl:binding>
+    <wsdl:service name="populationServicePortService">
+        <wsdl:port name="populationServicePortSoap11"
+                   binding="cs:populationServicePortSoap11">
+            <soap:address location="http://localhost"/>
+        </wsdl:port>
+    </wsdl:service>
+</wsdl:definitions>
