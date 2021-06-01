@@ -124,11 +124,9 @@ short, the file contains the following important top-level sections in order:
 
    The title is followed by a `<xforms:model>` element, which defines the
    following three main things:
-
     * `<xforms:instance>` - the datastructure
     * `<xforms:bind>` - the validation rules
     * `<xforms:submission>` - the query mapping
-
 4. The `<xhtml:body>` block, which also begins with a title, this time contained
    in an `<xhtml:h1>` element. The title if followed by the short description of
    the service, also inside an `<xhtml:h1>` element. The `<xfroms:switch>`
