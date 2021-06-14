@@ -10,8 +10,8 @@ Version: 1.0
 
 ## License <!-- omit in toc -->
 
-This document is licensed under the Creative Commons Attribution-ShareAlike 3.0 Unported License.
-To view a copy of this license, visit <http://creativecommons.org/licenses/by-sa/3.0/>
+This document is licensed under the Creative Commons Attribution-ShareAlike 4.0 International License.
+To view a copy of this license, visit <https://creativecommons.org/licenses/by-sa/4.0/>
 
 ## Table of content <!-- omit in toc -->
 
