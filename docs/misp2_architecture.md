@@ -28,7 +28,7 @@ To view a copy of this license, visit <https://creativecommons.org/licenses/by-s
   * [3.4 The MISP2 database](#34-the-misp2-database)
   * [3.5 The X-Road Security Server](#35-the-x-road-security-server)
   * [CRL update script](#crl-update-script)
-* [4 Installation digarma](#4-installation-digarma)
+* [4 Installation diagram](#4-installation-diagram)
 * [5 External interfaces](#5-external-interfaces)
   * [5.1 Connection to the X-Road Security Server](#51-connection-to-the-x-road-security-server)
   * [5.2 Loading WSDL descriptions](#52-loading-wsdl-descriptions)
@@ -174,7 +174,7 @@ The script checks the CRL list inside the Apache HTTP server at certain
 intervals against the one provided in the CA-s CRL repository and updates as
 required.
 
-## 4 Installation digarma
+## 4 Installation diagram
 
 ![Installation diagram](img/misp2-architecture-diagrams-installation-view.svg)
 
