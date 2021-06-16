@@ -45,3 +45,10 @@ independent X-Road instances, developing X-Road extensions and X-Road-compatible
 services, integrating informations systems with X-Road etc.
 
 No support for MISP2 deployment is provided here.
+
+## Credits
+
+* MISP2 was originally developed by the [Estonian Information System
+  Authority](https://www.ria.ee/en.html) during 2015-2020.
+* In 2020 it was agreed that [Nordic Institute for Interoperability Solutions
+  (NIIS)](https://www.niis.org/) takes maintenance responsibility.
