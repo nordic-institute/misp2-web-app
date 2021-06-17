@@ -3,13 +3,14 @@
 
 # MISP2 Installation and Configuration Guide
 
-Version: 2.13
+Version: 2.14
 
 ## Version history <!-- omit in toc -->
 
  Date       | Version | Description                                                     | Author
  ---------- | ------- | --------------------------------------------------------------- | --------------------
  25.05.2021 | 2.13    | Convert from Word to Markdown                                   | Raido Kaju
+ 17.06.2021 | 2.14    | Update MISP2 package repository info                            | Petteri Kivimäki
 
 ## License <!-- omit in toc -->
 
@@ -140,7 +141,7 @@ The following information can be used to verify the key:
 Add MISP2 package repository:
 
 ```bash
-apt-add-repository -y 'deb [arch=amd64] https://artifactory.niis.org/xroad-extensions-release-deb bionic-current main'
+apt-add-repository "https://artifactory.niis.org/xroad-extensions-release-deb main"
 ```
 
 The package list should then be updated with the command:
