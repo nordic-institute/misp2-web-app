@@ -131,6 +131,14 @@ Add the MISP2 repository’s signing key to the list of trusted keys:
 wget -qO - https://artifactory.niis.org/api/gpg/key/public | apt-key add -
 ```
 
+**NB!** Due to a known issue in the installation package, please perform the
+following action after upgrading your MISP2 installation:
+
+* Open the file `/var/lib/tomcat8/webapps/misp2/WEB-INF/classes/config.cfg`
+* Uncomment the line `mobileID.rest.trustStore.path =
+  MOBILE_ID_TRUST_STORE_PATH` by removing the `#` symbol from the beginning of
+  the line (the value can remain as is)
+
 The following information can be used to verify the key:
 
 * key hash: `935CC5E7FA5397B171749F80D6E3973B`
@@ -152,21 +160,22 @@ apt-get update
 
 ### 4.2 MISP2 database package
 
-The MISP2 database package `xtee-misp2-postgresql` is installed with default settings using the
-command:
+The MISP2 database package `xtee-misp2-postgresql` is installed with default
+settings using the command:
 
 ```bash
 apt-get install xtee-misp2-postgresql
 ```
 
 Below is a list of questions and answers displayed after this command is run.
-The default role i.e. username is `misp2` and only the password is queried. 
+The default role i.e. username is `misp2` and only the password is queried.
 
 ```text
 Creating database 'misp2db'
 Enter password for new role: 
 Enter it again:
 ```
+
 The same password is needed again during MISP2 application installation.
 
 ### 4.3 MISP2 application
@@ -363,6 +372,14 @@ is:
 Below is a list of some parameters which, though automatically set during
 installation, may later need to be changed when the application is reconfigured.
 
+**NB!** Due to a known issue in the installation package, please perform the
+following action after completing your MISP2 installation:
+
+* Open the file `/var/lib/tomcat8/webapps/misp2/WEB-INF/classes/config.cfg`
+* Uncomment the line `mobileID.rest.trustStore.path =
+  MOBILE_ID_TRUST_STORE_PATH` by removing the `#` symbol from the beginning of
+  the line (the value can remain as is)
+
 After the configuration file is changed, tomcat must always be restarted using
 the command:
 
@@ -417,6 +434,8 @@ Mobile-ID authentication setup parameters:
 # Mobile ID and its usage settings 
 mobileID.digidocServiceURL = https://digidocservice.sk.ee/ 
 mobileID.serviceName = Testimine
+mobileID.rest.trustStore.password = CHANGEME (this parameter was not commented out by default)
+mobileID.rest.trustStore.path = MOBILE_ID_TRUST_STORE_PATH
 ```
 
 ### 5.3 Configuring HTTPS connection between MISP2 application and X-Road Security Server
@@ -501,6 +520,13 @@ In the configuration file, parameters `mobileID.rest.relyingPartyUUID` and
 Certification Centre ([SK ID
 Solutions](https://www.skidsolutions.eu/en/services/mobile-id/technical-information-mid-rest-api/))
 assigns the respective service name value to every institution.
+
+The parameters `mobileID.rest.trustStore.password` and
+`mobileID.rest.trustStore.path` should be updated so that the path variable
+contains the trust store location and the password contains the key needed to
+access it. More information about optaining the required certificates and
+creating the trust store can be found in the [SK-s JAVA client source
+repository](https://github.com/SK-EID/mid-rest-java-client#how-to-obtain-server-certificate).
 
 ### 5.5 Other settings
 
