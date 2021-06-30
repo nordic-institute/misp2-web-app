@@ -24,6 +24,7 @@ To view a copy of this license, visit <https://creativecommons.org/licenses/by-s
 * [3 AdoptOpenJDK 8 installation (recommended)](#3-adoptopenjdk-8-installation-recommended)
 * [4 MISP2 installation](#4-misp2-installation)
   * [4.1 Setup package repository](#41-setup-package-repository)
+    * [4.1.1 Doing a version upgrade](#411-doing-a-version-upgrade)
   * [4.2 MISP2 database package](#42-misp2-database-package)
   * [4.3 MISP2 application](#43-misp2-application)
     * [4.3.1 Apache Tomcat + Apache HTTP Server + MISP2 base package](#431-apache-tomcat--apache-http-server--misp2-base-package)
@@ -131,14 +132,6 @@ Add the MISP2 repository’s signing key to the list of trusted keys:
 wget -qO - https://artifactory.niis.org/api/gpg/key/public | apt-key add -
 ```
 
-**NB!** Due to a known issue in the installation package, please perform the
-following action after upgrading your MISP2 installation:
-
-* Open the file `/var/lib/tomcat8/webapps/misp2/WEB-INF/classes/config.cfg`
-* Uncomment the line `mobileID.rest.trustStore.path =
-  MOBILE_ID_TRUST_STORE_PATH` by removing the `#` symbol from the beginning of
-  the line (the value can remain as is)
-
 The following information can be used to verify the key:
 
 * key hash: `935CC5E7FA5397B171749F80D6E3973B`
@@ -157,6 +150,16 @@ The package list should then be updated with the command:
 ```bash
 apt-get update
 ```
+
+#### 4.1.1 Doing a version upgrade
+
+Due to a known issue in the installation package, please perform the following
+action after upgrading your MISP2 installation:
+
+* Open the file /var/lib/tomcat8/webapps/misp2/WEB-INF/classes/config.cfg.
+* Uncomment the line mobileID.rest.trustStore.path = MOBILE_ID_TRUST_STORE_PATH
+  by removing the # symbol from the beginning of the line (the value can remain
+  as is).
 
 ### 4.2 MISP2 database package
 
@@ -375,10 +378,10 @@ installation, may later need to be changed when the application is reconfigured.
 **NB!** Due to a known issue in the installation package, please perform the
 following action after completing your MISP2 installation:
 
-* Open the file `/var/lib/tomcat8/webapps/misp2/WEB-INF/classes/config.cfg`
+* Open the file `/var/lib/tomcat8/webapps/misp2/WEB-INF/classes/config.cfg`.
 * Uncomment the line `mobileID.rest.trustStore.path =
   MOBILE_ID_TRUST_STORE_PATH` by removing the `#` symbol from the beginning of
-  the line (the value can remain as is)
+  the line (the value can remain as is).
 
 After the configuration file is changed, tomcat must always be restarted using
 the command:
@@ -434,7 +437,7 @@ Mobile-ID authentication setup parameters:
 # Mobile ID and its usage settings 
 mobileID.digidocServiceURL = https://digidocservice.sk.ee/ 
 mobileID.serviceName = Testimine
-mobileID.rest.trustStore.password = CHANGEME (this parameter was not commented out by default)
+mobileID.rest.trustStore.password = CHANGEME
 mobileID.rest.trustStore.path = MOBILE_ID_TRUST_STORE_PATH
 ```
 
