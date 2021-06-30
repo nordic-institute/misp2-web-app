@@ -3,14 +3,15 @@
 
 # MISP2 Installation and Configuration Guide
 
-Version: 2.14
+Version: 2.15
 
 ## Version history <!-- omit in toc -->
 
- Date       | Version | Description                                                     | Author
- ---------- | ------- | --------------------------------------------------------------- | --------------------
- 25.05.2021 | 2.13    | Convert from Word to Markdown                                   | Raido Kaju
- 17.06.2021 | 2.14    | Update MISP2 package repository info                            | Petteri Kivimäki
+ Date       | Version | Description                                                               | Author
+ ---------- | ------- | ------------------------------------------------------------------------- | --------------------
+ 25.05.2021 | 2.13    | Convert from Word to Markdown                                             | Raido Kaju
+ 17.06.2021 | 2.14    | Update MISP2 package repository info                                      | Petteri Kivimäki
+ 30.06.2021 | 2.15    | Added information about additional mobileID parameters and upgrade notice | Raido Kaju
 
 ## License <!-- omit in toc -->
 
@@ -24,6 +25,7 @@ To view a copy of this license, visit <https://creativecommons.org/licenses/by-s
 * [3 AdoptOpenJDK 8 installation (recommended)](#3-adoptopenjdk-8-installation-recommended)
 * [4 MISP2 installation](#4-misp2-installation)
   * [4.1 Setup package repository](#41-setup-package-repository)
+    * [4.1.1 Doing a version upgrade](#411-doing-a-version-upgrade)
   * [4.2 MISP2 database package](#42-misp2-database-package)
   * [4.3 MISP2 application](#43-misp2-application)
     * [4.3.1 Apache Tomcat + Apache HTTP Server + MISP2 base package](#431-apache-tomcat--apache-http-server--misp2-base-package)
@@ -150,23 +152,34 @@ The package list should then be updated with the command:
 apt-get update
 ```
 
+#### 4.1.1 Doing a version upgrade
+
+Due to a known issue in the installation package, please perform the following
+action after upgrading your MISP2 installation:
+
+* Open the file /var/lib/tomcat8/webapps/misp2/WEB-INF/classes/config.cfg.
+* Uncomment the line mobileID.rest.trustStore.path = MOBILE_ID_TRUST_STORE_PATH
+  by removing the # symbol from the beginning of the line (the value can remain
+  as is).
+
 ### 4.2 MISP2 database package
 
-The MISP2 database package `xtee-misp2-postgresql` is installed with default settings using the
-command:
+The MISP2 database package `xtee-misp2-postgresql` is installed with default
+settings using the command:
 
 ```bash
 apt-get install xtee-misp2-postgresql
 ```
 
 Below is a list of questions and answers displayed after this command is run.
-The default role i.e. username is `misp2` and only the password is queried. 
+The default role i.e. username is `misp2` and only the password is queried.
 
 ```text
 Creating database 'misp2db'
 Enter password for new role: 
 Enter it again:
 ```
+
 The same password is needed again during MISP2 application installation.
 
 ### 4.3 MISP2 application
@@ -363,6 +376,14 @@ is:
 Below is a list of some parameters which, though automatically set during
 installation, may later need to be changed when the application is reconfigured.
 
+**NB!** Due to a known issue in the installation package, please perform the
+following action after completing your MISP2 installation:
+
+* Open the file `/var/lib/tomcat8/webapps/misp2/WEB-INF/classes/config.cfg`.
+* Uncomment the line `mobileID.rest.trustStore.path =
+  MOBILE_ID_TRUST_STORE_PATH` by removing the `#` symbol from the beginning of
+  the line (the value can remain as is).
+
 After the configuration file is changed, tomcat must always be restarted using
 the command:
 
@@ -417,6 +438,8 @@ Mobile-ID authentication setup parameters:
 # Mobile ID and its usage settings 
 mobileID.digidocServiceURL = https://digidocservice.sk.ee/ 
 mobileID.serviceName = Testimine
+mobileID.rest.trustStore.password = CHANGEME
+mobileID.rest.trustStore.path = MOBILE_ID_TRUST_STORE_PATH
 ```
 
 ### 5.3 Configuring HTTPS connection between MISP2 application and X-Road Security Server
@@ -501,6 +524,13 @@ In the configuration file, parameters `mobileID.rest.relyingPartyUUID` and
 Certification Centre ([SK ID
 Solutions](https://www.skidsolutions.eu/en/services/mobile-id/technical-information-mid-rest-api/))
 assigns the respective service name value to every institution.
+
+The parameters `mobileID.rest.trustStore.password` and
+`mobileID.rest.trustStore.path` should be updated so that the path variable
+contains the trust store location and the password contains the key needed to
+access it. More information about optaining the required certificates and
+creating the trust store can be found in the [SK-s JAVA client source
+repository](https://github.com/SK-EID/mid-rest-java-client#how-to-obtain-server-certificate).
 
 ### 5.5 Other settings
 
