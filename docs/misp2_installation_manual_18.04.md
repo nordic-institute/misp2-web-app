@@ -3,14 +3,15 @@
 
 # MISP2 Installation and Configuration Guide
 
-Version: 2.14
+Version: 2.15
 
 ## Version history <!-- omit in toc -->
 
- Date       | Version | Description                                                     | Author
- ---------- | ------- | --------------------------------------------------------------- | --------------------
- 25.05.2021 | 2.13    | Convert from Word to Markdown                                   | Raido Kaju
- 17.06.2021 | 2.14    | Update MISP2 package repository info                            | Petteri Kivimäki
+ Date       | Version | Description                                                               | Author
+ ---------- | ------- | ------------------------------------------------------------------------- | --------------------
+ 25.05.2021 | 2.13    | Convert from Word to Markdown                                             | Raido Kaju
+ 17.06.2021 | 2.14    | Update MISP2 package repository info                                      | Petteri Kivimäki
+ 30.06.2021 | 2.15    | Added information about additional mobileID parameters and upgrade notice | Raido Kaju
 
 ## License <!-- omit in toc -->
 
