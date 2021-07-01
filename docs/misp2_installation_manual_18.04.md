@@ -3,7 +3,7 @@
 
 # MISP2 Installation and Configuration Guide
 
-Version: 2.15
+Version: 2.16
 
 ## Version history <!-- omit in toc -->
 
@@ -12,6 +12,7 @@ Version: 2.15
  25.05.2021 | 2.13    | Convert from Word to Markdown                                             | Raido Kaju
  17.06.2021 | 2.14    | Update MISP2 package repository info                                      | Petteri Kivimäki
  30.06.2021 | 2.15    | Added information about additional mobileID parameters and upgrade notice | Raido Kaju
+ 01.07.2021 | 2.16    | Update 3rd party key server                                               | Petteri Kivimäki
 
 ## License <!-- omit in toc -->
 
@@ -137,8 +138,7 @@ The following information can be used to verify the key:
 
 * key hash: `935CC5E7FA5397B171749F80D6E3973B`
 * key fingerprint: `A01B FE41 B9D8 EAF4 872F  A3F1 FB0D 532C 10F6 EC5B`
-* 3rd party key server: [SKS key
-  servers](http://pool.sks-keyservers.net/pks/lookup?op=vindex&hash=on&fingerprint=on&search=0xFB0D532C10F6EC5B)
+* 3rd party key server: [Ubuntu key server](https://keyserver.ubuntu.com/pks/lookup?search=0xfb0d532c10f6ec5b&fingerprint=on&op=index)
 
 Add MISP2 package repository:
 
