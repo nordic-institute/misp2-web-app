@@ -91,7 +91,7 @@ sudo -i
 Import the AdoptOpenJDK GPG key:
 
 ```bash
-wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | sudo apt- key add -
+wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | sudo apt-key add -
 ```
 
 Configure AdoptOpenJDK's apt repository:
@@ -519,6 +519,15 @@ The steps for configuring HTTPS:
 
 #### 5.4.1 Service parameters
 
+Before moving forward with the configuration, create a `p12` trust store
+containing the correct certificate based on the documentation provided in [SK-s
+JAVA client source
+repository](https://github.com/SK-EID/mid-rest-java-client#how-to-obtain-server-certificate).
+
+Once the trust store is created, move it to the
+`/var/lib/tomcat8/webapps/misp2/WEB-INF/classes` folder and update the file
+permissions so that it is accessible by the system user `tomcat8`.
+
 In the configuration file, parameters `mobileID.rest.relyingPartyUUID` and
 `mobileID.rest.relyingPartyName` must be set up with the correct value. The
 Certification Centre ([SK ID
@@ -527,10 +536,8 @@ assigns the respective service name value to every institution.
 
 The parameters `mobileID.rest.trustStore.password` and
 `mobileID.rest.trustStore.path` should be updated so that the path variable
-contains the trust store location and the password contains the key needed to
-access it. More information about optaining the required certificates and
-creating the trust store can be found in the [SK-s JAVA client source
-repository](https://github.com/SK-EID/mid-rest-java-client#how-to-obtain-server-certificate).
+refers to the trust store created before (e.g `/mid_trust_store.p12`) and
+password contains the key needed to access it.
 
 ### 5.5 Other settings
 
