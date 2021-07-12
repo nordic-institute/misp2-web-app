@@ -349,6 +349,13 @@ properly, please complete the following steps after the package has been
 installed (if you have upgraded from version 2.5.0 and had the ID-card
 previously set up, only step 6 is required):
 
+These steps require root privileges. These can be gained using the following
+command:
+
+```bash
+sudo -i
+```
+
 1. Download the required certificates from the Certificate Authority:
 
     ```bash
