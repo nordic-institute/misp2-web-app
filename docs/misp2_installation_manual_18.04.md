@@ -3,7 +3,7 @@
 
 # MISP2 Installation and Configuration Guide
 
-Version: 2.15
+Version: 2.16
 
 ## Version history <!-- omit in toc -->
 
@@ -12,6 +12,7 @@ Version: 2.15
  25.05.2021 | 2.13    | Convert from Word to Markdown                                             | Raido Kaju
  17.06.2021 | 2.14    | Update MISP2 package repository info                                      | Petteri Kivimäki
  30.06.2021 | 2.15    | Added information about additional mobileID parameters and upgrade notice | Raido Kaju
+ 12.07.2021 | 2.16    | Added manual Estonian ID-card installation instructions                   | Raido Kaju
 
 ## License <!-- omit in toc -->
 
@@ -41,6 +42,7 @@ To view a copy of this license, visit <https://creativecommons.org/licenses/by-s
     * [5.5.2 Logging settings](#552-logging-settings)
     * [5.5.3 Adding a HTTPS certificate](#553-adding-a-https-certificate)
   * [5.6 Enabling the Orbeon inspector](#56-enabling-the-orbeon-inspector)
+  * [5.7 Configuring support for the Estonian ID-card](#57-configuring-support-for-the-estonian-id-card)
 * [6 MISP2 administration interface](#6-misp2-administration-interface)
   * [6.1 Administration of MISP2 administrator accounts from the command line](#61-administration-of-misp2-administrator-accounts-from-the-command-line)
   * [6.2 Additions to the Apache web server configuration](#62-additions-to-the-apache-web-server-configuration)
@@ -91,7 +93,7 @@ sudo -i
 Import the AdoptOpenJDK GPG key:
 
 ```bash
-wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | sudo apt- key add -
+wget -qO - https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public | sudo apt-key add -
 ```
 
 Configure AdoptOpenJDK's apt repository:
@@ -340,6 +342,9 @@ described in Section
 [5.3](#53-configuring-https-connection-between-misp2-application-and-x-road-security-server)
 of this guide.
 
+If the Estonian ID-card based authentication needs to be supported, please read
+Section [5.7](#57-configuring-support-for-the-estonian-id-card) of this guide.
+
 ## 5 Configuration
 
 ### 5.1 Configuring an HTTPS certificate for the MISP2 Apache web server
@@ -519,6 +524,21 @@ The steps for configuring HTTPS:
 
 #### 5.4.1 Service parameters
 
+Before moving forward with the configuration, create a `p12` trust store
+containing the correct certificate based on the documentation provided in [SK-s
+JAVA client source
+repository](https://github.com/SK-EID/mid-rest-java-client#how-to-obtain-server-certificate).
+
+Once the trust store is created, move it to the
+`/var/lib/tomcat8/webapps/misp2/WEB-INF/classes` folder and update the file
+permissions so that it is accessible by the system user `tomcat8`. This can be
+done with the following command:
+
+```bash
+# In this example, the truststore was created with the name mid_trust_store.p12
+sudo chown tomcat8:tomcat8 mid_trust_store.p12
+```
+
 In the configuration file, parameters `mobileID.rest.relyingPartyUUID` and
 `mobileID.rest.relyingPartyName` must be set up with the correct value. The
 Certification Centre ([SK ID
@@ -527,10 +547,8 @@ assigns the respective service name value to every institution.
 
 The parameters `mobileID.rest.trustStore.password` and
 `mobileID.rest.trustStore.path` should be updated so that the path variable
-contains the trust store location and the password contains the key needed to
-access it. More information about optaining the required certificates and
-creating the trust store can be found in the [SK-s JAVA client source
-repository](https://github.com/SK-EID/mid-rest-java-client#how-to-obtain-server-certificate).
+refers to the trust store created before (e.g `/mid_trust_store.p12`) and
+password contains the key needed to access it.
 
 ### 5.5 Other settings
 
@@ -598,6 +616,83 @@ Once changed, the file must be saved and the inspector should appear in the
 interface.
 
 The Tomcat server does not need to be restarted.
+
+### 5.7 Configuring support for the Estonian ID-card
+
+In order to configure the Estonian ID-card based authentication to work
+properly, please complete the following steps after the package has been
+installed (if you have upgraded from version 2.5.0 and had the ID-card
+previously set up, only step 6 is required):
+
+These steps require root privileges. These can be gained using the following
+command:
+
+```bash
+sudo -i
+```
+
+1. Download the required certificates from the Certificate Authority:
+
+    ```bash
+    cd /etc/apache2/ssl
+    wget -O sk_root_2011_crt.pem https://www.sk.ee/upload/files/EE_Certification_Centre_Root_CA.pem.crt
+    wget -O sk_root_2018_crt.pem https://c.sk.ee/EE-GovCA2018.pem.crt
+    wget -O sk_esteid_2011_crt.pem https://www.sk.ee/upload/files/ESTEID-SK_2011.pem.crt
+    wget -O sk_esteid_2015_crt.pem https://www.sk.ee/upload/files/ESTEID-SK_2015.pem.crt
+    wget -O sk_esteid_2018_crt.pem https://c.sk.ee/esteid2018.pem.crt
+    ```
+
+2. Create the `client_ca` folder under `/etc/apache2/ssl` install the
+   certificates there with the following commands:
+
+    ```bash
+    mkdir client_ca
+    cp -v sk_esteid_2011_crt.pem sk_esteid_2015_crt.pem sk_esteid_2018_crt.pem client_ca/
+    openssl x509 -addtrust clientAuth -trustout -in sk_esteid_2011_crt.pem -out sk_esteid_2011_client_auth_trusted_crt.pem
+    openssl x509 -addtrust clientAuth -trustout -in sk_esteid_2015_crt.pem -out sk_esteid_2015_client_auth_trusted_crt.pem
+    openssl x509 -addtrust clientAuth -trustout -in sk_esteid_2018_crt.pem -out sk_esteid_2018_client_auth_trusted_crt.pem
+    rm sk_esteid_2011_crt.pem sk_esteid_2015_crt.pem sk_esteid_2018_crt.pem
+    c_rehash client_ca/
+    ```
+
+3. Install the root certificates by running the following commands under
+   `/etc/apache2/ssl`:
+
+    ```bash
+    openssl x509 -addreject clientAuth -trustout -in sk_root_2011_crt.pem -out sk_root_2011_CA_trusted_crt.pem
+    openssl x509 -addreject clientAuth -trustout -in sk_root_2018_crt.pem -out sk_root_2018_CA_trusted_crt.pem
+    rm sk_root_2011_crt.pem sk_root_2018_crt.pem
+    ```
+
+4. Install the OCSP certificate by running the following command under
+   `/etc/apache2/ssl`:
+
+    ```bash
+    wget -O sk_esteid_ocsp.pem https://www.sk.ee/upload/files/SK_OCSP_RESPONDER_2011.pem.cer
+    ```
+
+5. Update the CRL and rehash Apache symbolic links under `ssl` by running the
+   following commands under `/etc/apache2/ssl`:
+
+    ```bash
+    ./updatecrl.sh "norestart"
+    c_rehash ./
+    ```
+
+6. Open the file `/etc/apache2/sites-enabled/ssl.conf` and change the parameter
+   `SSLCADNRequestPath` on line 164 to be the following (be sure to also remove
+   the `#` from the beginning so that it isn't commented out):
+
+    ```properties
+    SSLCADNRequestPath /etc/apache2/ssl/client_ca/
+    ```
+
+7. After the configuration file is changed, Apache must be restarted using the
+   following command:
+
+    ```bash
+    service apache2 restart
+    ```
 
 ## 6 MISP2 administration interface
 
