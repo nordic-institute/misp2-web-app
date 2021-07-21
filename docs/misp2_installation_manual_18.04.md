@@ -525,14 +525,17 @@ The steps for configuring HTTPS:
 #### 5.4.1 Service parameters
 
 Before moving forward with the configuration, create a `p12` trust store
-containing the correct certificate based on the documentation provided in [SK-s
-JAVA client source
-repository](https://github.com/SK-EID/mid-rest-java-client#how-to-obtain-server-certificate).
+containing the correct certificates based on the documentation provided
+in the following sections of SK-s documentation for the JAVA client:
 
-Once the trust store is created, move it to the
-`/var/lib/tomcat8/webapps/misp2/WEB-INF/classes` folder and update the file
-permissions so that it is accessible by the system user `tomcat8`. This can be
-done with the following command:
+* [How to obtain server certificate](https://github.com/SK-EID/mid-rest-java-client#how-to-obtain-server-certificate).
+* [Validate returned certificate is a trusted MID certificate](https://github.com/SK-EID/mid-rest-java-client#validate-returned-certificate-is-a-trusted-mid-certificate)
+
+Once the trust store has been created, move it to the
+`/var/lib/tomcat8/webapps/misp2/WEB-INF/classes` folder in order to use it
+from the classpath or to your preferred folder anywhere in the filesystem
+and update the file permissions so that it is accessible by the system user
+`tomcat8`. This can be done with the following command:
 
 ```bash
 # In this example, the truststore was created with the name mid_trust_store.p12
@@ -547,8 +550,15 @@ assigns the respective service name value to every institution.
 
 The parameters `mobileID.rest.trustStore.password` and
 `mobileID.rest.trustStore.path` should be updated so that the path variable
-refers to the trust store created before (e.g `/mid_trust_store.p12`) and
+refers to the trust store created before (e.g. `/mid_trust_store.p12`) and
 password contains the key needed to access it.
+
+**NB!** The `mobileID.rest.trustStore.path` searches from the following places in order:
+
+1. The classpath (e.g. if `mid_trust_store.p12` was placed inside
+   `/var/lib/tomcat8/webapps/misp2/WEB-INF/classes`, then it can be found if path has
+   been configured to `/mid_trust_store.p12`)
+2. The filesystem
 
 ### 5.5 Other settings
 
