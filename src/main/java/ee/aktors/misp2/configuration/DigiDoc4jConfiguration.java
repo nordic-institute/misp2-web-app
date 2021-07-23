@@ -54,7 +54,7 @@ public class DigiDoc4jConfiguration implements ExternallyConfigured {
     private static final String PARAM_TEST_MODE = "digidoc4j.test";
     private static final String PARAM_OCSP_SOURCE = "digidoc4j.ocsp";
     private static final String PARAM_TRUSTED_TERRITORIES = "digidoc4j.trustedTerritories";
-    private static final String PARAM_MID_ENABLED= "auth.mobileID";
+    private static final String PARAM_MID_ENABLED = "auth.mobileID";
     private static final String PARAM_MID_HOST = "mobileID.rest.hostUrl";
     private static final String PARAM_MID_PARTY_UUID = "mobileID.rest.relyingPartyUUID";
     private static final String PARAM_MID_PARTY_NAME = "mobileID.rest.relyingPartyName";
