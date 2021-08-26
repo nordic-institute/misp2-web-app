@@ -25,6 +25,7 @@
 
 package ee.aktors.misp2.configuration;
 
+import ee.aktors.misp2.ExternallyConfigured;
 import ee.aktors.misp2.util.MIDTrustStoreInitialisationException;
 import ee.sk.mid.MidClient;
 import org.apache.commons.lang3.StringUtils;
@@ -33,9 +34,11 @@ import org.apache.logging.log4j.Logger;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Configuration.Mode;
 
-import ee.aktors.misp2.ExternallyConfigured;
-
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;

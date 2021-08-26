@@ -542,11 +542,14 @@ and update the file permissions so that it is accessible by the system user
 sudo chown tomcat8:tomcat8 mid_trust_store.p12
 ```
 
-In the configuration file, parameters `mobileID.rest.relyingPartyUUID` and
-`mobileID.rest.relyingPartyName` must be set up with the correct value. The
+In the configuration file, parameters `mobileID.rest.relyingPartyUUID`, `mobileID.rest.hostUrl`
+and `mobileID.rest.relyingPartyName` must be set up with the correct value. The
 Certification Centre ([SK ID
 Solutions](https://www.skidsolutions.eu/en/services/mobile-id/technical-information-mid-rest-api/))
 assigns the respective service name value to every institution.
+
+In addition `auth.mobileID` must be set to `true` for the authentication
+method to be enabled.
 
 The parameters `mobileID.rest.trustStore.password` and
 `mobileID.rest.trustStore.path` should be updated so that the path variable
@@ -558,7 +561,8 @@ password contains the key needed to access it.
 1. The classpath (e.g. if `mid_trust_store.p12` was placed inside
    `/var/lib/tomcat8/webapps/misp2/WEB-INF/classes`, then it can be found if path has
    been configured to `/mid_trust_store.p12`)
-2. The filesystem
+2. The filesystem (e.g. if `mid_trust_store.p12` was placed inside `/var/foo/bar`, then it 
+   can be found if path has been configured to `/var/foo/bar/mid_trust_store.p12`)
 
 ### 5.5 Other settings
 
