@@ -542,9 +542,9 @@ and update the file permissions so that it is accessible by the system user
 sudo chown tomcat8:tomcat8 mid_trust_store.p12
 ```
 
-In the configuration file, parameters `mobileID.rest.relyingPartyUUID`, `mobileID.rest.hostUrl`
-and `mobileID.rest.relyingPartyName` must be set up with the correct value. The
-Certification Centre ([SK ID
+In the configuration file, parameters `mobileID.rest.relyingPartyUUID`, 
+`mobileID.rest.relyingPartyName` and `mobileID.rest.hostUrl` must be 
+set up with the correct value. The Certification Centre ([SK ID
 Solutions](https://www.skidsolutions.eu/en/services/mobile-id/technical-information-mid-rest-api/))
 assigns the respective service name value to every institution.
 
