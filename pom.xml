@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>misp2</groupId>
     <artifactId>misp2</artifactId>
-    <version>2.6.1</version>
+    <version>2.6.2</version>
     <packaging>war</packaging>
 
     <properties>
@@ -12,7 +12,7 @@
         <spring.version>5.3.6</spring.version>
         <hibernate.version>5.4.30.Final</hibernate.version>
         <postgresql.version>42.2.19</postgresql.version>
-        <log4j2.version>2.15.0</log4j2.version>
+        <log4j2.version>2.16.0</log4j2.version>
         <digidoc4j.version>4.1.1</digidoc4j.version>
         <selenium.version>3.141.59</selenium.version>
         <commonmark-ext.version>0.17.1</commonmark-ext.version>
