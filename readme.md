@@ -2,8 +2,7 @@
 
 [![Go to X-Road Community
 Slack](https://img.shields.io/badge/Go%20to%20Community%20Slack-grey.svg)](https://jointxroad.slack.com/)
-[![Get
-invited](https://img.shields.io/badge/No%20Slack-Get%20invited-green.svg)](https://x-road.global/join-the-xroad-community)
+[![Get invited](https://img.shields.io/badge/No%20Slack-Get%20invited-green.svg)](https://x-road.global/community)
 
 MISP2 (Mini-Information System Portal) is an application that provides an easy
 way to query data over X-Road. Its easy-to-use web-based user interface provides
