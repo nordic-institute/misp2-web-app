@@ -3,7 +3,7 @@
 
 # MISP2 Installation and Configuration Guide
 
-Version: 2.17
+Version: 2.18
 
 ## Version history <!-- omit in toc -->
 
@@ -14,6 +14,7 @@ Version: 2.17
  30.06.2021 | 2.15    | Added information about additional mobileID parameters and upgrade notice | Raido Kaju
  01.07.2021 | 2.16    | Update 3rd party key server                                               | Petteri Kivimäki
  12.07.2021 | 2.17    | Added manual Estonian ID-card installation instructions                   | Raido Kaju
+ 17.02.2022 | 2.18    | Added instructions on configuring ID-card authentication on `<Location/>` | Raido Kaju
 
 ## License <!-- omit in toc -->
 
@@ -44,6 +45,7 @@ To view a copy of this license, visit <https://creativecommons.org/licenses/by-s
     * [5.5.3 Adding a HTTPS certificate](#553-adding-a-https-certificate)
   * [5.6 Enabling the Orbeon inspector](#56-enabling-the-orbeon-inspector)
   * [5.7 Configuring support for the Estonian ID-card](#57-configuring-support-for-the-estonian-id-card)
+    * [5.7.1 Additional ID-card configuration options](#571-additional-id-card-configuration-options)
 * [6 MISP2 administration interface](#6-misp2-administration-interface)
   * [6.1 Administration of MISP2 administrator accounts from the command line](#61-administration-of-misp2-administrator-accounts-from-the-command-line)
   * [6.2 Additions to the Apache web server configuration](#62-additions-to-the-apache-web-server-configuration)
@@ -693,6 +695,39 @@ sudo -i
     ```bash
     service apache2 restart
     ```
+
+#### 5.7.1 Additional ID-card configuration options
+
+It should be noted that the default configuration is set up so that the authentication certificate is requested on the
+root of the application. This means that the session does not get terminated until the user has closed the browser
+tab or navigated to a different webpage. If they do not do so, it might be possible to log in again without having the
+ID-card in the reader (hence why the system shows a message asking the user to close the browser window after logging
+out). If this behaviour is not appropriate for your use-case, it is possible to configure the `apache2` proxy in such a
+way that the certificate request and renegotiation happens as a result of the ID-card login action itself.
+To do this, please follow these steps:
+
+* Open the `apache2` configuration file located at `/etc/apache2/sites-enabled/ssl.conf` with your preferred text
+editor.
+* Modify the line (160) `SSLProtocol All -SSLv2 -SSLv3` so that it reads `SSLProtocol -all +TLSv1.2` instead.
+* Remove the following lines from the block `<VirtualHost *:443>`:
+  * (line 168) SSLOptions +StdEnvVars +ExportCertData
+  * (line 169) SSLVerifyClient optional
+* Add the following `<Location>` block inside the `<VirtualHost *:443>` block:
+
+```xml
+<Location "/*/IDCardLogin.action">
+  SSLVerifyClient require
+  SSLOptions +StdEnvVars +ExportCertData
+</Location>
+```
+
+* Reload the configuration: `service apache2 reload`.
+
+**NB!** It should be noted that this approach configures the server so that it will only use TLS 1.2 and not TLS 1.3.
+This is due to browsers currently not supporting `post-handshake authentication` that is required for this to work:
+
+* https://bugs.chromium.org/p/chromium/issues/detail?id=911653
+* https://bugzilla.mozilla.org/show_bug.cgi?id=1511989
 
 ## 6 MISP2 administration interface
 
