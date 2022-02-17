@@ -699,12 +699,12 @@ sudo -i
 #### 5.7.1 Additional ID-card configuration options
 
 It should be noted that the default configuration is set up so that the authentication certificate is requested on the
-root of the application. This means that the session does not get renegotiated until the user has closed the browser
-tab or navigated to a different webpage. If they do not do so, the session will still contain the client certificate
-for a time and make it possible to log in again without having the ID-card in the reader (hence why the system shows
-a message asking the user to close the browser window after logging out). If this behaviour is not appropriate for your
-use-case, it is possible to configure the `apache2` proxy in such a way that the certificate request and renegotiation
-happens as a result of the ID-card login action itself. To do this, please follow these steps:
+root of the application. This means that the session does not get terminated until the user has closed the browser
+tab or navigated to a different webpage. If they do not do so, it might be possible to log in again without having the
+ID-card in the reader (hence why the system shows a message asking the user to close the browser window after logging
+out). If this behaviour is not appropriate for your use-case, it is possible to configure the `apache2` proxy in such a
+way that the certificate request and renegotiation happens as a result of the ID-card login action itself.
+To do this, please follow these steps:
 
 * Open the `apache2` configuration file located at `/etc/apache2/sites-enabled/ssl.conf` with your preferred text
 editor.
