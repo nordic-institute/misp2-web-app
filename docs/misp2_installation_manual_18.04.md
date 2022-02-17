@@ -715,7 +715,7 @@ editor.
 * Add the following `<Location>` block inside the `<VirtualHost *:443>` block:
 
 ```xml
-<Location "/*/IDCardLogin.action>
+<Location "/*/IDCardLogin.action">
   SSLVerifyClient require
   SSLOptions +StdEnvVars +ExportCertData
 </Location>
