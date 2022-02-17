@@ -694,6 +694,39 @@ sudo -i
     service apache2 restart
     ```
 
+#### 5.7.1 Additional ID-card configuration options
+
+It should be noted that the default configuration is set up so that the authentication certificate is requested on the
+root of the application. This means that the session does not get renegotiated until the user has closed the browser
+tab or navigated to a different webpage. If they do not do so, the session will still contain the client certificate
+for a time and make it possible to log in again without having the ID-card in the reader (hence why the system shows
+a message asking the user to close the browser window after logging out). If this behaviour is not appropriate for your
+use-case, it is possible to configure the `apache2` proxy in such a way that the certificate request and renegotiation
+happens as a result of the ID-card login action itself. To do this, please follow these steps:
+
+* Open the `apache2` configuration file located at `/etc/apache2/sites-enabled/ssl.conf` with your preferred text
+editor.
+* Modify the line (160) `SSLProtocol All -SSLv2 -SSLv3` so that it reads `SSLProtocol -all +TLSv1.2` instead.
+* Remove the following lines from the block `<VirtualHost *:443>`:
+  * (line 168) SSLOptions +StdEnvVars +ExportCertData
+  * (line 169) SSLVerifyClient optional
+* Add the following `<Location>` block inside the `<VirtualHost *:443>` block:
+
+```xml
+<Location "/*/IDCardLogin.action>
+  SSLVerifyClient require
+  SSLOptions +StdEnvVars +ExportCertData
+</Location>
+```
+
+* Reload the configuration: `service apache2 reload`.
+
+**NB!** It should be noted that this approach configures the server so that it will only use TLS 1.2 and not TLS 1.3.
+This is due to browsers currently not supporting `post-handshake authentication` that is required for this to work:
+
+* https://bugs.chromium.org/p/chromium/issues/detail?id=911653
+* https://bugzilla.mozilla.org/show_bug.cgi?id=1511989
+
 ## 6 MISP2 administration interface
 
 Append `/admin` to the portal URL to enter the administration interface. For
