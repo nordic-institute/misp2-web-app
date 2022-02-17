@@ -3,7 +3,7 @@
 
 # MISP2 Installation and Configuration Guide
 
-Version: 2.17
+Version: 2.18
 
 ## Version history <!-- omit in toc -->
 
@@ -14,6 +14,7 @@ Version: 2.17
  30.06.2021 | 2.15    | Added information about additional mobileID parameters and upgrade notice | Raido Kaju
  01.07.2021 | 2.16    | Update 3rd party key server                                               | Petteri Kivimäki
  12.07.2021 | 2.17    | Added manual Estonian ID-card installation instructions                   | Raido Kaju
+ 17.02.2022 | 2.18    | Added instructions on configuring ID-card authentication on <Location/>   | Raido Kaju
 
 ## License <!-- omit in toc -->
 
@@ -44,6 +45,7 @@ To view a copy of this license, visit <https://creativecommons.org/licenses/by-s
     * [5.5.3 Adding a HTTPS certificate](#553-adding-a-https-certificate)
   * [5.6 Enabling the Orbeon inspector](#56-enabling-the-orbeon-inspector)
   * [5.7 Configuring support for the Estonian ID-card](#57-configuring-support-for-the-estonian-id-card)
+    * [5.7.1 Additional ID-card configuration options](#571-additional-id-card-configuration-options)
 * [6 MISP2 administration interface](#6-misp2-administration-interface)
   * [6.1 Administration of MISP2 administrator accounts from the command line](#61-administration-of-misp2-administrator-accounts-from-the-command-line)
   * [6.2 Additions to the Apache web server configuration](#62-additions-to-the-apache-web-server-configuration)
