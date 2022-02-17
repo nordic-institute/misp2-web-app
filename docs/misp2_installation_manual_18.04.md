@@ -14,7 +14,7 @@ Version: 2.18
  30.06.2021 | 2.15    | Added information about additional mobileID parameters and upgrade notice | Raido Kaju
  01.07.2021 | 2.16    | Update 3rd party key server                                               | Petteri Kivimäki
  12.07.2021 | 2.17    | Added manual Estonian ID-card installation instructions                   | Raido Kaju
- 17.02.2022 | 2.18    | Added instructions on configuring ID-card authentication on <Location/>   | Raido Kaju
+ 17.02.2022 | 2.18    | Added instructions on configuring ID-card authentication on `<Location/>` | Raido Kaju
 
 ## License <!-- omit in toc -->
 
