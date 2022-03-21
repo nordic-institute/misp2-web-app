@@ -739,10 +739,10 @@ not using the classifiers, you do not need to run the update.
 To update the EHAK classifiers in the database, please follow these steps:
 
 * Download the update file [EHAK2021v4.sql](./EHAK2021v4.sql) and move it to an appropriate location on the MISP2
-  server
+  server.
 * Execute the following command on the server: `psql -p 5432 misp2db -U postgres -f /path/to/EHAK2021v4.sql`
   * If you chose a different database name during installation, substitue `misp2db` with that. If you are unsure, the
-    details can be checked from `/var/lib/tomcat8/webapps/misp2/WEB-INF/classes/config.cfg`
+    details can be checked from `/var/lib/tomcat8/webapps/misp2/WEB-INF/classes/config.cfg`.
 
 ## 6 MISP2 administration interface
 
