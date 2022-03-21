@@ -3,7 +3,7 @@
 
 # MISP2 Installation and Configuration Guide
 
-Version: 2.18
+Version: 2.19
 
 ## Version history <!-- omit in toc -->
 
@@ -15,6 +15,7 @@ Version: 2.18
  01.07.2021 | 2.16    | Update 3rd party key server                                               | Petteri Kivimäki
  12.07.2021 | 2.17    | Added manual Estonian ID-card installation instructions                   | Raido Kaju
  17.02.2022 | 2.18    | Added instructions on configuring ID-card authentication on `<Location/>` | Raido Kaju
+ 03.03.2022 | 2.19    | Added instructions on updating EHAK classifiers for Estonian users        | Raido Kaju
 
 ## License <!-- omit in toc -->
 
@@ -46,6 +47,7 @@ To view a copy of this license, visit <https://creativecommons.org/licenses/by-s
   * [5.6 Enabling the Orbeon inspector](#56-enabling-the-orbeon-inspector)
   * [5.7 Configuring support for the Estonian ID-card](#57-configuring-support-for-the-estonian-id-card)
     * [5.7.1 Additional ID-card configuration options](#571-additional-id-card-configuration-options)
+  * [5.8 Updating EHAK classifiers to EHAK2021v4](#58-updating-ehak-classifiers-to-ehak2021v4)
 * [6 MISP2 administration interface](#6-misp2-administration-interface)
   * [6.1 Administration of MISP2 administrator accounts from the command line](#61-administration-of-misp2-administrator-accounts-from-the-command-line)
   * [6.2 Additions to the Apache web server configuration](#62-additions-to-the-apache-web-server-configuration)
@@ -728,6 +730,19 @@ This is due to browsers currently not supporting `post-handshake authentication`
 
 * https://bugs.chromium.org/p/chromium/issues/detail?id=911653
 * https://bugzilla.mozilla.org/show_bug.cgi?id=1511989
+
+### 5.8 Updating EHAK classifiers to EHAK2021v4
+
+**NB!** The current EHAK classifiers in MISP2 are specific to Estonia, if you are using MISP2 in another country or are
+not using the classifiers, you do not need to run the update.
+
+To update the EHAK classifiers in the database, please follow these steps:
+
+* Download the update file [EHAK2021v4.sql](./EHAK2021v4.sql) and move it to an appropriate location on the MISP2
+  server.
+* Execute the following command on the server: `psql -p 5432 misp2db -U postgres -f /path/to/EHAK2021v4.sql`
+  * If you chose a different database name during installation, substitue `misp2db` with that. If you are unsure, the
+    details can be checked from `/var/lib/tomcat8/webapps/misp2/WEB-INF/classes/config.cfg`.
 
 ## 6 MISP2 administration interface
 
