@@ -1,0 +1,11 @@
+Source: xtee-misp2-orbeon
+Section: contrib/web
+Priority: optional
+Maintainer: NIIS <info@niis.org>
+Build-Depends: debhelper (>= 4.0.0)
+Standards-Version: 3.6.1
+
+Package: xtee-misp2-orbeon
+Architecture: amd64
+Depends: xtee-misp2-base, debconf (>= 0.2.17)
+Description: Orbeon XForms engine installation package for MISP2 web application

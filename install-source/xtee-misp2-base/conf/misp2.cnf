@@ -1,0 +1,52 @@
+# This definition stops the following lines choking if HOME isn't
+# defined.
+HOME            = .
+#RANDFILE                = $ENV::HOME/.rnd
+
+database_file   = $ENV::TMPINDEX
+ca_dir          = $ENV::CA_DIR
+private_key     = $ca_dir/MISP2_CA_key.pem
+COMMONNAME      =
+
+[ ca ]
+default_ca      = CA_default            # The default ca section
+
+[ CA_default ]
+certs           = $ca_dir/certs
+crl_dir         = $ca_dir/crl
+database        = $database_file
+new_certs_dir   = $ca_dir/newcerts
+
+certificate     = $ca_dir/MISP2_CA_cert.pem
+serial          = $ca_dir/serial
+crl             = $ca_dir/crl.pem
+
+default_days    = 365
+default_crl_days= 30
+default_md      = sha256
+preserve        = no
+
+policy          = policy_match
+
+[ policy_match ]
+countryName             = supplied
+organizationName        = supplied
+commonName              = supplied
+
+[ req ]
+default_bits            = 2048
+default_keyfile         = $private_key
+distinguished_name      = req_distinguished_name
+default_md = sha256
+
+[ req_distinguished_name ]
+countryName                     = Country Name (2 letter code)
+countryName_default             = EE
+
+0.organizationName              = Organization Name (eg, company)
+0.organizationName_default      = MISP2
+
+commonName                      = Common Name (eg, YOUR name)
+commonName_default              = $ENV::COMMONNAME
+
+

@@ -1,5 +1,23 @@
-/target/
-*.iml
-.idea/
-**/node_modules/
+# Compiled class file
+*.class
+
+# Package Files
+*.jar
+*.war
+
+# Gradle
+.gradle
+**/build/
+!src/**/build/
+
+# Gradle wrapper jar file
+!gradle-wrapper.jar
+
+# Gradle wrappper properties
+!gradle-wrapper.properties
+
+# Distribution
+install-source/repo/dists/
+
+# Docs related rules
 /docs/*.pdf

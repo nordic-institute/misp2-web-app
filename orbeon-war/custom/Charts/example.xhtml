@@ -1,0 +1,18 @@
+<xhtml:html xmlns:xforms="http://www.w3.org/2002/xforms"
+    xmlns:xhtml="http://www.w3.org/1999/xhtml" 
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:fr="http://orbeon.org/oxf/xml/form-runner" >
+    <xhtml:head>
+        <xforms:model  id="main-model">     
+			<xforms:instance id="graph" xmlns="">
+                <graph>
+                	<set name='data1' value='10'/>
+                    <set name='data2' value='5' />
+                </graph>
+          	</xforms:instance>
+        </xforms:model>
+    </xhtml:head>
+    <xhtml:body>
+      <fr:fusion-charts ref="instance('graph')" swf="FCF_Column3D" width="600" height="400"/>
+    </xhtml:body>
+</xhtml:html>​

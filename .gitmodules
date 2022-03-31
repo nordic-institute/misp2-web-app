@@ -1,0 +1,3 @@
+[submodule "orbeon"]
+	path = orbeon
+	url = https://github.com/orbeon/orbeon-forms.git

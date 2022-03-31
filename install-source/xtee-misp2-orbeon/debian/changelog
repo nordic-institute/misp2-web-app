@@ -1,0 +1,124 @@
+xtee-misp2-orbeon (2.6.3) stable; urgency=medium
+
+  * Bump Log4J2 to 2.17.1 to resolve CVE-2021-44832
+
+ -- NIIS <info@niis.org>  Tue, 18 Jan 2022 13:50:16 +0200
+
+xtee-misp2-orbeon (2.6.2) stable; urgency=medium
+
+  * Bump Log4J2 to 2.16.0 to resolve CVE-2021-45046
+
+ -- NIIS <info@niis.org>  Wed, 15 Dec 2021 09:43:27 +0200
+
+xtee-misp2-orbeon (2.6.1) stable; urgency=medium
+
+  * Update Log4j2 to 2.15.0 to resolve CVE-2021-44228
+
+ -- NIIS <info@niis.org>  Mon, 13 Dec 2021 09:41:03 +0200
+
+xtee-misp2-orbeon (2.6.0) stable; urgency=medium
+
+  * MISPDEV-21	Updated apt-get purge to remove MISP2 files from Tomcat webapp folder and Apache settings folder
+  * MISPDEV-70	Added instructions for using AdoptOpenJDK8 instead of the unsupported OpenJDK8
+  * MISPDEV-8	3rd party libraries were reviewed and updated to the latest versions
+  * MISPDEV-35	Updated “javax.servlet:javax.servlet-api” library to the latest version
+  * MISPDEV-31	Updated MISP2 application source code to comply with Maven directory standard
+  * MISPDEV-40	Deprecated custom DigiDocServlet implementation
+  * MISPDEV-53	Refactored “install-misp2-base.sh” post-install script
+  * MISPDEV-54	Refactored “install-misp2-orbeon.sh” post-install script
+  * MISPDEV-51	Refactored “install-misp2-application.sh” post-install script
+  * MISPDEV-45	Removed support for deprecated HTML keygen tag-based certificate authentication
+  * MISPDEV-65	Fixed SonarQube BLOCKER level security vulnerabilities
+  * MISPDEV-34	Updated “ee.sk.mid:mid-rest-java-client” library
+  * MISPDEV-60	Added experimental support for Java 11 runtime
+  * MISPDEV-64	Replaced “javax.xml.soap.*” classes with Jakarta XML Web services implementation to get MISP2 running on Java 11 runtime
+  * MISPDEV-55	Improved Debian packaging conformity for “misp2-base” package
+
+ -- NIIS <info@niis.org>  Fri, 28 May 2021 16:37:38 +0300
+
+xtee-misp2-orbeon (2.5.0) stable; urgency=medium
+
+  * NIIS copyrights now
+
+ -- NIIS <info@niis.org>  Tue, 26 Jan 2021 08:36:58 +0200
+
+xtee-misp2-orbeon (2.0.1) stable; urgency=low
+
+  * Use Orbeon 4.9 official CE (previously preliminary CE-version was used)
+  * Installation script waits until Orbeon has deployed before it alters conf (previously waited for 15 or 30 s)
+ -- Aktors <info@aktors.ee>  Tue, 08 Oct 2015 13:30:00 +0300
+ 
+xtee-misp2-orbeon (2.0.0) stable; urgency=low
+
+  * Migration to Ubuntu 14.04
+  * Orbeon 4.9 support
+ -- Aktors <info@aktors.ee>  Tue, 16 Feb 2015 18:30:00 +0300
+ 
+xtee-misp2-orbeon (1.1.2) unstable; urgency=low
+
+  * Orbeon 4.4 toetus
+  * FusionCharts library lisatud, et xformsides graafikuid kuvada
+ -- Aktors <info@aktors.ee>  Wed,  26 Feb 2014 15:57:15 +0300
+
+xtee-misp2-orbeon (1.1.1) unstable; urgency=low
+
+  * Orbeon 4.0M toetus 
+ -- Aktors <info@aktors.ee>  Thu,  04 Oct 2012 13:00:00 +0300
+
+xtee-misp2-orbeon (1.1.0) unstable; urgency=low
+
+  * Orbeon 3.9 test 
+ -- Aktors <info@aktors.ee>  Fri,  07 Sept 2012 15:00:00 +0300
+
+xtee-misp2-orbeon (1.0.9) stable; urgency=low
+
+  * xforms.js-s on muudetud ja lisatud orbeon-functions.js-le laadimise protsessi funktsioon
+ -- Aktors <info@aktors.ee>  Thu,  22 Apr 2012 10:00:00 +0300
+
+xtee-misp2-orbeon (1.0.8) stable; urgency=low
+
+  * lisatud preprocess.xpl ja pdf.xsl; epilogue-servlet.xpl teeb vajalikud transformatsioonid PDFi jaoks; page-flow.xml -s kommenteeritud sisse ebavajalikud osad;
+ -- Aktors <info@aktors.ee>  Thu,  12 Apr 2012 10:00:00 +0300
+
+xtee-misp2-orbeon (1.0.7) stable; urgency=low
+
+  * custom error dialog MISP2 jaoks
+ -- Aktors <info@aktors.ee>  Fri,  30 Mar 2012 10:00:00 +0300
+
+xtee-misp2-orbeon (1.0.6) stable; urgency=low
+
+  * submission-body vaikimisi ei logita (Sun Java arvab, et Content-Type jutumärkides ei ole hea)
+ -- Aktors <info@aktors.ee>  Wed,  29 Feb 2012 10:00:00 +0300
+
+xtee-misp2-orbeon (1.0.5) stable; urgency=low
+
+  * lisatud oxf.xforms.client.events.filter ja oxf.xforms.format.* parameetrid
+ -- Aktors <info@aktors.ee>  Tue,  24 Jan 2012 17:00:00 +0300
+
+xtee-misp2-orbeon (1.0.4) stable; urgency=low
+
+  * orbeon.log automaatselt salvestatakse /var/log/tomcat7/ kataloogi
+ -- Aktors <info@aktors.ee>  Tue,  06 Sep 2011 17:20:00 +0300
+
+xtee-misp2-orbeon (1.0.3) stable; urgency=low
+
+  * amd64 versioon; lisatud oxf.xforms.state-handling parameeter properties-local.xml faili
+ -- Mihhail <info@aktors.ee>  Wed,  23 Mar 2011 15:20:00 +0300
+
+xtee-misp2-orbeon (1.0.2) stable; urgency=low
+
+  * versioon Ubuntu peal testimiseks; orbeon.css kommenteeritud valja
+ -- Mihhail <info@aktors.ee>  Thu,  23 Dec 2010 10:20:00 +0300
+
+xtee-misp2-orbeon (1.0.1) stable; urgency=low
+
+  * versioon Ubuntu peal testimiseks: inspector=false
+ -- Mihhail <info@aktors.ee>  Tue,  09 Nov 2010 15:21:19 +0300
+
+xtee-misp2-orbeon (1.0.0) stable; urgency=low
+
+  * esimene versioon testimiseks
+ -- Mihhail <info@aktors.ee>  Wed,  27 Oct 2010 15:21:19 +0300
+
+
+

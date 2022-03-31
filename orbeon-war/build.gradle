@@ -1,0 +1,30 @@
+tasks.register('unpack-war', Copy) {
+  dependsOn(parent.buildVanillaOrbeonWar)
+  from(zipTree(parent.buildVanillaOrbeonWar.outputs.files.singleFile)) {
+    include 'WEB-INF/*.jar'
+    include 'WEB-INF/*.xml'
+    include 'WEB-INF/classes/*'
+    include 'WEB-INF/exist-data/README.txt'
+    include 'WEB-INF/lib/*'
+    include 'WEB-INF/resources/*'
+    include 'xforms-jsp'
+    exclude 'xforms-jsp/*'
+  }
+  into layout.buildDirectory.dir('vanilla-war-exploded') 
+}
+
+tasks.register('war', Zip) {
+  dependsOn('unpack-war')
+  destinationDirectory = layout.buildDirectory.dir('dist')
+  archiveFileName = 'orbeon.war'
+  from layout.buildDirectory.dir('vanilla-war-exploded')
+  from ('custom') {
+    into 'WEB-INF/resources'
+  }
+}
+
+tasks.register('clean'){
+  doLast {
+    delete buildDir
+  }
+}

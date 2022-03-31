@@ -1,0 +1,53 @@
+<!--
+  Copyright (C) 2010 Orbeon, Inc.
+
+  This program is free software; you can redistribute it and/or modify it under the terms of the
+  GNU Lesser General Public License as published by the Free Software Foundation; either version
+  2.1 of the License, or (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+  without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  See the GNU Lesser General Public License for more details.
+
+  The full text of the license is available at http://www.gnu.org/copyleft/lesser.html
+  -->
+<controller xmlns="http://www.orbeon.com/oxf/controller" matcher="regexp">
+
+    <!-- ==== XForms Server ======================================================================================== -->
+
+    <page path="/xforms-server.*" model="/ops/xforms/xforms-server.xpl" public-methods="HEAD GET POST"/>
+
+    <!-- ==== Forward application services ========================================================================= -->
+
+    <service path="/([^/]+)/service/.+" model="apps/${1}/page-flow.xml" public-methods="#all"/>
+
+    <!-- ==== Files ================================================================================================ -->
+
+    <files path="(?!/([^/]+)/service/).+\.(gif|css|pdf|json|js|png|jpg|xsd|htc|ico|swf|html|htm|txt)"/>
+
+    <!-- ==== Pages ================================================================================================ -->
+
+    <!-- Home / welcome application -->
+    <page path="/" model="apps/home/page-flow.xml"/>
+
+    <!-- Dispatch request to a specific application -->
+    <page path="/([^/]+)/.*" model="apps/${1}/page-flow.xml" public-methods="#all"/>
+
+    <!-- ==== Epilogue and handlers ================================================================================ -->
+    <!-- <misp-change comment="Custom replacement: since only error.xpl exists and xhtml files are deleted, always show this error "> -->
+	<!-- 
+    <page id="not-found"    path="/not-found"    view="/config/not-found.xhtml"/>
+    <page id="unauthorized" path="/unauthorized" view="/config/unauthorized.xhtml"/>
+     -->
+    <page id="not-found"    path="/not-found" 		model="/config/error.xpl" />
+    <page id="unauthorized" path="/unauthorized"    model="/config/error.xpl"/>
+    <page id="error"        path="/error"        	model="/config/error.xpl"/>
+	<!-- </misp-change> -->
+	
+    <not-found-handler    page="not-found"/>
+    <unauthorized-handler page="unauthorized"/>
+    <error-handler        page="error"/>
+
+    <epilogue url="/config/epilogue.xpl"/>
+
+</controller>
