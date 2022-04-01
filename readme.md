@@ -1,8 +1,5 @@
 # MISP2
 
-TODO: Change to more accurately represent the current state (most of this information is
-now available in the root of the repository).
-
 [![Go to X-Road Community
 Slack](https://img.shields.io/badge/Go%20to%20Community%20Slack-grey.svg)](https://jointxroad.slack.com/)
 [![Get invited](https://img.shields.io/badge/No%20Slack-Get%20invited-green.svg)](https://x-road.global/community)
@@ -13,8 +10,30 @@ a unified way to access different services.
 
 ## About the repository
 
-The [source code](./src) of MISP2 is open for all and it is licensed under the
-MIT licence.
+This respository contains the following modules:
+
+* [install-source](./install-source) which contains the installation scripts and
+  packaging related functionality
+* [orbeon-war](./orbeon-war) which contains the build files for the customised
+  [Orbeon Forms](https://www.orbeon.com/) instance
+* [web-app](./web-app) which contains the source of the MISP2 web application 
+  itself
+
+The for source code for the modules `install-source`, 'orbeon-war' and `web-app`
+of MISP2 is open for all and it is licensed under the MIT licence.
+
+This repository also contains a git submodule [orbeon](./orbeon) which links to the
+[GitHub repository of Orbeon Forms](https://github.com/orbeon/orbeon-forms).
+
+## Development of MISP2
+
+### How to build MISP2?
+
+See the instructions in [build.md](./build.md)
+
+### How to run the development packages locally
+
+See the instructions in [docker-dev/readme.md](./docker-dev/readme.md)
 
 ## Documentation
 
