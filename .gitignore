@@ -21,3 +21,7 @@ install-source/repo/dists/
 
 # Docs related rules
 /docs/*.pdf
+
+# Docker dev environment
+/docker-dev/pgdata/*
+/docker-dev/webapps/*

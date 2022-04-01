@@ -73,3 +73,21 @@ java.sourceCompatibility = JavaVersion.VERSION_1_8
 tasks.withType(JavaCompile) {
   options.encoding = 'UTF-8'
 }
+
+war {
+  archiveBaseName = 'misp2'
+  rootSpec.exclude('**/*.dev')
+}
+
+tasks.register('devWar', War) {
+  archiveBaseName = 'misp2-dev'
+  rootSpec.eachFile { file ->
+   if (['config.cfg', 'log4j2.xml'].contains(file.name)) {
+     file.exclude()
+   } 
+   if (file.name.endsWith('.dev')) {
+     file.name = file.name - '.dev'
+   }
+  }
+  outputs.upToDateWhen { false }
+}

@@ -1,3 +1,5 @@
+// Tasks and configuration related to building Orbeon
+
 ant.importBuild('orbeon/build.xml') { antTargetName -> 'orbeon-' + antTargetName }
 
 def orbeonCommitHash() {
@@ -16,21 +18,28 @@ def orbeonCommitHash() {
 ext.orbeonHash = orbeonCommitHash();
 ext.vanillaOrbeonWarName = "orbeon-${ant.properties['version.number']}${ant.properties['edition']}-${orbeonHash}.war"
 ext.orbeonFilterJarName = "orbeon-xforms-filter-${ant.properties['version.number']}${ant.properties['edition']}-${orbeonHash}.jar"
-
 ext.orbeonAntWarTasks = ['orbeon-exits-task', 'orbeon-exist-import-sample-data-to-build', 'orbeon-orbeon-dist-war']
+
+tasks
+  .matching { task -> task.name.startsWith('orbeon-') }
+  .each { task -> task.doFirst {
+    if (System.getenv('GITHUB_TOKEN') == null) {
+      throw new GradleException('Orbeon builds require the environmental variable "GITHUB_TOKEN" to be set to a GitHub ' +
+                                'token with access to repositories allowed so that it can download private dependencies')
+    }
+  }
+}
+
 tasks
   .matching { task -> orbeonAntWarTasks.contains(task.name) }
   .each { task -> task.outputs.upToDateWhen {
     file("${buildDir}/${vanillaOrbeonWarName}").exists()
-    //layout.buildDirectory.file(vanillaOrbeonWarName).exists()
   }
 }
 
 tasks.getByName('orbeon-war-common').outputs.upToDateWhen {
   file("${buildDir}/${vanillaOrbeonWarName}").exists() || 
   file("${buildDir}/${orbeonFilterJarName}").exists()
-  // layout.buildDirectory.file(vanillaOrbeonWarName).exists() ||
-  // layout.buildDirectory.file(orbeonFilterJarName).exists()
 }
 
 tasks.getByName('orbeon-xforms-filter-jar').outputs.file('orbeon/build/lib/orbeon-xforms-filter.jar')
@@ -67,5 +76,22 @@ tasks.register('clean'){
   dependsOn('orbeon-clean')
   doLast {
     delete buildDir
+  }
+}
+
+// Tasks for installing components to the docker-compose development environment
+
+tasks.register('deployDevOrbeon', Copy) {
+  dependsOn(':orbeon-war:war')
+  from tasks.getByPath(':orbeon-war:war').outputs.files.singleFile
+  into 'docker-dev/webapps'
+}
+
+tasks.register('deployDevMisp', Copy) {
+  dependsOn(':web-app:devWar')
+  from tasks.getByPath(':web-app:devWar').outputs.files.singleFile
+  into 'docker-dev/webapps'
+  rename {
+    'misp2.war'
   }
 }
