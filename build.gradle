@@ -80,18 +80,26 @@ tasks.register('clean'){
 }
 
 // Tasks for installing components to the docker-compose development environment
-
-tasks.register('deployDevOrbeon', Copy) {
+// Not type of Copy because it causes issues with the docker volume specified as output
+tasks.register('deployDevOrbeon') {
   dependsOn(':orbeon-war:war')
-  from tasks.getByPath(':orbeon-war:war').outputs.files.singleFile
-  into 'docker-dev/webapps'
+  outputs.file('docker-dev/webapps/orbeon.war')
+  copy {
+    from tasks.getByPath(':orbeon-war:war').outputs.files.singleFile
+    into 'docker-dev/webapps'
+  }
 }
 
-tasks.register('deployDevMisp', Copy) {
+tasks.register('deployDevMisp') {
   dependsOn(':web-app:devWar')
-  from tasks.getByPath(':web-app:devWar').outputs.files.singleFile
-  into 'docker-dev/webapps'
-  rename {
-    'misp2.war'
+  outputs.file('docker-dev/webapps/misp2.war')
+  doLast {
+    copy {
+      from tasks.getByPath(':web-app:devWar').outputs.files.singleFile
+      into 'docker-dev/webapps'
+      rename {
+        'misp2.war'
+      }
+    }
   }
 }
