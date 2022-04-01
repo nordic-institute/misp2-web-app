@@ -118,7 +118,10 @@
   padding-right: 12px;
 }
 
-
+/* Hide output fields in thead with Orbeon 2021.1CE */
+.orbeon .maincontent table thead tr th span output {
+  display: none;
+}
 
 .orbeon .maincontent table.repeat-full,
 .orbeon .maincontent table.group-full

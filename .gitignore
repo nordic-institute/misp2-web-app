@@ -23,5 +23,5 @@ install-source/repo/dists/
 /docs/*.pdf
 
 # Docker dev environment
-/docker-dev/pgdata/*
-/docker-dev/webapps/*
+/docker-dev/pgdata
+/docker-dev/webapps
