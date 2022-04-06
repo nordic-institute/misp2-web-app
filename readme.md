@@ -12,14 +12,14 @@ a unified way to access different services.
 
 This respository contains the following modules:
 
-* [install-source](./install-source) which contains the installation scripts and
+* [packages](./packages) which contains the installation scripts and
   packaging related functionality
 * [orbeon-war](./orbeon-war) which contains the build files for the customised
   [Orbeon Forms](https://www.orbeon.com/) instance
 * [web-app](./web-app) which contains the source of the MISP2 web application 
   itself
 
-The for source code for the modules `install-source`, 'orbeon-war' and `web-app`
+The for source code for the modules `packages`, 'orbeon-war' and `web-app`
 of MISP2 is open for all and it is licensed under the MIT licence.
 
 This repository also contains a git submodule [orbeon](./orbeon) which links to the

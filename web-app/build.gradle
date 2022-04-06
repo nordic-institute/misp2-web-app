@@ -75,8 +75,11 @@ tasks.withType(JavaCompile) {
 }
 
 war {
-  archiveBaseName = 'misp2'
+  archiveName = 'misp2.war'
   rootSpec.exclude('**/*.dev')
+  manifest {
+    attributes('App-Version': version)
+  }
 }
 
 tasks.register('devWar', War) {

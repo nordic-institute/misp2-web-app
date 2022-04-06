@@ -2,30 +2,16 @@
 ##
 # Compile xtee-misp2-* debian packages and add them to repo.
 # 
-# The script is part of install_source directory content which all
-# has to be layed out in home directory (normally /home/misp2)
-# so that it contains the following directory structure:
-# /home
-#    /misp2
-#       /git
-#           /MISP2-install-source
-#               /repo
-#               /xtee-misp2-postgresql
-#               /xtee-misp2-base
-#               /xtee-misp2-orbeon
-#               /xtee-misp2-application
-#               /build.sh
-#
-# Script has to be run by normal user (e.g. misp2) with MISP2-install-source set as current directory.
+# Script has to be run by a normal user (e.g. misp2) while being inside the packages directory.
 # 
 # Examples:
 #
-### Before running the script, change directory to 'MISP2-install-source' and make the script executable
+### Before running the script, change directory to 'misp2-web-app/packages' and make the script executable
 #
-# cd ~/git/MISP2-install-source
+# cd ~/git/misp2-web-app/packages
 # chmod u+x build.sh
 #
-### To build all 5 xtee-misp2 packages and add them to /repo directory, 
+### To build all the xtee-misp2 packages and add them to /repo directory, 
 ### run build.sh without arguments.
 #
 # ./build.sh
@@ -74,9 +60,7 @@ cd "$(dirname "$0")"
 . resources/functions-build.sh
 
 # Variable declarations
-git_branch_install_source=master
-git_branch_orbeon_war=master
-git_branch_misp2_webapp=develop
+git_branch_misp2_webapp=master
 
 prefix=xtee-misp2
 repo_name="repo"
@@ -118,37 +102,23 @@ if ! contains_word "$*" "-nogit"
 then
 	# Cache Git credentials for 60 s to avoid inserting them multiple times
 	git config --global credential.helper 'cache --timeout=60'
-	# Update install source project
-	git pull origin "$git_branch_install_source"
-	if [ "$build_webapp" == true ]
-	then
-		# Update MISP2 webapp project
-		cd ../misp2-web-app
-		git pull origin "$git_branch_misp2_webapp"
-		cd ../misp2-install-source
-	fi
-
-	if [ "$build_orbeon" == true ]
-	then
-		# Update Orbeon webapp project
-		cd ../misp2-orbeon-war
-		git pull origin "$git_branch_orbeon_war"
-		cd ../misp2-install-source
-	fi
+	# Update project
+  cd ../
+	git pull origin "$git_branch_misp2_webapp"
 fi
 
 # Build webapp WAR-s and copy them to Debian package build directories
 if [ "$build_webapp" == true ]
 then
-	cd ../misp2-web-app
+	cd ../
 	echo "(Building MISP2 webapp)"
 	
 	# Build webapp
-	mvn --batch-mode clean install
+  ./gradlew clean :web-app:war
 	# Copy webapp to 'war' directory in xtee-misp2-application project
-	cp target/misp2.war ../misp2-install-source/$prefix-application/war/misp2.war
+	cp web-app/build/libs/misp2.war packages/$prefix-application/war/misp2.war
 
-	cd ../misp2-install-source
+	cd packages
 else
 	echo "(Not building MISP2 webapp)"
 fi
@@ -167,15 +137,15 @@ fi
 
 if [ "$build_orbeon" == true ]
 then
-	cd ../misp2-orbeon-war
+	cd ../
 	echo "(Building Orbeon webapp)"
 	
 	# Build Orbeon webapp WAR
-	ant war
+  ./gradlew clean :orbeon-war:war
 	# Copy webapp WAR file to 'war' directory in xtee-misp2-orbeon project
-	cp build/orbeon-misp2.war ../misp2-install-source/$prefix-orbeon/war/orbeon.war
+	cp orbeon-war/build/dist/orbeon.war packages/$prefix-orbeon/war/orbeon.war
 
-	cd ../misp2-install-source
+	cd packages
 else
 	echo "(Not building Orbeon webapp)"
 fi

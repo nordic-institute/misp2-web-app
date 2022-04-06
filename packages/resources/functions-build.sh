@@ -111,7 +111,7 @@ function get_last_version {
 }
 
 ##
-# Check WAR POM version if it matches application package version.
+# Check WAR manifest 'App-Version' if it matches application package version.
 # If it matches, show message, if versions do not match, prompt user whether to continue with the build.
 # Assumes current directory is located directly within package source root directory. 
 # Current directory should also contain the WAR file.
@@ -131,18 +131,19 @@ function check_war_version {
 		echo "Performing WAR check"
 	fi
 
-	local pom_path="META-INF/maven/misp2/misp2/pom.xml"
-	jar -xf ${war_file_name} $pom_path
-	# find WAR POM version by taking text between first found 'version>' and '<' 
-	local pom_version=$(perl -p -e "BEGIN{undef $/;} s/^.*?version[^<]*>([^<]+).*$/\1/smg" $pom_path)
+	local mf_path="META-INF/MANIFEST.MF"
+	jar -xf ${war_file_name} $mf_path
+	# Find WAR app version by greping the line from MANIFEST.MF, cutting the variable name
+  # and running it through xargs to trim the result.
+  local app_version=$(grep "App-Version" $mf_path | cut -d':' -f2 | xargs)
 	rm -rf META-INF
 	# take top version entry from changelog: text between first found ' (' and ')'
 	local changelog_version=$(get_last_version ../debian/changelog)
-	if [ "$pom_version" != "$changelog_version" ] 
+	if [ "$app_version" != "$changelog_version" ] 
 	then
 		echo
 		echo -n "WARNING: Latest $package_name changelog version $changelog_version "
-		echo "is different to WAR POM version $pom_version "
+		echo "is different to WAR app version $app_version "
 		echo -n "Continue (y/n)? [default: y] "
 		read user_continue < /dev/tty
 		if [ "$user_continue" != "" ] && [ "$user_continue" != "y" ] && [ "$user_continue" != "Y" ]
