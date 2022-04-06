@@ -105,51 +105,50 @@ then
 	# Update project
   cd ../
 	git pull origin "$git_branch_misp2_webapp"
+  cd packages
 fi
 
-# Build webapp WAR-s and copy them to Debian package build directories
-if [ "$build_webapp" == true ]
+if [ "$build_webapp" == true ] || [ "$build_orbeon" == true ]
 then
-	cd ../
-	echo "(Building MISP2 webapp)"
-	
-	# Build webapp
-  ./gradlew clean :web-app:war
-	# Copy webapp to 'war' directory in xtee-misp2-application project
-	cp web-app/build/libs/misp2.war packages/$prefix-application/war/misp2.war
+  cd ../ # To the root of the project
 
-	cd packages
-else
-	echo "(Not building MISP2 webapp)"
+  echo "$(pwd): Running cleanup for MISP2"
+  ./gradlew clean  
+    
+  # Build webapp WAR-s and copy them to Debian package build directories
+  if [ "$build_webapp" == true ]
+  then
+    # Build webapp
+    echo "$(pwd): Building MISP2 webapp"
+    ./gradlew :web-app:war
+    # Copy webapp to 'war' directory in xtee-misp2-application project
+    cp web-app/build/libs/misp2.war packages/$prefix-application/war/misp2.war
+
+  fi
+
+  # If application package is being built, check WAR version
+  if contains_word "$packages" "$prefix-application" 
+  then
+    cd packages/$prefix-application/war
+
+    # Check WAR version if it matches application package version
+    echo "$(pwd): Checking MISP webapp version"
+    check_war_version misp2.war $prefix-application "$*"
+
+    cd ../../.. # Back to the root
+  fi
+
+  if [ "$build_orbeon" == true ]
+  then
+    # Build Orbeon webapp WAR
+    echo "$(pwd) Building Orbeon webapp"
+    ./gradlew :orbeon-war:war
+    # Copy webapp WAR file to 'war' directory in xtee-misp2-orbeon project
+    cp orbeon-war/build/dist/orbeon.war packages/$prefix-orbeon/war/orbeon.war
+  fi
+
+  cd packages # Back to packages
 fi
-
-# If application package is being built, check WAR version
-if contains_word "$packages" "$prefix-application" 
-then
-	cd $prefix-application/war
-	echo "(Checking MISP webapp version)"
-	# Check WAR POM version if it matches application package version
-	check_war_version misp2.war $prefix-application "$*"
-	cd ../..
-else
-	echo "(Not checking MISP2 webapp version)"
-fi
-
-if [ "$build_orbeon" == true ]
-then
-	cd ../
-	echo "(Building Orbeon webapp)"
-	
-	# Build Orbeon webapp WAR
-  ./gradlew clean :orbeon-war:war
-	# Copy webapp WAR file to 'war' directory in xtee-misp2-orbeon project
-	cp orbeon-war/build/dist/orbeon.war packages/$prefix-orbeon/war/orbeon.war
-
-	cd packages
-else
-	echo "(Not building Orbeon webapp)"
-fi
-
 
 
 # Optional exit when '-nodebian' argument is given; in order to avoid time-consuming debian package build process

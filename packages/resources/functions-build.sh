@@ -518,7 +518,7 @@ function adjust_to_distro {
 	then
 		# Update logging conf file in WAR with the correct Tomcat version
 		echo "Replacing Tomcat log dir reference in orbeon.war with tomcat$new_tomcat_version."
-		local war_internal_files="WEB-INF/resources/config/log4j.xml"
+		local war_internal_files="WEB-INF/resources/config/log4j2.xml"
 		local war_file=$prefix-orbeon/war/orbeon.war
 		jar xfv "$war_file" $war_internal_files
 		perl -pi -e "s/tomcat[0-9]/tomcat$new_tomcat_version/g" $war_internal_files

@@ -22,6 +22,7 @@
 
 # Distribution
 packages/repo/dists/
+packages/repo-unsigned/dists/
 
 # Docs related rules
 /docs/*.pdf
