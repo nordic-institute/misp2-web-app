@@ -1,3 +1,7 @@
+# Project files
+.classpath
+.project
+.settings
 # Compiled class file
 *.class
 
@@ -17,7 +21,7 @@
 !gradle-wrapper.properties
 
 # Distribution
-install-source/repo/dists/
+packages/repo/dists/
 
 # Docs related rules
 /docs/*.pdf
