@@ -75,10 +75,10 @@ tasks.withType(JavaCompile) {
 }
 
 war {
-  archiveName = 'misp2.war'
+  archiveFileName = 'misp2.war'
   rootSpec.exclude('**/*.dev')
   manifest {
-    attributes('App-Version': version)
+    attributes('App-Version': archiveVersion)
   }
 }
 

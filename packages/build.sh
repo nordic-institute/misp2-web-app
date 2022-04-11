@@ -113,7 +113,7 @@ then
   cd ../ # To the root of the project
 
   echo "$(pwd): Running cleanup for MISP2"
-  ./gradlew clean  
+  ./gradlew clean
     
   # Build webapp WAR-s and copy them to Debian package build directories
   if [ "$build_webapp" == true ]

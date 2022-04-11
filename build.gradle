@@ -20,6 +20,10 @@ ext.vanillaOrbeonWarName = "orbeon-${ant.properties['version.number']}${ant.prop
 ext.orbeonFilterJarName = "orbeon-xforms-filter-${ant.properties['version.number']}${ant.properties['edition']}-${orbeonHash}.jar"
 ext.orbeonAntWarTasks = ['orbeon-exits-task', 'orbeon-exist-import-sample-data-to-build', 'orbeon-orbeon-dist-war']
 
+/*
+  ** This was required for building Orbeon Forms 2021.1CE, however is not required in the 2020.1.5CE version.
+  ** We use the 2020.1.5CE version currently, as it is the last one compatible with JAVA 8, which MISP2
+  ** itself uses.
 tasks
   .matching { task -> task.name.startsWith('orbeon-') }
   .each { task -> task.doFirst {
@@ -29,6 +33,7 @@ tasks
     }
   }
 }
+*/
 
 tasks
   .matching { task -> orbeonAntWarTasks.contains(task.name) }
