@@ -142,8 +142,8 @@ function check_war_version {
 	if [ "$app_version" != "$changelog_version" ] 
 	then
 		echo
-		echo -n "WARNING: Latest $package_name changelog version $changelog_version "
-		echo "is different to WAR app version $app_version "
+		echo -n "WARNING: Latest $package_name changelog version '$changelog_version' "
+		echo "is different to WAR app version '$app_version'"
 		echo -n "Continue (y/n)? [default: y] "
 		read user_continue < /dev/tty
 		if [ "$user_continue" != "" ] && [ "$user_continue" != "y" ] && [ "$user_continue" != "Y" ]
