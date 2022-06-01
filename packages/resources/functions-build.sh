@@ -135,15 +135,14 @@ function check_war_version {
 	jar -xf ${war_file_name} $mf_path
 	# Find WAR app version by greping the line from MANIFEST.MF, cutting the variable name
   # and running it through xargs to trim the result.
-  local app_version=$(grep "App-Version" $mf_path | cut -d':' -f2 | xargs)
+  local app_version=$(perl -0777 -wpe 's/\n //g' META-INF/MANIFEST.MF | tr -d '\r' | awk '/App-Version/{print $2}')
 	rm -rf META-INF
 	# take top version entry from changelog: text between first found ' (' and ')'
 	local changelog_version=$(get_last_version ../debian/changelog)
 	if [ "$app_version" != "$changelog_version" ] 
 	then
 		echo
-		echo -n "WARNING: Latest $package_name changelog version '$changelog_version' "
-		echo "is different to WAR app version '$app_version'"
+		echo "WARNING: Latest $package_name changelog version '$changelog_version' is different to WAR app version '$app_version'"
 		echo -n "Continue (y/n)? [default: y] "
 		read user_continue < /dev/tty
 		if [ "$user_continue" != "" ] && [ "$user_continue" != "y" ] && [ "$user_continue" != "Y" ]
