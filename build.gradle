@@ -78,7 +78,7 @@ tasks.register('buildOrbeonFilter') {
 }
 
 tasks.register('clean'){
-  dependsOn('orbeon-clean')
+  dependsOn('orbeon-mega-clean')
   doLast {
     delete buildDir
   }
