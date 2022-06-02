@@ -121,6 +121,8 @@ then
     # Build webapp
     echo "$(pwd): Building MISP2 webapp"
     ./gradlew :web-app:war
+    # Make packages/$prefix-application/war if it does not exist
+    mkdir -p packages/$prefix-application/war
     # Copy webapp to 'war' directory in xtee-misp2-application project
     cp web-app/build/libs/misp2.war packages/$prefix-application/war/misp2.war
 
@@ -143,6 +145,8 @@ then
     # Build Orbeon webapp WAR
     echo "$(pwd) Building Orbeon webapp"
     ./gradlew :orbeon-war:war
+    # Make packages/$prefix-orbeon/war if it does not exist
+    mkdir -p packages/$prefix-orbeon/war
     # Copy webapp WAR file to 'war' directory in xtee-misp2-orbeon project
     cp orbeon-war/build/dist/orbeon.war packages/$prefix-orbeon/war/orbeon.war
   fi
