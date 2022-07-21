@@ -1,3 +1,7 @@
+plugins {
+  id "com.bmuschko.docker-remote-api" version "6.7.0"
+}
+
 // Tasks and configuration related to building Orbeon
 
 ant.importBuild('orbeon/build.xml') { antTargetName -> 'orbeon-' + antTargetName }
@@ -15,6 +19,8 @@ def orbeonCommitHash() {
     return hash
 }
 
+
+// Orbeon variables
 ext.orbeonHash = orbeonCommitHash();
 ext.vanillaOrbeonWarName = "orbeon-${ant.properties['version.number']}${ant.properties['edition']}-${orbeonHash}.war"
 ext.orbeonFilterJarName = "orbeon-xforms-filter-${ant.properties['version.number']}${ant.properties['edition']}-${orbeonHash}.jar"
@@ -108,3 +114,152 @@ tasks.register('deployDevMisp') {
     }
   }
 }
+
+// Utility functions for integration tests
+
+// Used to check if the integration environment MISP2 is operational
+boolean checkMisp2ITRunning() {
+  def connection = new URL('http://localhost:9090/misp2').openConnection()
+  connection.requestMethod = 'HEAD'
+  try {
+    connection.responseCode == 200
+  } catch (IOException error) {
+    false
+  }
+}
+
+// Tasks to run integration tests on web-app
+
+tasks.register('createITNetwork', com.bmuschko.gradle.docker.tasks.network.DockerCreateNetwork) {
+  networkName = 'misp2-it-network'
+}
+
+tasks.register('pullITPostgres', com.bmuschko.gradle.docker.tasks.image.DockerPullImage) {
+  image = 'postgres:10-alpine'
+}
+
+tasks.register('pullITTomcat', com.bmuschko.gradle.docker.tasks.image.DockerPullImage) { 
+  image = 'tomcat:8'
+}
+
+tasks.register('pullSeleniumDriver', com.bmuschko.gradle.docker.tasks.image.DockerPullImage) { 
+  image = 'selenium/standalone-firefox:4.3.0'
+}
+
+tasks.register('createITPostgres', com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+  dependsOn pullITPostgres, createITNetwork
+  targetImageId pullITPostgres.getImage()
+  hostConfig.network = createITNetwork.getNetworkId()
+  hostConfig.binds = ["${rootDir}/web-app/src/test/resources/db/initdb.d": "/docker-entrypoint-initdb.d"]
+  containerName = 'misp2-it-postgres'
+  envVars = [
+    "POSTGRES_PASSWORD": "secret",
+    "POSTGRES_HOST_AUTH_METHOD": "trust"
+  ]
+}
+
+tasks.register('createITTomcat', com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+  dependsOn pullITTomcat, createITNetwork, ':web-app:itTestWar', ':orbeon-war:war'
+  targetImageId pullITTomcat.getImage()
+  hostConfig.network = createITNetwork.getNetworkId()
+  hostConfig.portBindings = [
+    "9090:8080"
+  ]
+  containerName = 'misp2-it-tomcat'
+  mustRunAfter ':web-app:itTestWar', ':orbeon-war:war'
+}
+
+tasks.register('createSeleniumDriver', com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
+  dependsOn pullSeleniumDriver, createITNetwork
+  targetImageId pullSeleniumDriver.getImage()
+  hostConfig.binds = ["${rootDir}/web-app/src/test/resources": "/resources"]
+  // Since the tests currently send requests both through to driver and JAVA HTTP client, we can't rely on
+  // the internal docker networking.
+  //hostConfig.network = createITNetwork.getNetworkId()
+  hostConfig.network = 'host'
+  hostConfig.portBindings = [
+    "4444:4444"
+  ]
+  hostConfig.shmSize = 2147483648 //https://github.com/SeleniumHQ/docker-selenium#--shm-size2g
+  containerName = 'misp2-it-firefox'
+}
+
+// FIXME: For some reason inlining these in the copy task breaks the JAVA language server JDT.LS
+// Maybe there is a better solution?
+ext.itMisp2WarLocation = tasks.getByPath(':web-app:itTestWar').outputs.files.singleFile
+ext.itOrbeon2WarLocation = tasks.getByPath(':orbeon-war:war').outputs.files.singleFile
+tasks.register('copyMISPToIT', com.bmuschko.gradle.docker.tasks.container.DockerCopyFileToContainer) {
+  dependsOn createITTomcat
+  targetContainerId createITTomcat.getContainerId()
+  withFile(itMisp2WarLocation, '/usr/local/tomcat/webapps')
+  withFile(itOrbeon2WarLocation, '/usr/local/tomcat/webapps')
+}
+
+tasks.register('startITPostgres', com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
+  dependsOn createITPostgres
+  targetContainerId createITPostgres.getContainerId()
+}
+
+tasks.register('startITTomcat', com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
+  dependsOn copyMISPToIT
+  targetContainerId createITTomcat.getContainerId()
+}
+
+tasks.register('startSeleniumDriver', com.bmuschko.gradle.docker.tasks.container.DockerStartContainer) {
+  dependsOn createSeleniumDriver
+  targetContainerId createSeleniumDriver.getContainerId()
+}
+
+tasks.register('logITTomcat', com.bmuschko.gradle.docker.tasks.container.DockerLogsContainer) {
+  dependsOn startITTomcat
+  targetContainerId createITTomcat.getContainerId()
+  stdErr = true
+  stdOut = true
+}
+
+tasks.register('test') {
+  dependsOn startITPostgres, logITTomcat, startSeleniumDriver 
+  doFirst {
+    def url = ''
+    def i = 0
+    println "Waiting for MISP2 to start ..."
+    while (!checkMisp2ITRunning() && i < 10) {
+      sleep(5000)
+      i++
+    }
+    println "MISP2 is running"
+  }
+  finalizedBy 'web-app:test'
+}
+
+// Clean up docker images and network
+tasks.register('removeITPostgres', com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
+  force = true
+  removeVolumes = true
+  targetContainerId createITPostgres.getContainerId()
+  mustRunAfter(test)
+}
+
+tasks.register('removeITTomcat', com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
+  force = true
+  removeVolumes = true
+  targetContainerId createITTomcat.getContainerId()
+  mustRunAfter(test)
+}
+
+tasks.register('removeSeleniumDriver', com.bmuschko.gradle.docker.tasks.container.DockerRemoveContainer) {
+  force = true
+  removeVolumes = true
+  targetContainerId createSeleniumDriver.getContainerId()
+  mustRunAfter(test)
+}
+
+tasks.register('removeITNetwork', com.bmuschko.gradle.docker.tasks.network.DockerRemoveNetwork) {
+  targetNetworkId createITNetwork.getNetworkId()
+  mustRunAfter(test)
+}
+
+createITNetwork.finalizedBy(removeITNetwork)
+createITPostgres.finalizedBy(removeITPostgres)
+createITTomcat.finalizedBy(removeITTomcat)
+createSeleniumDriver.finalizedBy(removeSeleniumDriver)

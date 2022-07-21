@@ -1,19 +1,14 @@
 package ee.aktors.misp2;
 
-import ee.aktors.misp2.util.TestFileUtil;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Test;
 import org.openqa.selenium.By;
-import org.openqa.selenium.OutputType;
-import org.openqa.selenium.TakesScreenshot;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.pagefactory.ByChained;
 
-import java.io.File;
+import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertTrue;
 
@@ -21,7 +16,7 @@ public class Misp2OrbeonIT extends BaseUITest {
 
     @After
     public void resetTimeout() {
-        driver.manage().timeouts().implicitlyWait(defaultImplicitWaitTimeout, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(defaultImplicitWaitTimeout));
     }
 
     /*
@@ -30,7 +25,7 @@ public class Misp2OrbeonIT extends BaseUITest {
      */
     @Test
     public void OrbeonFormRunCheck() throws Exception {
-        String wsdlFilePath = TestFileUtil.getConfigPathForTest("xforms/6.wsdl");
+        String wsdlFilePath = "/resources/xforms/6.wsdl";
         userLogin();
         driver.findElement(By.id("roleselect-button")).click();
         driver.findElement(By.cssSelector("#roleselect-menu > li:nth-child(3) > a:nth-child(1)")).click();
@@ -39,7 +34,7 @@ public class Misp2OrbeonIT extends BaseUITest {
         driver.findElement(By.id("form_queries2_sourceFile")).sendKeys(wsdlFilePath);
         driver.findElement(By.id("updateServicesListBtn")).click();
 
-        driver.manage().timeouts().implicitlyWait(defaultImplicitWaitTimeout, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(defaultImplicitWaitTimeout));
         Optional<WebElement> yesButton = driver.findElements(By.id("btnRemoveQueriesYes")).stream().findFirst();
         yesButton.ifPresent(WebElement::click);
         // select query and update it's  xform
@@ -55,7 +50,7 @@ public class Misp2OrbeonIT extends BaseUITest {
         assertTrue("Update Selected Service Froms button missing", generateServicesFormsBtn.isPresent());
         generateServicesFormsBtn.ifPresent(WebElement::click);
 
-        driver.manage().timeouts().implicitlyWait(defaultImplicitWaitTimeout * 4, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(defaultImplicitWaitTimeout * 4));
 
         ByChained refreshedNotifySelector = new ByChained(
                 By.id("content"),

@@ -1,4 +1,3 @@
-# Config file for Test purposes
 # DB Info
 jdbc.driver=org.postgresql.Driver
 jdbc.url=jdbc:postgresql://misp2-it-postgres:5432/misp2db

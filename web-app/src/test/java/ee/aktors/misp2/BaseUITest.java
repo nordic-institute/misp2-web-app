@@ -1,20 +1,23 @@
 package ee.aktors.misp2;
 
-import java.util.Objects;
-import java.util.concurrent.TimeUnit;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.time.Duration;
 import org.junit.After;
 import org.junit.Before;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.RemoteWebDriver;
 
 public class BaseUITest {
 
   protected static final String MOBILE_ID_DEMO_NUMBER_1 = "+37200000566";
   protected static final String MODILE_ID_DEMO_SSN_1 = "60001018800";
   protected static final Long defaultImplicitWaitTimeout = 30L;
+  protected FirefoxOptions options;
   protected WebDriver driver;
   protected String baseUrl;
   protected String ssUrl;
@@ -24,24 +27,19 @@ public class BaseUITest {
   protected String testSSN = "EE49002124277";
 
   @Before
-  public void setUp() {
+  public void setUp() throws MalformedURLException {
     System.setProperty("webdriver.gecko.driver", "/usr/bin/geckodriver");
-    driver = new FirefoxDriver();
-    String misp2Port = Objects.requireNonNull(
-            System.getProperty("misp2.it-test.misp2_port"),
-            "misp2.development.misp2_port property needs to be defined"
-    );
-
-    ssUrl = Objects.requireNonNull(
-            System.getProperty("misp2.it-test.ss_url"),
-            "misp2.it-test.ss_url property needs to be defined"
-    );
+    options = new FirefoxOptions();
+    options.setHeadless(true);
+    driver = new RemoteWebDriver(new URL("http://localhost:4444"), options);
+    String misp2Port = "9090";
+    ssUrl = "http://localhost/";
     baseUrl = "http://localhost:"+ misp2Port +"/misp2";
-    username = Objects.requireNonNull(System.getProperty("misp2.it-test.username"),"misp2.it-test.username property needed");
-    password = Objects.requireNonNull(System.getProperty("misp2.it-test.password"),"misp2.it-test.password property needed");
+    username = "misp2";
+    password = "secret";
     serverBeforeConfiguration = Boolean
         .parseBoolean(System.getProperty("server.before.configuration"));
-    driver.manage().timeouts().implicitlyWait(defaultImplicitWaitTimeout, TimeUnit.SECONDS );
+    driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(defaultImplicitWaitTimeout));
   }
 
   @After

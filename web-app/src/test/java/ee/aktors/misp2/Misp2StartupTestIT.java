@@ -7,10 +7,10 @@ import org.springframework.http.HttpStatus;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.*;
 
@@ -58,11 +58,12 @@ public class Misp2StartupTestIT extends BaseUITest {
         adminLogin();
         
         createPortal();
-        driver.manage().timeouts().implicitlyWait( 5, TimeUnit.SECONDS);
+        driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(5));
         assertNotNull("Save Successfull -notify should appear", driver.findElement(By.className("ok")));
 
     }
 
+    // TODO: Why is this not used?
     private void addManager() {
         driver.findElement(By.partialLinkText("admin/addManager.action")).click();
         driver.findElement(By.id("usersFilter_submit")).click();
