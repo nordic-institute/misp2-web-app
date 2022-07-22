@@ -143,7 +143,7 @@ tasks.register('pullITTomcat', com.bmuschko.gradle.docker.tasks.image.DockerPull
 }
 
 tasks.register('pullSeleniumDriver', com.bmuschko.gradle.docker.tasks.image.DockerPullImage) { 
-  image = 'selenium/standalone-firefox:4.3.0'
+  image = 'selenium/standalone-chrome:4.3.0'
 }
 
 tasks.register('createITPostgres', com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
@@ -175,12 +175,16 @@ tasks.register('createSeleniumDriver', com.bmuschko.gradle.docker.tasks.containe
   // Since the tests currently send requests both through to driver and JAVA HTTP client, we can't rely on
   // the internal docker networking.
   //hostConfig.network = createITNetwork.getNetworkId()
-  hostConfig.network = 'host'
-  hostConfig.portBindings = [
-    "4444:4444"
+  //hostConfig.portBindings = [
+  //  "4444:4444"
+  //]
+  hostConfig.network = 'host' // No need to forward ports since we use the hosts network
+  envVars = [
+    "SE_VNC_NO_PASSWORD": "1",
+    "SE_VNC_VIEW_ONLY": "1"
   ]
   hostConfig.shmSize = 2147483648 //https://github.com/SeleniumHQ/docker-selenium#--shm-size2g
-  containerName = 'misp2-it-firefox'
+  containerName = 'misp2-it-webdriver'
 }
 
 // FIXME: For some reason inlining these in the copy task breaks the JAVA language server JDT.LS

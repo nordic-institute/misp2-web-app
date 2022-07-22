@@ -5,19 +5,21 @@ import java.net.URL;
 import java.time.Duration;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
 import org.openqa.selenium.WebElement;
-import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
+
+import ee.aktors.misp2.util.JUnitScreenShotRule;
 
 public class BaseUITest {
 
   protected static final String MOBILE_ID_DEMO_NUMBER_1 = "+37200000566";
   protected static final String MODILE_ID_DEMO_SSN_1 = "60001018800";
   protected static final Long defaultImplicitWaitTimeout = 30L;
-  protected FirefoxOptions options;
   protected RemoteWebDriver driver;
   protected String baseUrl;
   protected String ssUrl;
@@ -26,12 +28,12 @@ public class BaseUITest {
   protected String password;
   protected String testSSN = "EE49002124277";
 
+  @Rule
+  public JUnitScreenShotRule screenShotRule = new JUnitScreenShotRule();
+
   @Before
   public void setUp() throws MalformedURLException {
-    System.setProperty("webdriver.gecko.driver", "/usr/bin/geckodriver");
-    options = new FirefoxOptions();
-    options.setHeadless(true);
-    driver = new RemoteWebDriver(new URL("http://localhost:4444"), options);
+    driver = new RemoteWebDriver(new URL("http://localhost:4444"), new ChromeOptions());
     driver.setFileDetector(new LocalFileDetector()); 
     String misp2Port = "9090";
     ssUrl = "http://localhost/";
@@ -41,11 +43,7 @@ public class BaseUITest {
     serverBeforeConfiguration = Boolean
         .parseBoolean(System.getProperty("server.before.configuration"));
     driver.manage().timeouts().implicitlyWait(Duration.ofSeconds(defaultImplicitWaitTimeout));
-  }
-
-  @After
-  public void tearDown() {
-    driver.quit();
+    this.screenShotRule.setDriver(driver);
   }
 
   protected boolean isTextPresent(String s) {
