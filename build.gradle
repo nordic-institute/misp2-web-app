@@ -172,7 +172,6 @@ tasks.register('createITTomcat', com.bmuschko.gradle.docker.tasks.container.Dock
 tasks.register('createSeleniumDriver', com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer) {
   dependsOn pullSeleniumDriver, createITNetwork
   targetImageId pullSeleniumDriver.getImage()
-  hostConfig.binds = ["${rootDir}/web-app/src/test/resources": "/resources"]
   // Since the tests currently send requests both through to driver and JAVA HTTP client, we can't rely on
   // the internal docker networking.
   //hostConfig.network = createITNetwork.getNetworkId()

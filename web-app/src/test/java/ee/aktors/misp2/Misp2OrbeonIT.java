@@ -1,5 +1,6 @@
 package ee.aktors.misp2;
 
+import ee.aktors.misp2.util.TestFileUtil;
 import org.junit.After;
 import org.junit.Test;
 import org.openqa.selenium.By;
@@ -25,7 +26,7 @@ public class Misp2OrbeonIT extends BaseUITest {
      */
     @Test
     public void OrbeonFormRunCheck() throws Exception {
-        String wsdlFilePath = "/resources/xforms/6.wsdl";
+        String wsdlFilePath = TestFileUtil.getConfigPathForTest("xforms/6.wsdl");
         userLogin();
         driver.findElement(By.id("roleselect-button")).click();
         driver.findElement(By.cssSelector("#roleselect-menu > li:nth-child(3) > a:nth-child(1)")).click();

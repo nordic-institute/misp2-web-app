@@ -7,9 +7,9 @@ import org.junit.After;
 import org.junit.Before;
 import org.openqa.selenium.By;
 import org.openqa.selenium.NoSuchElementException;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxOptions;
+import org.openqa.selenium.remote.LocalFileDetector;
 import org.openqa.selenium.remote.RemoteWebDriver;
 
 public class BaseUITest {
@@ -18,7 +18,7 @@ public class BaseUITest {
   protected static final String MODILE_ID_DEMO_SSN_1 = "60001018800";
   protected static final Long defaultImplicitWaitTimeout = 30L;
   protected FirefoxOptions options;
-  protected WebDriver driver;
+  protected RemoteWebDriver driver;
   protected String baseUrl;
   protected String ssUrl;
   protected boolean serverBeforeConfiguration = false;
@@ -32,6 +32,7 @@ public class BaseUITest {
     options = new FirefoxOptions();
     options.setHeadless(true);
     driver = new RemoteWebDriver(new URL("http://localhost:4444"), options);
+    driver.setFileDetector(new LocalFileDetector()); 
     String misp2Port = "9090";
     ssUrl = "http://localhost/";
     baseUrl = "http://localhost:"+ misp2Port +"/misp2";
