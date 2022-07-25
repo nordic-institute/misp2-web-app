@@ -194,6 +194,7 @@ ext.itOrbeon2WarLocation = tasks.getByPath(':orbeon-war:war').outputs.files.sing
 tasks.register('copyMISPToIT', com.bmuschko.gradle.docker.tasks.container.DockerCopyFileToContainer) {
   dependsOn createITTomcat
   targetContainerId createITTomcat.getContainerId()
+  withFile("${rootDir}/web-app/src/test/resources/certs/mobiili_id_trust_store.p12", '/tmp')
   withFile(itMisp2WarLocation, '/usr/local/tomcat/webapps')
   withFile(itOrbeon2WarLocation, '/usr/local/tomcat/webapps')
 }

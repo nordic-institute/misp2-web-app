@@ -42,10 +42,20 @@ function import_root() {
 
 }
 
-download_pem tsp_demo_sk_ee.pem.cer https://www.skidsolutions.eu/upload/files/tsp_demo_sk_ee.pem.cer
+rm -f ${TRUST_STORE_FILE}.jks
+rm -f ${TRUST_STORE_FILE}.p12
+
+download_pem tsp_demo_sk_ee.pem.cer https://www.skidsolutions.eu/upload/files/tsp_demo_sk_ee.pem
 import_root tsp_demo_sk_ee
+
 download_pem  sk_root_2018_crt.pem    https://sk.ee/upload/files/TEST_of_EE-GovCA2018.pem.crt
 import_pem_crt sk_root_2018
+
+download_pem sid_demo_sk_ee_2021_crt.pem https://www.skidsolutions.eu/upload/files/sid_demo_sk_ee_2021.cer
+import_pem_crt sid_demo_sk_ee_2021
+
+download_pem sk_ocsp_responder_2020_crt.pem https://www.skidsolutions.eu/upload/files/TEST_of_SK_OCSP_RESPONDER_2020.pem.cer
+import_pem_crt sk_ocsp_responder_2020
 
 download_pem  sk_esteid_2018_crt.pem  https://sk.ee/upload/files/TEST_of_ESTEID2018.pem.crt
 import_pem_crt sk_esteid_2018
@@ -61,3 +71,7 @@ import_pem_crt sk_esteid_2011
 
 keytool -importkeystore -srcstorepass ${TEST_PW} -deststorepass ${TEST_PW} -noprompt -srckeystore ${TRUST_STORE_FILE}.jks -destkeystore ${TRUST_STORE_FILE}.p12 \
         -srcstoretype JKS -deststoretype PKCS12
+
+rm -f *.crt
+rm -f *.cer
+rm -f *.pem

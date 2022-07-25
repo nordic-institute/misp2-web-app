@@ -113,6 +113,7 @@ public class MobileIdService {
 		if (!authenticationResult.isValid()) {
 			LOG.warn("Mobile-ID authentication was unsuccessful for phone nr: {} and ssn {}",
 					mobileIdSessionData.getPhoneNo(), mobileIdSessionData.getPersonalCode());
+			LOG.debug("Errors reported: {}", authenticationResult.getErrors());
 			throw new AuthenticationException("Mobile-ID failed to authenticate. Result is not valid.");
 		}
 
@@ -159,3 +160,4 @@ public class MobileIdService {
 
 
 }
+

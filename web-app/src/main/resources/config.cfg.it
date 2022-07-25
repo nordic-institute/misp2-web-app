@@ -37,13 +37,13 @@ mobileID.rest.relyingPartyUUID = 00000000-0000-0000-0000-000000000000
 mobileID.rest.relyingPartyName = DEMO
 mobileID.rest.pollingTimeoutSeconds = 60
 mobileID.rest.trustStore.password = secret
-mobileID.rest.trustStore.path = /mobiili_id_trust_store.p12
+mobileID.rest.trustStore.path = /tmp/mobiili_id_trust_store.p12
 
 #Truststore settings - developer only! Do not put these lines in the config for installation for end-user.
 # isLocal setting specifies whether truststore file in app directory should be used or not. If it is false, then javax.net.ssl.trustStore system property must be set
 #truststore.isLocal = true
-#truststore.location = /resources/truststore.jks
-#truststore.password = 123456
+#truststore.location = /tmp/truststore.jks
+#truststore.password = secret
 
 #Authentication settings
 auth.password=true

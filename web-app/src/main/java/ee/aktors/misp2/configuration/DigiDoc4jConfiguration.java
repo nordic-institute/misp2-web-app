@@ -25,6 +25,8 @@
 
 package ee.aktors.misp2.configuration;
 
+import ee.aktors.misp2.ExternallyConfigured;
+import ee.aktors.misp2.util.MIDTrustStoreInitialisationException;
 import ee.sk.mid.MidClient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -32,8 +34,9 @@ import org.apache.logging.log4j.Logger;
 import org.digidoc4j.Configuration;
 import org.digidoc4j.Configuration.Mode;
 
-import ee.aktors.misp2.ExternallyConfigured;
-
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
@@ -54,6 +57,7 @@ public class DigiDoc4jConfiguration implements ExternallyConfigured {
     private static final String PARAM_TEST_MODE = "digidoc4j.test";
     private static final String PARAM_OCSP_SOURCE = "digidoc4j.ocsp";
     private static final String PARAM_TRUSTED_TERRITORIES = "digidoc4j.trustedTerritories";
+    private static final String PARAM_MID_ENABLED = "auth.mobileID";
     private static final String PARAM_MID_HOST = "mobileID.rest.hostUrl";
     private static final String PARAM_MID_PARTY_UUID = "mobileID.rest.relyingPartyUUID";
     private static final String PARAM_MID_PARTY_NAME = "mobileID.rest.relyingPartyName";
@@ -75,37 +79,66 @@ public class DigiDoc4jConfiguration implements ExternallyConfigured {
         digiDoc4jConfiguration = new Configuration(digiDoc4jMode);
         digiDoc4jConfiguration.setOcspSource(getOcspSource());
         digiDoc4jConfiguration.setTrustedTerritories(getTrustedTerritories());
-        LOG.debug("Launched DigiDoc4j in {} mode", digiDoc4jMode);
-        String certAliases;
+        LOG.info("Initialised DigiDoc4j in {} mode", digiDoc4jMode);
+        midClient = getMIDEnabled() ? initialiseMIDClient() : null; // Don't run MidClient initialisation if it hasn't been enabled
+    }
 
-         MidClient.MobileIdClientBuilder mobileIdClientBuilder= MidClient.newBuilder()
-            .withHostUrl(getMidHost())
-            .withRelyingPartyUUID(getMidPartyUuid())
-            .withRelyingPartyName(getMidPartyName())
-            .withLongPollingTimeoutSeconds(getMidPollingTimeoutSeconds());
-        KeyStore trustStore;
-        try (InputStream is = DigiDoc4jConfiguration.class.getResourceAsStream(getParamMidTrustStorePath())) {
-            trustStore = KeyStore.getInstance("PKCS12");
+    /**
+     * @return {@link MidClient} object based on the configuration, throws {@link MIDTrustStoreInitialisationException}
+     * if the configuration is incorrect
+     * @exception MIDTrustStoreInitialisationException thrown when configuration can not be used to create a working client
+     */
+    private MidClient initialiseMIDClient() {
+        try (InputStream is = openTrustStore()) {
+            KeyStore trustStore = KeyStore.getInstance("PKCS12");
             trustStore.load(is, getParamMidTrustStorePassword().toCharArray());
-            certAliases = Collections.list(trustStore.aliases()).stream()
-                    .reduce("cert aliases:", (list,alias) -> list.concat(", ".concat(alias)));
-        } catch (KeyStoreException | CertificateException |NoSuchAlgorithmException trustStoreException) {
-           throw new RuntimeException(
+            String certAliases = Collections.list(trustStore.aliases()).stream()
+                    .reduce("aliases:", (list,alias) -> list.concat(", ".concat(alias)));
+
+            LOG.info("Initialising MidClient with host: {}, name: {}, trustStore: {}",
+                    getMidHost(),
+                    getMidPartyName(),
+                    certAliases
+            );
+
+            MidClient.MobileIdClientBuilder mobileIdClientBuilder= MidClient.newBuilder()
+                    .withHostUrl(getMidHost())
+                    .withRelyingPartyUUID(getMidPartyUuid())
+                    .withRelyingPartyName(getMidPartyName())
+                    .withLongPollingTimeoutSeconds(getMidPollingTimeoutSeconds())
+                    .withTrustStore(trustStore);
+
+            return mobileIdClientBuilder.build();
+        } catch (KeyStoreException | CertificateException | NoSuchAlgorithmException trustStoreException) {
+           throw new MIDTrustStoreInitialisationException(
                    "Problem creating truststore with PKCS12 file:" + getParamMidTrustStorePath(), trustStoreException
            );
         } catch (IOException ioException) {
-            throw new RuntimeException(
-                    "Truststore reading failed from PKCS12 file:"+getParamMidTrustStorePath(), ioException
+            throw new MIDTrustStoreInitialisationException(
+                    "Truststore reading failed from PKCS12 file:" + getParamMidTrustStorePath(), ioException
             );
         }
-        mobileIdClientBuilder.withTrustStore(trustStore);
+    }
 
-        midClient =   mobileIdClientBuilder.build();
-        LOG.debug("Launched MidClient with params host:{}, name: {}, truststore: {}",
-                getMidHost(),
-                getMidPartyName(),
-                certAliases
-        );
+    /**
+     * @return {@link InputStream} for the trust store specified in the configuration.
+     * First in tries to locate the resource from the classpath, failing that, from the
+     * filesystem. If neither produces a result, a {@link FileNotFoundException} is thrown
+     * @throws FileNotFoundException trust store specified in the configuration could not be opened
+     */
+    private InputStream openTrustStore() throws FileNotFoundException {
+        String midTrustStorePath = getParamMidTrustStorePath();
+        InputStream is = DigiDoc4jConfiguration.class.getResourceAsStream(midTrustStorePath);
+
+        // We were not able to read the resource as a classpath resource,
+        // so lets try reading it from the provided path from the system
+        if (is == null) {
+            LOG.debug("Was not able to open the trust store from classpath, trying filesystem");
+            File f = new File(midTrustStorePath);
+            return new FileInputStream(f);
+        }
+
+        return is;
     }
 
     /**
@@ -122,6 +155,14 @@ public class DigiDoc4jConfiguration implements ExternallyConfigured {
      */
     private String getOcspSource() {
         return CONFIG.getString(PARAM_OCSP_SOURCE, DEFAULT_OCSP_SOURCE);
+    }
+
+    /**
+     * @return True if MID based authentication is enabled. If parameter {@value #PARAM_MID_ENABLED} is not found, then it is set to
+     *         false.
+     */
+    private boolean getMIDEnabled() {
+        return CONFIG.getBoolean(PARAM_MID_ENABLED, false);
     }
 
     /**
@@ -200,3 +241,4 @@ public class DigiDoc4jConfiguration implements ExternallyConfigured {
     public MidClient getMidClient() {return midClient;}
 
 }
+
