@@ -239,6 +239,7 @@ public class OpenApiParser {
                 QueryName queryName = new QueryName();
                 //queryName.setLang("en"); // default is en
                 queryName.setLang(LanguageUtil.ALL_LANGUAGES);
+                // TODO: Investigate why the following 3 lines of code are here and if the end result should be used?
                 String description = op.getSummary();
                 if (StringUtils.isBlank(description)) {
                     description = op.getDescription();

@@ -538,6 +538,9 @@ public class QueryAction extends QuickTipAction {
                         List<ListMethodsResponse.QueryInfo> queryInfos = listMethodsQuery.fetchQueries(isSecurityServerAllAllowed());
 
                         for(ListMethodsResponse.QueryInfo queryInfo: queryInfos) {
+                            if (!"OPENAPI".equals(queryInfo.getServiceType()) && queryInfo.getServiceType() != null) {
+                                continue; // Not an OpenAPI service, so we can not request the description for it
+                            }
                             String serviceCode = queryInfo.getServiceCode();
                             try {
                                 GetOpenApiQuery getOpenApiQuery = new GetOpenApiQuery(producer);

@@ -26,10 +26,12 @@
 package ee.aktors.misp2.util.xroad.rest.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import java.util.List;
 
 public class ListMethodsResponse {
 
+    @JsonIgnoreProperties(ignoreUnknown = true)
 	public static class QueryInfo {
         @JsonProperty("member_class")
         private String memberClass;
@@ -43,6 +45,8 @@ public class ListMethodsResponse {
         private String objectType;
         @JsonProperty("xroad_instance")
 		private String xroadInstance;
+        @JsonProperty("service_type")
+        private String serviceType;
 
 		public String getMemberClass() {
 			return memberClass;
@@ -90,6 +94,14 @@ public class ListMethodsResponse {
 
 		public void setXroadInstance(String xroadInstance) {
 			this.xroadInstance = xroadInstance;
+		}
+
+		public String getServiceType() {
+			return serviceType;
+		}
+
+		public void setServiceType(String serviceType) {
+			this.serviceType = serviceType;
 		}
 
 	}

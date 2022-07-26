@@ -91,6 +91,10 @@ public abstract class GeneralBeanName extends GeneralBean {
      * @param descriptionNew the description to set
      */
     public void setDescription(String descriptionNew) {
+        // Since the database currently accepts a maximum of 256 characters, lets enforce it
+        if (descriptionNew.length() > 256) {
+            descriptionNew = descriptionNew.substring(0, 256);
+        }
         this.description = descriptionNew;
     }
 

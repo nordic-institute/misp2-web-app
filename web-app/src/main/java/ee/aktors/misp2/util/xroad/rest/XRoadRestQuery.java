@@ -114,6 +114,7 @@ abstract public class XRoadRestQuery {
         try {
             return objectMapper.readValue(fetch(uri), responseClass);
         } catch (IOException e) {
+            logger.error("IOException while trying to deserialize response", e);
             String errorMessage = String.format("REST X-Road response in unknown format for uri: %s", uri.toString());
             logger.error(errorMessage);
             throw new DataExchangeException(DataExchangeException.Type.XROAD_REST_RESPONSE_INVALID_JSON_FORMAT, errorMessage);
