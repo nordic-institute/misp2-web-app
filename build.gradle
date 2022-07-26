@@ -95,6 +95,7 @@ tasks.register('clean'){
 tasks.register('deployDevOrbeon') {
   dependsOn(':orbeon-war:war')
   outputs.file('docker-dev/webapps/orbeon.war')
+  outputs.upToDateWhen { false } 
   copy {
     from tasks.getByPath(':orbeon-war:war').outputs.files.singleFile
     into 'docker-dev/webapps'
@@ -104,6 +105,7 @@ tasks.register('deployDevOrbeon') {
 tasks.register('deployDevMisp') {
   dependsOn(':web-app:devWar')
   outputs.file('docker-dev/webapps/misp2.war')
+  outputs.upToDateWhen { false } 
   doLast {
     copy {
       from tasks.getByPath(':web-app:devWar').outputs.files.singleFile
