@@ -1,5 +1,8 @@
 # MISP2
 
+**NB!** This repository has been archived. The main repository is now located
+at <https://github.com/nordic-institute/misp2>
+
 [![Go to X-Road Community
 Slack](https://img.shields.io/badge/Go%20to%20Community%20Slack-grey.svg)](https://jointxroad.slack.com/)
 [![Get invited](https://img.shields.io/badge/No%20Slack-Get%20invited-green.svg)](https://x-road.global/community)
